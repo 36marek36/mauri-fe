@@ -1,13 +1,18 @@
 <template>
+    <RouterView />
+</template>
+
+
+<!-- <template>
 
     <h1>players</h1>
-    
+     -->
     <!-- <ul>
         <li v-for="player in players">
             {{player.firstName}} {{player.lastName}} {{ player.registrationDate }}
         </li>
     </ul> -->
-    <table>
+    <!-- <table>
         <thead>
             <tr>
                 <th>firstName</th>
@@ -54,4 +59,4 @@
     
     <style scoped>
     
-    </style>
+    </style> -->

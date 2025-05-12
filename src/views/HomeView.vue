@@ -1,9 +1,4 @@
-<script setup>
-import TheWelcome from '../components/TheWelcome.vue'
-</script>
-
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <h1>home page</h1>
+  <RouterLink to="/players">list of players</RouterLink>
 </template>
