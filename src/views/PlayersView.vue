@@ -2,6 +2,7 @@
 
     <h1>list of players</h1>
     <RouterLink to="/">home</RouterLink>
+    <RouterLink to="/seasons">seasons</RouterLink>
 
     <TTable v-if="!loading" :headers="headers" :tableData="playersToDisplay"/>
 
