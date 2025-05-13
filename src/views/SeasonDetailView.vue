@@ -8,10 +8,9 @@
         <h1>{{ season.year }}</h1>
 
         <ul v-for="league in season.leagues">
-            <li>
-                <span>{{ league.name + ' ' + league.leagueType}}</span>
+            <li @click="this.$router.push('/leagues/'+league.id)">
+                <span>{{ league.name + ' ' + league.leagueType }}</span>
             </li>
-            
         </ul>
     </div>
 
@@ -43,11 +42,13 @@ export default {
 </script>
 
 <style scoped>
-
 ul {
-  list-style-type: none;
-  display: flex;
-
+    list-style-type: none;
+    display: flex;
 }
 
+li {
+    padding: .3em .6em;
+    cursor: pointer;
+}
 </style>
