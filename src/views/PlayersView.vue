@@ -4,47 +4,50 @@
     <RouterLink to="/">home</RouterLink>
     <RouterLink to="/seasons">seasons</RouterLink>
 
-    <TTable v-if="!loading" :headers="headers" :tableData="playersToDisplay"/>
+    <ul v-if="!loading" >
+        <li v-for="player in players"
+        @click="this.$router.push('/players/'+player.id)">
+            {{ player.firstName + ' ' + player.lastName }}
+        </li>
+    </ul>
 
     <div v-else>... loading ...</div>
 
 </template>
 
 <script>
-import TTable from '@/components/TTable.vue';
 import axios from 'axios';
 
-export default{
-    name:'PlayersView',
+export default {
+    name: 'PlayersView',
     data() {
-        return{
+        return {
             players: [],
-            loading: true,
-            headers: ['first name', 'last name', 'email', 'phone', 'registration date']
+            loading: true
         }
     },
-    computed:{
-        playersToDisplay (){
-            return this.players.map((player) => {
-                return {
-                firstName: player.firstName,
-                lastName: player.lastName,
-                email: player.email,
-                phone: player.phone,
-                registrationDate: player.registrationDate
-                }
-               
-            })
-        }
-    },
-    created () {
+    created() {
         axios.get('/api/rest/players/')
-        .then((response) =>{
-            this.players = response.data
-            this.loading = false
-        })
-    },
-    components: {TTable}
+            .then((response) => {
+                this.players = response.data
+                this.loading = false
+            })
+    }
 }
 
 </script>
+
+<style scoped>
+ul{
+    list-style-type: none;
+    border: 1px solid #cdcdcd;
+}
+li{
+    padding: .3em .6em;
+    cursor: pointer;
+}
+li:not(:last-child){
+    border-bottom: 1px solid #cdcdcd;
+}
+
+</style>
