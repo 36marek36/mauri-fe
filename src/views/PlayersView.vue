@@ -4,14 +4,17 @@
     <RouterLink to="/">home</RouterLink>
     <RouterLink to="/seasons">seasons</RouterLink>
 
-    <ul v-if="!loading" >
-        <li v-for="player in players"
-        @click="this.$router.push('/players/'+player.id)">
+    <ul v-if="!loading">
+        <li v-for="player in players" @click="goToDetail(player.id)">
+            
             {{ player.firstName + ' ' + player.lastName }}
+
         </li>
     </ul>
 
     <div v-else>... loading ...</div>
+
+    <button @click="this.$router.push('/players/create')">Vytvorit hraca</button>
 
 </template>
 
@@ -27,27 +30,41 @@ export default {
         }
     },
     created() {
-        axios.get('/api/rest/players/')
-            .then((response) => {
-                this.players = response.data
-                this.loading = false
-            })
+        this.fetchPlayers()
+    },
+    methods: {
+        fetchPlayers() {
+            axios.get('/api/rest/players/')
+                .then((response) => {
+                    this.players = response.data
+                    this.loading = false
+                })
+                .catch((error) => {
+                    console.error('Chyba pri načítaní hráčov:', error)
+                    this.loading = false
+                })
+        },
+        goToDetail(id) {
+            this.$router.push('/players/' + id)
+        },
+      
+        }
     }
-}
 
 </script>
 
 <style scoped>
-ul{
+ul {
     list-style-type: none;
     border: 1px solid #cdcdcd;
 }
-li{
+
+li {
     padding: .3em .6em;
     cursor: pointer;
 }
-li:not(:last-child){
+
+li:not(:last-child) {
     border-bottom: 1px solid #cdcdcd;
 }
-
 </style>

@@ -22,6 +22,11 @@ const router = createRouter({
       name: 'playerDetail',
       component: () => import('../views/PlayerDetailView.vue'),
     },
+            {
+      path: '/players/create',
+      name: 'newPlayer',
+      component: () => import('../views/PlayerFormView.vue'),
+    },
      {
       path: '/seasons',
       name: 'seasons',
