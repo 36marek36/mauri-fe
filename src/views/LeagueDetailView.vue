@@ -7,15 +7,26 @@
     <div v-else>
         <h1>{{ league.name }}</h1>
 
-        <ul v-for="participant in league.players">
-            <li>
+        <ul>
+            <li v-for="participant in league.players" :key="participant.id">
                 <span>{{ participant.firstName + ' ' + participant.lastName }}</span>
             </li>
         </ul>
 
+        <h2>Zápasy ligy</h2>
+
+        <ul v-if="matches.length > 0">
+            <li v-for="match in matches" :key="match.id">
+                {{ match.homePlayer.firstName }} {{ match.homePlayer.lastName }} vs {{ match.awayPlayer.firstName + ' '
+                    +
+                    match.awayPlayer.lastName }}
+            </li>
+        </ul>
+        <p v-else>Žiadne zápasy pre túto ligu.</p>
+
         <h2>Vsetci hraci:</h2>
-        <ul v-for="player in players">
-            <li>
+        <ul>
+            <li v-for="player in players" :key="player.id">
                 <span>{{ player.firstName + ' ' + player.lastName }}</span>
                 <button @click="addPlayerToLeague(player.id)">Pridat hraca do ligy</button>
             </li>
@@ -37,8 +48,9 @@ export default {
     name: 'LeagueDetail',
     data() {
         return {
-            league: [],
+            league: {},
             players: [],
+            matches: [],
             matchGenerationMessage: '',
             loading: true
         }
@@ -48,11 +60,13 @@ export default {
 
         Promise.all([
             axios.get('/api/rest/leagues/' + leagueId),
-            axios.get('/api/rest/players/')
+            axios.get('/api/rest/players/'),
+            axios.get('/api/rest/leagues/' + leagueId + '/matches')
         ])
-            .then(([leagueResponse, playersResponse]) => {
+            .then(([leagueResponse, playersResponse, matchesResponse]) => {
                 this.league = leagueResponse.data;
                 this.players = playersResponse.data;
+                this.matches = matchesResponse.data
             })
             .catch((error) => {
                 console.error('Chyba pri načítaní údajov:', error);
@@ -79,12 +93,28 @@ export default {
                     console.log('Chyba pri nacitavani:', err)
                 })
         },
+
+        fetchMatches() {
+            const leagueId = this.$route.params.id
+            return axios.get('/api/rest/leagues/' + leagueId + '/matches')
+                .then((res) => {
+                    this.matches = res.data
+                    console.log('Zapasy boli nacitane:', this.matches)
+                })
+                .catch((err) => {
+                    console.error('Chyba pri nacitavani zapasov', err)
+                })
+        },
         generateMatches() {
             const leagueId = this.$route.params.id
             axios.patch('/api/rest/matches/' + leagueId + '/generate-matches')
-                .then((res) => {
+                .then(() => {
                     this.matchGenerationMessage = 'Zapasy boli uspesne vygenerovane'
-                    console.log('Vygenerovane zapasy:', res.data)
+                    return axios.get('/api/rest/leagues/'+leagueId)
+                })
+                .then((res)=>{
+                    this.league = res.data
+                    return this.fetchMatches()
                 })
                 .catch((err) => {
                     if (err.response && err.response.status === 409) {
