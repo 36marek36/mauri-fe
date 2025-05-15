@@ -2,10 +2,11 @@
     <h1>Sezóny</h1>
     <RouterLink to="/">home</RouterLink>
     <RouterLink to="/players">list of players</RouterLink>
+    <RouterLink to="/seasons">seasons</RouterLink>
+    <RouterLink to="/leagues">leagues</RouterLink>
     <div v-if="loading">... loading ...</div>
     <ul v-else>
-        <li v-for="season in seasons"
-        @click="this.$router.push('/seasons/'+season.id)">
+        <li v-for="season in seasons" @click="this.$router.push('/seasons/' + season.id)">
             <h2>Sezóna {{ season.year }}</h2>
         </li>
     </ul>
@@ -25,11 +26,20 @@ export default {
         }
     },
     created() {
-        axios.get('/api/rest/seasons/')
-            .then((response) => {
-                this.seasons = response.data
-                this.loading = false
-            })
+        this.fetchSeasons()
+    },
+    methods: {
+        fetchSeasons() {
+            axios.get('/api/rest/seasons/')
+                .then((res) => {
+                    this.seasons = res.data
+                    this.loading = false
+                })
+                .catch((error) => {
+                    console.error('Chyba pri nacitavani sezon:', error)
+                    this.loading = false
+                })
+        },
     }
 }
 </script>

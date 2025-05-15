@@ -1,6 +1,8 @@
 <template>
     <RouterLink to="/">home</RouterLink>
+    <RouterLink to="/players">list of players</RouterLink>
     <RouterLink to="/seasons">seasons</RouterLink>
+    <RouterLink to="/leagues">leagues</RouterLink>
 
     <div v-if="loading">... loading ...</div>
 
@@ -110,9 +112,9 @@ export default {
             axios.patch('/api/rest/matches/' + leagueId + '/generate-matches')
                 .then(() => {
                     this.matchGenerationMessage = 'Zapasy boli uspesne vygenerovane'
-                    return axios.get('/api/rest/leagues/'+leagueId)
+                    return axios.get('/api/rest/leagues/' + leagueId)
                 })
-                .then((res)=>{
+                .then((res) => {
                     this.league = res.data
                     return this.fetchMatches()
                 })

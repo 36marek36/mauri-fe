@@ -2,7 +2,9 @@
 
     <h1>list of players</h1>
     <RouterLink to="/">home</RouterLink>
+    <RouterLink to="/players">list of players</RouterLink>
     <RouterLink to="/seasons">seasons</RouterLink>
+    <RouterLink to="/leagues">leagues</RouterLink>
 
     <ul v-if="!loading">
         <li v-for="player in players" @click="goToDetail(player.id)">

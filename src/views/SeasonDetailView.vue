@@ -1,6 +1,8 @@
 <template>
     <RouterLink to="/">home</RouterLink>
+    <RouterLink to="/players">list of players</RouterLink>
     <RouterLink to="/seasons">seasons</RouterLink>
+    <RouterLink to="/leagues">leagues</RouterLink>
 
     <div v-if="loading">... loading ...</div>
 
@@ -8,7 +10,7 @@
         <h1>{{ season.year }}</h1>
 
         <ul v-for="league in season.leagues">
-            <li @click="this.$router.push('/leagues/'+league.id)">
+            <li @click="this.$router.push('/leagues/' + league.id)">
                 <span>{{ league.name + ' ' + league.leagueType }}</span>
             </li>
         </ul>

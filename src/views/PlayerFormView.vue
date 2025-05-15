@@ -2,6 +2,7 @@
     <RouterLink to="/">home</RouterLink>
     <RouterLink to="/players">list of players</RouterLink>
     <RouterLink to="/seasons">seasons</RouterLink>
+    <RouterLink to="/leagues">leagues</RouterLink>
     <div class="create-player">
         <h2>Vytvoriť hráča</h2>
         <form @submit.prevent="submitForm">
