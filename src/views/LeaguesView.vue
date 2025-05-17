@@ -1,20 +1,8 @@
 <template>
     <h1>Všetky ligy</h1>
 
-    <div v-if="loading">... loading ...</div>
-
-    <ul v-else>
-        <li v-for="league in sortedLeagues" @click="this.$router.push('/leagues/' + league.id)">
-            {{ league.name }} {{ league.leagueType }}
-
-            <DeleteButton :onDelete="() => deleteLeague(league.id)" />
-
-        </li>
-    </ul>
-
-    <button @click="showCreateLeagueForm = !showCreateLeagueForm">
-        {{ showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu' }}
-    </button>
+    <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
+        :type="showCreateLeagueForm ? 'delete' : 'create'" :onClick="toggleCreateForm" />
 
     <div v-if="showCreateLeagueForm">
         <input v-model="newLeague.name" placeholder="Názov ligy" />
@@ -22,16 +10,25 @@
             <option value="SINGLES">SINGLES</option>
             <option value="DOUBLES">DOUBLES</option>
         </select>
-        <button @click="createLeague">Vytvoriť</button>
+
+        <AppButton label="Vytvoriť" type="create" icon="➕" :onClick="createLeague"/>
+        
     </div>
 
+    <div v-if="loading">... loading ...</div>
 
+    <ul v-else>
+        <li v-for="league in sortedLeagues" @click="this.$router.push('/leagues/' + league.id)">
+            {{ league.name }} {{ league.leagueType }}
+            <AppButton label="Zmazať" icon="🗑️" type="delete" :onClick="() => deleteLeague(league.id)" />
 
+        </li>
+    </ul>
 
 </template>
 
 <script>
-import DeleteButton from '@/components/DeleteButton.vue';
+import AppButton from '@/components/AppButton.vue';
 import axios from 'axios';
 
 
@@ -74,6 +71,9 @@ export default {
                     this.loading = false
                 })
         },
+        toggleCreateForm() {
+            this.showCreateLeagueForm = !this.showCreateLeagueForm
+        },
 
         async createLeague() {
             try {
@@ -103,6 +103,8 @@ export default {
         //             console.error('Chyba pri vytváraní ligy:', err);
         //         });
         // },
+
+
         deleteLeague(id) {
             console.log('Mažem ligu s ID:', id)
             axios.delete('/api/rest/leagues/' + id)
@@ -116,7 +118,7 @@ export default {
 
         }
     },
-    components: { DeleteButton }
+    components: { AppButton }
 }
 
 

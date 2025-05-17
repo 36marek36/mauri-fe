@@ -47,6 +47,7 @@ export default {
     async submitForm() {
       try {
         const response = await axios.post('/api/rest/players/create', this.player)
+        console.log('Hráč: ' + response.data.firstName + ' bol úspešne vytvorený.')
         this.responseMessage = 'Hráč ' + response.data.firstName + ' bol úspešne vytvorený.'
         setTimeout(() => {
           this.$router.push('/players/')

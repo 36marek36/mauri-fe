@@ -1,25 +1,25 @@
 <template>
 
-    <h1>list of players</h1>
+    <h1>Všetci hráči:</h1>
+
+    <AppButton label="Vytvoriť hráča" icon="➕" type="create" :onClick="addPlayer" />
 
     <ul v-if="!loading">
         <li v-for="player in players" @click="goToDetail(player.id)">
 
             {{ player.firstName + ' ' + player.lastName }}
 
-            <DeleteButton :onDelete="()=> deletePlayer(player.id)"/>
+            <AppButton label="Zmazať" icon="🗑️" type="delete" :onClick="() => deletePlayer(player.id)" />
 
         </li>
     </ul>
 
     <div v-else>... loading ...</div>
 
-    <button @click="this.$router.push('/players/create')">Vytvorit hraca</button>
-
 </template>
 
 <script>
-import DeleteButton from '@/components/DeleteButton.vue';
+import AppButton from '@/components/AppButton.vue';
 import axios from 'axios';
 
 export default {
@@ -55,13 +55,15 @@ export default {
                     this.fetchPlayers()
                     console.log('Hráč bol úspešne zmazaný.')
                 })
-                .catch(err=>{
+                .catch(err => {
                     console.error('Chyba pri mazaní hráča:', err)
                 })
-
+        },
+        addPlayer() {
+            this.$router.push('/players/create')
         }
     },
-    components: { DeleteButton }
+    components: { AppButton }
 }
 
 </script>
