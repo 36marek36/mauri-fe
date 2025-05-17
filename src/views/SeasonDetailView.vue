@@ -9,12 +9,26 @@
     <div v-else>
         <h1>{{ season.year }}</h1>
 
-        <ul v-for="league in season.leagues">
+        <ul>
+            <li v-for="league in season.leagues" :key="league.id">
+                {{ league.name }}
+            </li>
+        </ul>
+
+        <!-- <ul v-for="league in season.leagues">
             <li @click="this.$router.push('/leagues/' + league.id)">
                 <span>{{ league.name + ' ' + league.leagueType }}</span>
             </li>
-        </ul>
+        </ul> -->
     </div>
+
+    <h2>Všetky dostupné ligy</h2>
+    <ul>
+        <li v-for="league in noSeasonLeagues" :key="league.id">
+            {{ league.name }}
+            <button @click="addLeagueToSeason(league.id)">Pridať do sezóny</button>
+        </li>
+    </ul>
 
 
 
@@ -28,16 +42,67 @@ export default {
     name: 'SeasonDetail',
     data() {
         return {
-            season: [],
+            season: {},
+            noSeasonLeagues: [],
             loading: true
         }
     },
     created() {
-        axios.get('/api/rest/seasons/' + this.$route.params.id)
-            .then((response) => {
-                this.season = response.data
-                this.loading = false
+        const seasonId = this.$route.params.id;
+        this.fetchSeason(seasonId);
+        this.fetchNoSeasonLeagues();
+    },
+    // computed: {
+    //     leaguesNotInSeason() {
+    //         const existingIds = this.season.leagues?.map(l => l.id) || [];
+    //         return this.allLeagues.filter(league => !existingIds.includes(league.id));
+    //     }
+    // },
+    methods: {
+        fetchSeason(seasonId) {
+            axios.get('/api/rest/seasons/' + seasonId)
+                .then((response) => {
+                    this.season = response.data
+                    this.loading = false
+                })
+                .catch((err) => {
+                    console.error('Chyba pri nacitavani sezony', err)
+                })
+        },
+
+        // fetchAllLeagues() {
+        //     axios.get('/api/rest/leagues/')
+        //         .then(res => {
+        //             this.allLeagues = res.data;
+        //         })
+        //         .catch((err) => {
+        //             console.error('Chyba pri nacitavani lig', err)
+        //         })
+        // },
+
+        fetchNoSeasonLeagues() {
+            axios.get('/api/rest/leagues/no-season')
+                .then(res => {
+                    this.noSeasonLeagues = res.data;
+                })
+                .catch((err) => {
+                    console.error('Chyba pri nacitavani lig', err)
+                })
+        },
+        addLeagueToSeason(leagueId) {
+            const seasonId = this.$route.params.id;
+            axios.patch('/api/rest/seasons/' + seasonId + '/addLeague', {
+                leagueId: leagueId
             })
+                .then(() => {
+                    alert('Liga bola pridaná do sezóny.');
+                    this.fetchSeason(seasonId); // znovu načítaj sezónu
+                    this.fetchNoSeasonLeagues();
+                })
+                .catch(err => {
+                    console.error('Chyba pri priraďovaní ligy:', err);
+                });
+        }
     }
 }
 
