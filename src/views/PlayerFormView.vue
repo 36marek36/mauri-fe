@@ -56,6 +56,7 @@ export default {
         console.error(error)
       }
     }
+    
   }
 }
 </script>

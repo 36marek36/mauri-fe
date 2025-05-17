@@ -54,26 +54,31 @@ export default {
         }
     },
     created() {
-        const leagueId = this.$route.params.id;
-
-        Promise.all([
-            axios.get('/api/rest/leagues/' + leagueId),
-            axios.get('/api/rest/players/'),
-            axios.get('/api/rest/leagues/' + leagueId + '/matches')
-        ])
-            .then(([leagueResponse, playersResponse, matchesResponse]) => {
-                this.league = leagueResponse.data;
-                this.players = playersResponse.data;
-                this.matches = matchesResponse.data
-            })
-            .catch((error) => {
-                console.error('Chyba pri načítaní údajov:', error);
-            })
-            .finally(() => {
-                this.loading = false;
-            });
+        this.loadInitialData()
     },
+
     methods: {
+        loadInitialData() {
+            const leagueId = this.$route.params.id;
+            this.loading = true
+
+            Promise.all([
+                axios.get('/api/rest/leagues/' + leagueId),
+                axios.get('/api/rest/players/'),
+                this.fetchMatches()
+            ])
+                .then(([leagueResponse, playersResponse]) => {
+                    this.league = leagueResponse.data;
+                    this.players = playersResponse.data;
+                })
+                .catch((error) => {
+                    console.error('Chyba pri načítaní údajov:', error);
+                })
+                .finally(() => {
+                    this.loading = false;
+                });
+        },
+
         addPlayerToLeague(playerId) {
             const leagueId = this.$route.params.id
             axios.patch('/api/rest/leagues/' + leagueId + '/addParticipant', {
@@ -103,7 +108,7 @@ export default {
                     console.error('Chyba pri nacitavani zapasov', err)
                 })
         },
-        
+
         generateMatches() {
             const leagueId = this.$route.params.id
             axios.patch('/api/rest/matches/' + leagueId + '/generate-matches')

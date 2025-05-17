@@ -48,13 +48,9 @@ export default {
         this.fetchSeason(seasonId);
         this.fetchNoSeasonLeagues();
     },
-    // computed: {
-    //     leaguesNotInSeason() {
-    //         const existingIds = this.season.leagues?.map(l => l.id) || [];
-    //         return this.allLeagues.filter(league => !existingIds.includes(league.id));
-    //     }
-    // },
+
     methods: {
+
         fetchSeason(seasonId) {
             axios.get('/api/rest/seasons/' + seasonId)
                 .then((response) => {
@@ -66,16 +62,6 @@ export default {
                 })
         },
 
-        // fetchAllLeagues() {
-        //     axios.get('/api/rest/leagues/')
-        //         .then(res => {
-        //             this.allLeagues = res.data;
-        //         })
-        //         .catch((err) => {
-        //             console.error('Chyba pri nacitavani lig', err)
-        //         })
-        // },
-
         fetchNoSeasonLeagues() {
             axios.get('/api/rest/leagues/no-season')
                 .then(res => {
@@ -85,6 +71,7 @@ export default {
                     console.error('Chyba pri nacitavani lig', err)
                 })
         },
+
         addLeagueToSeason(leagueId) {
             const seasonId = this.$route.params.id;
             axios.patch('/api/rest/seasons/' + seasonId + '/addLeague', {

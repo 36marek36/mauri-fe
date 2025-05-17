@@ -57,6 +57,7 @@ export default {
             })
         }
     },
+    
     methods: {
         fetchLeagues() {
             axios.get('/api/rest/leagues/')
