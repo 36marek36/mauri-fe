@@ -4,8 +4,10 @@
 
     <ul v-if="!loading">
         <li v-for="player in players" @click="goToDetail(player.id)">
-            
+
             {{ player.firstName + ' ' + player.lastName }}
+
+            <DeleteButton :onDelete="()=> deletePlayer(player.id)"/>
 
         </li>
     </ul>
@@ -17,6 +19,7 @@
 </template>
 
 <script>
+import DeleteButton from '@/components/DeleteButton.vue';
 import axios from 'axios';
 
 export default {
@@ -45,9 +48,21 @@ export default {
         goToDetail(id) {
             this.$router.push('/players/' + id)
         },
-      
+        deletePlayer(id) {
+            console.log('Mažem hráča s ID:', id)
+            axios.delete('/api/rest/players/' + id)
+                .then(() => {
+                    this.fetchPlayers()
+                    console.log('Hráč bol úspešne zmazaný.')
+                })
+                .catch(err=>{
+                    console.error('Chyba pri mazaní hráča:', err)
+                })
+
         }
-    }
+    },
+    components: { DeleteButton }
+}
 
 </script>
 
