@@ -1,8 +1,4 @@
 <template>
-    <RouterLink to="/">home</RouterLink>
-    <RouterLink to="/players">list of players</RouterLink>
-    <RouterLink to="/seasons">seasons</RouterLink>
-    <RouterLink to="/leagues">leagues</RouterLink>
 
     <div v-if="loading">... loading ...</div>
 
@@ -107,6 +103,7 @@ export default {
                     console.error('Chyba pri nacitavani zapasov', err)
                 })
         },
+        
         generateMatches() {
             const leagueId = this.$route.params.id
             axios.patch('/api/rest/matches/' + leagueId + '/generate-matches')
