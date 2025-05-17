@@ -36,9 +36,5 @@
   color: white;
   text-decoration: none;
 }
-.navbar a.router-link-exact-active {
-  font-weight: bold;
-  border-bottom: 2px solid white;
-}
 
 </style>
