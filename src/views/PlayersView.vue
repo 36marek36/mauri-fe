@@ -2,14 +2,14 @@
 
     <h1>Všetci hráči:</h1>
 
-    <AppButton label="Vytvoriť hráča" icon="➕" type="create" :onClick="addPlayer" />
+    <AppButton label="Vytvoriť hráča" icon="➕" type="create" @clicked="addPlayer" />
 
     <ul v-if="!loading">
         <li v-for="player in players" @click="goToDetail(player.id)">
 
             {{ player.firstName + ' ' + player.lastName }}
 
-            <AppButton label="Zmazať" icon="🗑️" type="delete" :onClick="() => deletePlayer(player.id)" />
+            <AppButton label="Zmazať" icon="🗑️" type="delete" @clicked="() => deletePlayer(player.id)" />
 
         </li>
     </ul>

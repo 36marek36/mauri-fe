@@ -30,10 +30,6 @@ export default {
     disabled: {
       type: Boolean,
       default: false
-    },
-    onClick: {
-      type: Function,
-      default: null
     }
   },
   computed: {
@@ -43,9 +39,7 @@ export default {
   },
   methods: {
     handleClick(event) {
-      if (this.onClick) {
-        this.onClick(event);
-      }
+    this.$emit('clicked', event);
     }
   }
 }

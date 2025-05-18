@@ -2,7 +2,7 @@
     <h1>Všetky ligy</h1>
 
     <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
-        :type="showCreateLeagueForm ? 'delete' : 'create'" :onClick="toggleCreateForm" />
+        :type="showCreateLeagueForm ? 'delete' : 'create'" @clicked="toggleCreateForm" />
 
     <div v-if="showCreateLeagueForm">
         <input v-model="newLeague.name" placeholder="Názov ligy" />
@@ -11,7 +11,7 @@
             <option value="DOUBLES">DOUBLES</option>
         </select>
 
-        <AppButton label="Vytvoriť" type="create" icon="➕" :onClick="createLeague"/>
+        <AppButton label="Vytvoriť" type="create" icon="➕" @clicked="createLeague"/>
         
     </div>
 
@@ -20,7 +20,8 @@
     <ul v-else>
         <li v-for="league in sortedLeagues" @click="this.$router.push('/leagues/' + league.id)">
             {{ league.name }} {{ league.leagueType }}
-            <AppButton label="Zmazať" icon="🗑️" type="delete" :onClick="() => deleteLeague(league.id)" />
+
+            <AppButton label="Zmazať" icon="🗑️" type="delete" @clicked="() => deleteLeague(league.id)" />
 
         </li>
     </ul>
@@ -72,6 +73,7 @@ export default {
                 })
         },
         toggleCreateForm() {
+            
             this.showCreateLeagueForm = !this.showCreateLeagueForm
         },
 
