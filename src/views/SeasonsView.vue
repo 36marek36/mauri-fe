@@ -1,10 +1,19 @@
 <template>
     <h1>Sezóny</h1>
+    <AppButton :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
+        :type="showCreateSeasonForm ? 'delete' : 'create'" @clicked="toggleCreateForm" icon="➕"/>
 
+    <div v-if="showCreateSeasonForm">
+        <input v-model="newSeason.year" placeholder="Rok sezóny:" />
+
+        <AppButton label="Vytvoriť" type="create" icon="➕" @clicked="createSeason" />
+
+    </div>
     <div v-if="loading">... loading ...</div>
     <ul v-else>
         <li v-for="season in seasons" @click="this.$router.push('/seasons/' + season.id)">
-            <h2>Sezóna {{ season.year }}</h2>
+            Sezóna {{ season.year }}
+            <AppButton label="Zmazať" icon="🗑️" type="delete" @clicked="() => deleteSeason(season.id)" />
         </li>
     </ul>
 
@@ -12,6 +21,7 @@
 
 <script>
 import axios from 'axios';
+import AppButton from '@/components/AppButton.vue';
 
 
 export default {
@@ -19,6 +29,10 @@ export default {
     data() {
         return {
             seasons: null,
+            showCreateSeasonForm: false,
+            newSeason: {
+                year: ''
+            },
             loading: true
         }
     },
@@ -37,8 +51,35 @@ export default {
                     this.loading = false
                 })
         },
-        
-    }
+        toggleCreateForm() {
+
+            this.showCreateSeasonForm = !this.showCreateSeasonForm
+        },
+        async createSeason() {
+            try {
+                const res = await axios.post('/api/rest/seasons/create', this.newSeason);
+                console.log('Sezóna: ' + res.data.year + ' bola úspešne vytvorená.')
+                this.showCreateSeasonForm = false;
+                this.newSeason = { year: '' };
+                this.fetchSeasons();
+            } catch (err) {
+                console.error('Chyba pri vytváraní sezóny:', err);
+            }
+        },
+        deleteSeason(id) {
+            console.log('Mažem sezónu s ID:', id)
+            axios.delete('/api/rest/seasons/' + id)
+                .then(() => {
+                    this.fetchSeasons()
+                    console.log('Sezóna bola úspešne zmazaná.')
+                })
+                .catch(err => {
+                    console.error('Chyba pri mazaní sezóny:', err)
+                })
+
+        }
+    },
+    components: { AppButton }
 }
 </script>
 

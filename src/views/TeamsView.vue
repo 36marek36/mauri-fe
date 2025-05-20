@@ -3,7 +3,7 @@
 
     <div v-if="!loading">
         <h2>Vytvoriť nový tím</h2>
-        <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="🗑️"
+        <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
             :type="showCreateTeamForm ? 'delete' : 'create'" @clicked="toggleCreateForm" />
 
         <div v-if="showCreateTeamForm">

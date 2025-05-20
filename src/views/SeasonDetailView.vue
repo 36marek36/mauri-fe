@@ -6,16 +6,12 @@
         <h1>{{ season.year }}</h1>
 
         <ul>
-            <li v-for="league in season.leagues" :key="league.id">
-                {{ league.name }}
+            <li v-for="league in season.leagues" :key="league.id" @click="this.$router.push('/leagues/' + league.id)">
+                <span>
+                    {{ league.name }}
+                </span>
             </li>
         </ul>
-
-        <!-- <ul v-for="league in season.leagues">
-            <li @click="this.$router.push('/leagues/' + league.id)">
-                <span>{{ league.name + ' ' + league.leagueType }}</span>
-            </li>
-        </ul> -->
     </div>
 
     <h2>Všetky dostupné ligy</h2>
@@ -78,7 +74,7 @@ export default {
                 leagueId: leagueId
             })
                 .then(() => {
-                    alert('Liga bola pridaná do sezóny.');
+                    console.log('Liga bola pridaná do sezóny.')
                     this.fetchSeason(seasonId); // znovu načítaj sezónu
                     this.fetchNoSeasonLeagues();
                 })

@@ -2,7 +2,7 @@
     <h1>Všetky ligy</h1>
 
     <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
-        :type="showCreateLeagueForm ? 'delete' : 'create'" @clicked="toggleCreateForm" />
+        :type="showCreateLeagueForm ? 'delete' : 'create'" @clicked="toggleCreateForm" icon="➕" />
 
     <div v-if="showCreateLeagueForm">
         <input v-model="newLeague.name" placeholder="Názov ligy" />
