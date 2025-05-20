@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
 
     <div v-if="loading">... loading ...</div>
 
@@ -36,7 +36,82 @@
 
 
 
+</template> -->
+
+<template>
+    <div v-if="loading">... loading ...</div>
+
+    <div v-else>
+        <h1>{{ league.name }} {{ league.leagueType }}</h1>
+
+        <!-- Zobrazenie hráčov pre SINGLES -->
+        <div v-if="league.leagueType === 'SINGLES'">
+            <h2>Hráči v lige</h2>
+            <ul>
+                <li v-for="player in league.players" :key="player.id">
+                    <span>{{ player.firstName }} {{ player.lastName }}</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Zobrazenie tímov pre DOUBLES -->
+        <div v-else-if="league.leagueType === 'DOUBLES'">
+            <h2>Tímy v lige</h2>
+            <ul>
+                <li v-for="team in league.teams" :key="team.id">
+                    <span>{{ team.player1.firstName }} {{ team.player1.lastName }} a
+                        {{ team.player2.firstName }} {{ team.player2.lastName }}</span>
+                </li>
+            </ul>
+        </div>
+
+        <h2>Zápasy ligy</h2>
+
+        <ul v-if="matches.length > 0">
+            <li v-for="match in matches" :key="match.id">
+                <template v-if="league.leagueType === 'SINGLES'">
+                    {{ match.homePlayer.firstName }} {{ match.homePlayer.lastName }}
+                    vs
+                    {{ match.awayPlayer.firstName }} {{ match.awayPlayer.lastName }}
+                </template>
+                <template v-else-if="league.leagueType === 'DOUBLES'">
+                    {{ match.homeTeam.player1.firstName }} {{ match.homeTeam.player1.lastName }} a
+                    {{ match.homeTeam.player2.firstName }} {{ match.homeTeam.player2.lastName }}
+                    vs
+                    {{ match.awayTeam.player1.firstName }} {{ match.awayTeam.player1.lastName }} a
+                    {{ match.awayTeam.player2.firstName }} {{ match.awayTeam.player2.lastName }}
+                </template>
+            </li>
+        </ul>
+        <p v-else>Žiadne zápasy pre túto ligu.</p>
+
+        <div v-if="league.leagueType === 'SINGLES'">
+            <h2>Všetci hráči:</h2>
+            <ul>
+                <li v-for="player in players" :key="player.id">
+                    <span>{{ player.firstName }} {{ player.lastName }}</span>
+                    <button @click="addParticipantToLeague(player.id)">Pridať hráča do ligy</button>
+                </li>
+            </ul>
+        </div>
+
+        <div v-else-if="league.leagueType === 'DOUBLES'">
+            <h2>Všetky tímy</h2>
+            <ul>
+                <li v-for="team in teams" :key="team.id">
+                    <span>{{ team.player1.firstName }} {{ team.player1.lastName }} a
+                        {{ team.player2.firstName }} {{ team.player2.lastName }}</span>
+                    <button @click="addParticipantToLeague(team.id)">Pridať tím do ligy</button>
+                </li>
+            </ul>
+        </div>
+
+        <button @click="generateMatches">Start</button>
+        <p v-if="matchGenerationMessage">{{ matchGenerationMessage }}</p>
+    </div>
 </template>
+
+
 
 <script>
 import axios from 'axios';
@@ -48,6 +123,7 @@ export default {
         return {
             league: {},
             players: [],
+            teams: [],
             matches: [],
             matchGenerationMessage: '',
             loading: true
@@ -65,11 +141,13 @@ export default {
             Promise.all([
                 axios.get('/api/rest/leagues/' + leagueId),
                 axios.get('/api/rest/players/'),
+                axios.get('/api/rest/teams/'),
                 this.fetchMatches()
             ])
-                .then(([leagueResponse, playersResponse]) => {
-                    this.league = leagueResponse.data;
-                    this.players = playersResponse.data;
+                .then(([leagueResponse, playersResponse, teamsResponse]) => {
+                    this.league = leagueResponse.data
+                    this.players = playersResponse.data
+                    this.teams = teamsResponse.data
                 })
                 .catch((error) => {
                     console.error('Chyba pri načítaní údajov:', error);
@@ -79,10 +157,10 @@ export default {
                 });
         },
 
-        addPlayerToLeague(playerId) {
+        addParticipantToLeague(participantId) {
             const leagueId = this.$route.params.id
             axios.patch('/api/rest/leagues/' + leagueId + '/addParticipant', {
-                participantId: playerId
+                participantId: participantId
             })
                 .then(() => {
                     // Načítame ligu znova, aby bola vždy aktuálna

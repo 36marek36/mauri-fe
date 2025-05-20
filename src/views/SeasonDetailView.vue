@@ -4,11 +4,24 @@
 
     <div v-else>
         <h1>{{ season.year }}</h1>
+        <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
+            :type="showCreateLeagueForm ? 'delete' : 'create'" @clicked="toggleCreateForm" icon="➕" />
+
+        <div v-if="showCreateLeagueForm">
+            <input v-model="newLeague.name" placeholder="Názov ligy" />
+            <select v-model="newLeague.leagueType">
+                <option value="SINGLES">SINGLES</option>
+                <option value="DOUBLES">DOUBLES</option>
+            </select>
+
+            <AppButton label="Vytvoriť" type="create" icon="➕" @clicked="createLeague" />
+
+        </div>
 
         <ul>
             <li v-for="league in season.leagues" :key="league.id" @click="this.$router.push('/leagues/' + league.id)">
                 <span>
-                    {{ league.name }}
+                    {{ league.name }} {{ league.leagueType }}
                 </span>
             </li>
         </ul>
@@ -28,6 +41,7 @@
 
 <script>
 import axios from 'axios';
+import AppButton from '@/components/AppButton.vue';
 
 
 export default {
@@ -36,6 +50,12 @@ export default {
         return {
             season: {},
             noSeasonLeagues: [],
+            showCreateLeagueForm: false,
+            newLeague: {
+                name: '',
+                leagueType: 'SINGLES',
+                seasonId: ''
+            },
             loading: true
         }
     },
@@ -67,6 +87,21 @@ export default {
                     console.error('Chyba pri nacitavani lig', err)
                 })
         },
+        async createLeague() {
+            try {
+                const res = await axios.post('/api/rest/leagues/create', this.newLeague);
+                this.addLeagueToSeason(res.data.id)
+                console.log('Liga: ' + res.data.name + ' bola úspešne vytvorená.')
+                this.showCreateLeagueForm = false;
+                this.newLeague = { name: '', leagueType: 'SINGLES', seasonId: '' };
+            } catch (err) {
+                console.error('Chyba pri vytváraní ligy:', err);
+            }
+        },
+        toggleCreateForm() {
+
+            this.showCreateLeagueForm = !this.showCreateLeagueForm
+        },
 
         addLeagueToSeason(leagueId) {
             const seasonId = this.$route.params.id;
@@ -82,7 +117,8 @@ export default {
                     console.error('Chyba pri priraďovaní ligy:', err);
                 });
         }
-    }
+    },
+    components: { AppButton }
 }
 
 </script>

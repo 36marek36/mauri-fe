@@ -2,7 +2,6 @@
     <h1>Všetky tými:</h1>
 
     <div v-if="!loading">
-        <h2>Vytvoriť nový tím</h2>
         <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
             :type="showCreateTeamForm ? 'delete' : 'create'" @clicked="toggleCreateForm" />
 
