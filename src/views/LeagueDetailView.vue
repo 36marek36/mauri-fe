@@ -58,7 +58,6 @@ export default {
     },
 
     methods: {
-
         loadInitialData() {
             const leagueId = this.$route.params.id;
             this.loading = true
@@ -98,16 +97,15 @@ export default {
                 })
         },
 
-        fetchMatches() {
+        async fetchMatches() {
             const leagueId = this.$route.params.id
-            return axios.get('/api/rest/leagues/' + leagueId + '/matches')
-                .then((res) => {
-                    this.matches = res.data
-                    console.log('Zapasy v lige boli nacitane:', this.matches)
-                })
-                .catch((err) => {
-                    console.error('Chyba pri nacitavani zapasov', err)
-                })
+            try {
+                const res = await axios.get('/api/rest/leagues/' + leagueId + '/matches');
+                this.matches = res.data;
+                console.log('Zapasy v lige boli nacitane:', this.matches);
+            } catch (err) {
+                console.error('Chyba pri nacitavani zapasov', err);
+            }
         },
 
         generateMatches() {
