@@ -1,43 +1,3 @@
-<!-- <template>
-
-    <div v-if="loading">... loading ...</div>
-
-    <div v-else>
-        <h1>{{ league.name }}</h1>
-
-        <ul>
-            <li v-for="participant in league.players" :key="participant.id">
-                <span>{{ participant.firstName + ' ' + participant.lastName }}</span>
-            </li>
-        </ul>
-
-        <h2>Zápasy ligy</h2>
-
-        <ul v-if="matches.length > 0">
-            <li v-for="match in matches" :key="match.id">
-                {{ match.homePlayer.firstName }} {{ match.homePlayer.lastName }} vs {{ match.awayPlayer.firstName + ' '
-                    +
-                    match.awayPlayer.lastName }}
-            </li>
-        </ul>
-        <p v-else>Žiadne zápasy pre túto ligu.</p>
-
-        <h2>Vsetci hraci:</h2>
-        <ul>
-            <li v-for="player in players" :key="player.id">
-                <span>{{ player.firstName + ' ' + player.lastName }}</span>
-                <button @click="addPlayerToLeague(player.id)">Pridat hraca do ligy</button>
-            </li>
-        </ul>
-
-        <button @click="generateMatches">Start</button>
-        <p v-if="matchGenerationMessage">{{ matchGenerationMessage }}</p>
-    </div>
-
-
-
-</template> -->
-
 <template>
     <div v-if="loading">... loading ...</div>
 
@@ -49,7 +9,7 @@
             <h2>Hráči v lige</h2>
             <ul>
                 <li v-for="player in league.players" :key="player.id">
-                    <span>{{ player.firstName }} {{ player.lastName }}</span>
+                    <span>{{ fullName(player) }}</span>
                     <AppButton label="Zmazať" icon="🗑️" type="delete"
                         @clicked="() => removeParticipantFromLeague(player.id)" />
                 </li>
@@ -61,8 +21,7 @@
             <h2>Tímy v lige</h2>
             <ul>
                 <li v-for="team in league.teams" :key="team.id">
-                    <span>{{ team.player1.firstName }} {{ team.player1.lastName }} a
-                        {{ team.player2.firstName }} {{ team.player2.lastName }}</span>
+                    <span>{{ fullName(team.player1) }} a {{ fullName(team.player2) }}</span>
                     <AppButton label="Zmazať" icon="🗑️" type="delete"
                         @clicked="() => removeParticipantFromLeague(team.id)" />
                 </li>
@@ -74,16 +33,11 @@
         <ul v-if="matches.length > 0">
             <li v-for="match in matches" :key="match.id">
                 <template v-if="league.leagueType === 'SINGLES'">
-                    {{ match.homePlayer.firstName }} {{ match.homePlayer.lastName }}
-                    vs
-                    {{ match.awayPlayer.firstName }} {{ match.awayPlayer.lastName }}
+                    {{ fullName(match.homePlayer) }} vs {{ fullName(match.awayPlayer) }}
                 </template>
                 <template v-else-if="league.leagueType === 'DOUBLES'">
-                    {{ match.homeTeam.player1.firstName }} {{ match.homeTeam.player1.lastName }} a
-                    {{ match.homeTeam.player2.firstName }} {{ match.homeTeam.player2.lastName }}
-                    vs
-                    {{ match.awayTeam.player1.firstName }} {{ match.awayTeam.player1.lastName }} a
-                    {{ match.awayTeam.player2.firstName }} {{ match.awayTeam.player2.lastName }}
+                    {{ fullName(match.homeTeam.player1) }} a {{ fullName(match.homeTeam.player2) }} vs
+                    {{ fullName(match.awayTeam.player1) }} a {{ fullName(match.awayTeam.player2) }}
                 </template>
             </li>
         </ul>
@@ -95,7 +49,7 @@
                 <li v-for="player in freePlayers" :key="player.id">
                     <label>
                         <input type="checkbox" :value="player.id" v-model="selectedParticipants" />
-                        {{ player.firstName }}
+                        <span>{{ fullName(player) }}</span>
                     </label>
                 </li>
             </ul>
@@ -110,7 +64,7 @@
                 <li v-for="team in freeTeams" :key="team.id">
                     <label>
                         <input type="checkbox" :value="team.id" v-model="selectedParticipants" />
-                        {{ team.player1.firstName }}
+                        <span>{{ fullName(team.player1) }} a {{ fullName(team.player2) }}</span>
                     </label>
                 </li>
             </ul>
@@ -227,6 +181,9 @@ export default {
                     }
                     console.log('err.response:', err.response.data);
                 })
+        },
+        fullName(person) {
+            return person.firstName + ' ' + person.lastName;
         }
     },
     components: { AppButton }
