@@ -86,24 +86,34 @@
         <p v-else>Žiadne zápasy pre túto ligu.</p>
 
         <div v-if="league.leagueType === 'SINGLES'">
-            <h2>Všetci hráči:</h2>
+            <h2>Všetci nezaradení hráči:</h2>
             <ul>
                 <li v-for="player in players" :key="player.id">
-                    <span>{{ player.firstName }} {{ player.lastName }}</span>
-                    <button @click="addParticipantToLeague(player.id)">Pridať hráča do ligy</button>
+                    <label>
+                        <input type="checkbox" :value="player.id" v-model="selectedParticipants" />
+                        {{ player.firstName }}
+                    </label>
                 </li>
             </ul>
+
+            <AppButton label="Pridať vybraných hráčov do ligy" type="create" icon="➕"
+                @clicked="addSelectedParticipantsToLeague" :disabled="selectedParticipants.length === 0" />
         </div>
 
         <div v-else-if="league.leagueType === 'DOUBLES'">
-            <h2>Všetky tímy</h2>
+            <h2>Všetky nezaradené tímy</h2>
             <ul>
                 <li v-for="team in teams" :key="team.id">
-                    <span>{{ team.player1.firstName }} {{ team.player1.lastName }} a
-                        {{ team.player2.firstName }} {{ team.player2.lastName }}</span>
-                    <button @click="addParticipantToLeague(team.id)">Pridať tím do ligy</button>
+                    <label>
+                        <input type="checkbox" :value="team.id" v-model="selectedParticipants" />
+                        {{ team.player1.firstName }}
+                    </label>
                 </li>
             </ul>
+
+            <AppButton label="Pridať vybrané tými do ligy" type="create" icon="➕"
+                @clicked="addSelectedParticipantsToLeague" :disabled="selectedParticipants.length === 0" />
+
         </div>
 
         <button @click="generateMatches">Start</button>
@@ -114,6 +124,7 @@
 
 
 <script>
+import AppButton from '@/components/AppButton.vue';
 import axios from 'axios';
 
 
@@ -125,6 +136,7 @@ export default {
             players: [],
             teams: [],
             matches: [],
+            selectedParticipants: [],
             matchGenerationMessage: '',
             loading: true
         }
@@ -140,8 +152,8 @@ export default {
 
             Promise.all([
                 axios.get('/api/rest/leagues/' + leagueId),
-                axios.get('/api/rest/players/'),
-                axios.get('/api/rest/teams/'),
+                axios.get('/api/rest/players/not-in-any-league'),
+                axios.get('/api/rest/teams/not-in-any-league'),
                 this.fetchMatches()
             ])
                 .then(([leagueResponse, playersResponse, teamsResponse]) => {
@@ -156,24 +168,48 @@ export default {
                     this.loading = false;
                 });
         },
+        addSelectedParticipantsToLeague() {
+            const leagueId = this.$route.params.id;
+            const payload = {
+                participantIds: this.selectedParticipants
+            };
 
-        addParticipantToLeague(participantId) {
-            const leagueId = this.$route.params.id
-            axios.patch('/api/rest/leagues/' + leagueId + '/addParticipant', {
-                participantId: participantId
-            })
+            axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload)
                 .then(() => {
-                    // Načítame ligu znova, aby bola vždy aktuálna
-                    return axios.get('/api/rest/leagues/' + leagueId)
+                    return Promise.all([
+                        axios.get(`/api/rest/leagues/${leagueId}`),
+                        axios.get('/api/rest/players/not-in-any-league'),
+                        axios.get('/api/rest/teams/not-in-any-league')
+                    ]);
                 })
-                .then((updatedLeagueResponse) => {
-                    // Aktualizujeme ligu zo servera
+                .then(([updatedLeagueResponse, freePlayersResponse, freeTeamsResponse]) => {
                     this.league = updatedLeagueResponse.data
+                    this.players = freePlayersResponse.data
+                    this.teams = freeTeamsResponse.data
+                    this.selectedParticipants = [];
                 })
-                .catch((err) => {
-                    console.log('Chyba pri nacitavani:', err)
-                })
+                .catch(err => {
+                    console.error('Chyba pri hromadnom pridávaní:', err);
+                });
         },
+
+        // addParticipantToLeague(participantId) {
+        //     const leagueId = this.$route.params.id
+        //     axios.patch('/api/rest/leagues/' + leagueId + '/addParticipant', {
+        //         participantId: participantId
+        //     })
+        //         .then(() => {
+        //             // Načítame ligu znova, aby bola vždy aktuálna
+        //             return axios.get('/api/rest/leagues/' + leagueId)
+        //         })
+        //         .then((updatedLeagueResponse) => {
+        //             // Aktualizujeme ligu zo servera
+        //             this.league = updatedLeagueResponse.data
+        //         })
+        //         .catch((err) => {
+        //             console.log('Chyba pri nacitavani:', err)
+        //         })
+        // },
 
         async fetchMatches() {
             const leagueId = this.$route.params.id
@@ -204,7 +240,8 @@ export default {
                     console.log('err.response:', err.response.data);
                 })
         }
-    }
+    },
+    components: { AppButton }
 }
 
 </script>
