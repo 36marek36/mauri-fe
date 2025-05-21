@@ -50,6 +50,8 @@
             <ul>
                 <li v-for="player in league.players" :key="player.id">
                     <span>{{ player.firstName }} {{ player.lastName }}</span>
+                    <AppButton label="Zmazať" icon="🗑️" type="delete"
+                        @clicked="() => removeParticipantFromLeague(player.id)" />
                 </li>
             </ul>
         </div>
@@ -61,6 +63,8 @@
                 <li v-for="team in league.teams" :key="team.id">
                     <span>{{ team.player1.firstName }} {{ team.player1.lastName }} a
                         {{ team.player2.firstName }} {{ team.player2.lastName }}</span>
+                    <AppButton label="Zmazať" icon="🗑️" type="delete"
+                        @clicked="() => removeParticipantFromLeague(team.id)" />
                 </li>
             </ul>
         </div>
@@ -88,7 +92,7 @@
         <div v-if="league.leagueType === 'SINGLES'">
             <h2>Všetci nezaradení hráči:</h2>
             <ul>
-                <li v-for="player in players" :key="player.id">
+                <li v-for="player in freePlayers" :key="player.id">
                     <label>
                         <input type="checkbox" :value="player.id" v-model="selectedParticipants" />
                         {{ player.firstName }}
@@ -103,7 +107,7 @@
         <div v-else-if="league.leagueType === 'DOUBLES'">
             <h2>Všetky nezaradené tímy</h2>
             <ul>
-                <li v-for="team in teams" :key="team.id">
+                <li v-for="team in freeTeams" :key="team.id">
                     <label>
                         <input type="checkbox" :value="team.id" v-model="selectedParticipants" />
                         {{ team.player1.firstName }}
@@ -133,8 +137,8 @@ export default {
     data() {
         return {
             league: {},
-            players: [],
-            teams: [],
+            freePlayers: [],
+            freeTeams: [],
             matches: [],
             selectedParticipants: [],
             matchGenerationMessage: '',
@@ -158,8 +162,8 @@ export default {
             ])
                 .then(([leagueResponse, playersResponse, teamsResponse]) => {
                     this.league = leagueResponse.data
-                    this.players = playersResponse.data
-                    this.teams = teamsResponse.data
+                    this.freePlayers = playersResponse.data
+                    this.freeTeams = teamsResponse.data
                 })
                 .catch((error) => {
                     console.error('Chyba pri načítaní údajov:', error);
@@ -176,41 +180,26 @@ export default {
 
             axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload)
                 .then(() => {
-                    return Promise.all([
-                        axios.get(`/api/rest/leagues/${leagueId}`),
-                        axios.get('/api/rest/players/not-in-any-league'),
-                        axios.get('/api/rest/teams/not-in-any-league')
-                    ]);
-                })
-                .then(([updatedLeagueResponse, freePlayersResponse, freeTeamsResponse]) => {
-                    this.league = updatedLeagueResponse.data
-                    this.players = freePlayersResponse.data
-                    this.teams = freeTeamsResponse.data
-                    this.selectedParticipants = [];
+                    this.loadInitialData()
+                    this.selectedParticipants = []
                 })
                 .catch(err => {
                     console.error('Chyba pri hromadnom pridávaní:', err);
                 });
         },
+        removeParticipantFromLeague(id) {
+            const leagueId = this.$route.params.id;
+            console.log('Mažem participanta z ligy:')
+            axios.delete('/api/rest/leagues/' + leagueId + '/participants/' + id)
+                .then(() => {
+                    this.loadInitialData()
+                    console.log('Participant bol úspešne odstánený y ligy')
+                })
+                .catch(err => {
+                    console.error('Chyba pri mazaní participanta z ligy:', err)
+                })
 
-        // addParticipantToLeague(participantId) {
-        //     const leagueId = this.$route.params.id
-        //     axios.patch('/api/rest/leagues/' + leagueId + '/addParticipant', {
-        //         participantId: participantId
-        //     })
-        //         .then(() => {
-        //             // Načítame ligu znova, aby bola vždy aktuálna
-        //             return axios.get('/api/rest/leagues/' + leagueId)
-        //         })
-        //         .then((updatedLeagueResponse) => {
-        //             // Aktualizujeme ligu zo servera
-        //             this.league = updatedLeagueResponse.data
-        //         })
-        //         .catch((err) => {
-        //             console.log('Chyba pri nacitavani:', err)
-        //         })
-        // },
-
+        },
         async fetchMatches() {
             const leagueId = this.$route.params.id
             try {
@@ -221,7 +210,6 @@ export default {
                 console.error('Chyba pri nacitavani zapasov', err);
             }
         },
-
         generateMatches() {
             const leagueId = this.$route.params.id
             axios.patch('/api/rest/matches/' + leagueId + '/generate-matches')
