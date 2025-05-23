@@ -8,7 +8,8 @@
         <div v-if="league.leagueType === 'SINGLES'">
             <h2>Hráči v lige</h2>
             <ul>
-                <li v-for="player in league.players" :key="player.id">
+                <li v-for="player in league.players" :key="player.id"
+                    @click="this.$router.push('/players/' + player.id)">
                     <span>{{ fullName(player) }}</span>
                     <AppButton label="Zmazať" icon="🗑️" type="delete"
                         @clicked="() => removeParticipantFromLeague(player.id)" />
@@ -31,14 +32,27 @@
         <h2>Zápasy ligy</h2>
 
         <ul v-if="matches.length > 0">
-            <li v-for="match in matches" :key="match.id">
-                <template v-if="league.leagueType === 'SINGLES'">
-                    {{ fullName(match.homePlayer) }} vs {{ fullName(match.awayPlayer) }}
-                </template>
-                <template v-else-if="league.leagueType === 'DOUBLES'">
-                    {{ fullName(match.homeTeam.player1) }} a {{ fullName(match.homeTeam.player2) }} vs
-                    {{ fullName(match.awayTeam.player1) }} a {{ fullName(match.awayTeam.player2) }}
-                </template>
+            <li v-for="match in matches" :key="match.id" style="margin-bottom: 30px;">
+                <div>
+                    <!-- Zobrazenie hráčov -->
+                    <template v-if="league.leagueType === 'SINGLES'">
+                        {{ fullName(match.homePlayer) }} vs {{ fullName(match.awayPlayer) }}
+                    </template>
+                    <template v-else-if="league.leagueType === 'DOUBLES'">
+                        {{ fullName(match.homeTeam.player1) }} a {{ fullName(match.homeTeam.player2) }} vs
+                        {{ fullName(match.awayTeam.player1) }} a {{ fullName(match.awayTeam.player2) }}
+                    </template>
+
+                    <!-- Tlačidlo na otvorenie formulára -->
+                    <AppButton :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
+                        :type="activeMatchId === match.id ? 'delete' : 'create'" icon="📝"
+                        @clicked="toggleForm(match.id)" />
+
+                    <!-- Komponent formulára -->
+                    <div v-if="activeMatchId === match.id">
+                        <AddMatchResult :matchId="match.id" @result-submitted="fetchMatchesAndClose" />
+                    </div>
+                </div>
             </li>
         </ul>
         <p v-else>Žiadne zápasy pre túto ligu.</p>
@@ -75,7 +89,7 @@
         </div>
 
         <button @click="generateMatches">Start</button>
-        <p v-if="matchGenerationMessage">{{ matchGenerationMessage }}</p>
+        <p v-if="message">{{ message }}</p>
     </div>
 </template>
 
@@ -83,6 +97,7 @@
 
 <script>
 import AppButton from '@/components/AppButton.vue';
+import AddMatchResult from '@/components/AddMatchResult.vue';
 import axios from 'axios';
 
 
@@ -95,7 +110,8 @@ export default {
             freeTeams: [],
             matches: [],
             selectedParticipants: [],
-            matchGenerationMessage: '',
+            message: '',
+            activeMatchId: null,
             loading: true
         }
     },
@@ -104,6 +120,7 @@ export default {
     },
 
     methods: {
+
         loadInitialData() {
             const leagueId = this.$route.params.id;
             this.loading = true
@@ -135,6 +152,11 @@ export default {
             axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload)
                 .then(() => {
                     this.loadInitialData()
+                    this.message = '✅ Hráči boli úspešne pridaný do ligy!';
+
+                    setTimeout(() => {
+                        this.message = '';
+                    }, 3000)
                     this.selectedParticipants = []
                 })
                 .catch(err => {
@@ -165,28 +187,47 @@ export default {
             }
         },
         generateMatches() {
-            const leagueId = this.$route.params.id
+            const leagueId = this.$route.params.id;
             axios.patch('/api/rest/matches/' + leagueId + '/generate-matches')
                 .then(() => {
-                    this.matchGenerationMessage = 'Zapasy boli uspesne vygenerovane'
-                    return axios.get('/api/rest/leagues/' + leagueId)
+                    this.message = 'Zápasy boli úspešne vygenerované';
+                    setTimeout(() => {
+                        this.message = '';
+                    }, 3000);
+
+                    return axios.get('/api/rest/leagues/' + leagueId);
                 })
                 .then((res) => {
-                    this.league = res.data
-                    return this.fetchMatches()
+                    this.league = res.data;
+                    return this.fetchMatches();
                 })
                 .catch((err) => {
                     if (err.response && err.response.status === 409) {
-                        this.matchGenerationMessage = err.response.data;
+                        this.message = err.response.data;
+                        setTimeout(() => {
+                            this.message = '';
+                        }, 3000);
                     }
                     console.log('err.response:', err.response.data);
-                })
+                });
         },
         fullName(person) {
             return person.firstName + ' ' + person.lastName;
+        },
+        toggleForm(matchId) {
+            this.activeMatchId = this.activeMatchId === matchId ? null : matchId;
+        },
+        async fetchMatchesAndClose() {
+            await this.fetchMatches();
+            this.activeMatchId = null;
+            this.message = '✅ Výsledok bol úspešne uložený!';
+
+            setTimeout(() => {
+                this.message = '';
+            }, 3000)
         }
     },
-    components: { AppButton }
+    components: { AppButton, AddMatchResult }
 }
 
 </script>

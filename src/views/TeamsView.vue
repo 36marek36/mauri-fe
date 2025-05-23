@@ -87,7 +87,6 @@ export default {
                 })
         },
         toggleCreateForm() {
-
             this.showCreateTeamForm = !this.showCreateTeamForm
         },
         async createTeam() {
@@ -121,22 +120,6 @@ export default {
                 })
 
         }
-        // createTeam() {
-        //     const payload = {
-        //         player1Id: this.newTeam.player1Id,
-        //         player2Id: this.newTeam.player2Id
-        //     }
-
-        //     axios.post('/api/rest/teams/create', payload)
-        //         .then(() => {
-        //             this.newTeam.player1Id = ''
-        //             this.newTeam.player2Id = ''
-        //             this.fetchTeams() // refresh tímov po vytvorení
-        //         })
-        //         .catch((error) => {
-        //             console.error('Chyba pri vytváraní tímu:', error)
-        //         })
-        // }
     },
     components: { AppButton }
 }
