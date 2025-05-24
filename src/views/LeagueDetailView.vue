@@ -29,42 +29,42 @@
             </ul>
         </div>
 
-<h2>Zápasy ligy</h2>
+        <h2>Zápasy ligy</h2>
 
-<ul v-if="matches.length > 0">
-    <li v-for="match in matches" :key="match.id" style="margin-bottom: 30px;">
-        <div>
-            <!-- Zobrazenie hráčov -->
-            <template v-if="league.leagueType === 'SINGLES'">
-                {{ fullName(match.homePlayer) }} vs {{ fullName(match.awayPlayer) }}
-            </template>
-            <template v-else-if="league.leagueType === 'DOUBLES'">
-                {{ fullName(match.homeTeam.player1) }} a {{ fullName(match.homeTeam.player2) }} vs
-                {{ fullName(match.awayTeam.player1) }} a {{ fullName(match.awayTeam.player2) }}
-            </template>
-
-            <!-- Ak je zápas typu CREATED, zobraz formulár -->
-            <template v-if="match.status === 'CREATED'">
-                <AppButton :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
-                    :type="activeMatchId === match.id ? 'delete' : 'create'" icon="📝"
-                    @clicked="toggleForm(match.id)" />
-
-                <div v-if="activeMatchId === match.id">
-                    <AddMatchResult :match="match" @result-submitted="fetchMatchesAndClose" />
-                </div>
-            </template>
-
-            <!-- Ak je zápas typu FINISHED, zobraz výsledok -->
-            <template v-else-if="match.status === 'FINISHED'">
+        <ul v-if="matches.length > 0">
+            <li v-for="match in matches" :key="match.id" style="margin-bottom: 30px;">
                 <div>
-                    <strong>Výsledok:</strong>
-                    {{ match.result.score1 }} : {{ match.result.score2 }}
+                    <!-- 🧑‍🤝‍🧑 Zobrazenie hráčov -->
+                    <span v-if="league.leagueType === 'SINGLES'">
+                        {{ fullName(match.homePlayer) }} vs {{ fullName(match.awayPlayer) }}
+                    </span>
+                    <span v-else-if="league.leagueType === 'DOUBLES'">
+                        {{ fullName(match.homeTeam?.player1) }} a {{ fullName(match.homeTeam?.player2) }} vs
+                        {{ fullName(match.awayTeam?.player1) }} a {{ fullName(match.awayTeam?.player2) }}
+                    </span>
+
+                    <!-- 📝 Formulár pri zápase CREATED -->
+                    <div v-if="match.status === 'CREATED'">
+                        <AppButton :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
+                            :type="activeMatchId === match.id ? 'delete' : 'create'" icon="📝"
+                            @clicked="toggleForm(match.id)" />
+
+                        <div v-if="activeMatchId === match.id">
+                            <AddMatchResult :match="match" :leagueType="league.leagueType"
+                                @result-submitted="fetchMatchesAndClose" />
+                        </div>
+                    </div>
+
+                    <!-- 🏁 Výsledok pri FINISHED zápase -->
+                    <div v-else-if="match.status === 'FINISHED'">
+                        <strong>Výsledok:</strong>
+                        {{ match.result?.score1 }} : {{ match.result?.score2 }}
+                    </div>
                 </div>
-            </template>
-        </div>
-    </li>
-</ul>
-<p v-else>Žiadne zápasy pre túto ligu.</p>
+            </li>
+        </ul>
+
+        <p v-else>Žiadne zápasy pre túto ligu.</p>
 
         <div v-if="league.leagueType === 'SINGLES'">
             <h2>Všetci nezaradení hráči:</h2>
