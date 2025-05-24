@@ -4,9 +4,9 @@
         <input v-model="formData.scratchedId" placeholder="napr. 123" />
 
         <div v-for="(set, index) in formData.setScores" :key="index">
-            <label>Set {{ index + 1 }} – Hráč 1:</label>
+            <label>Set {{ index + 1 }} – {{ match.homePlayer.firstName + ' ' + match.homePlayer.lastName +':'}}</label>
             <input type="number" v-model.number="set.score1" />
-            <label>Hráč 2:</label>
+            <label>{{ match.awayPlayer.firstName + ' ' + match.awayPlayer.lastName +':'}}</label>
             <input type="number" v-model.number="set.score2" />
             <button type="button" @click="removeSet(index)">❌</button>
         </div>
@@ -30,8 +30,8 @@ export default {
         };
     },
     props: {
-        matchId: {
-            type: String,
+        match: {
+            type: Object,
             required: true
         }
     },
@@ -44,7 +44,7 @@ export default {
         },
         async submitResult() {
             try {
-                await axios.patch(`/api/rest/matches/${this.matchId}/result`, this.formData);
+                await axios.patch(`/api/rest/matches/${this.match.id}/result`, this.formData);
                 this.$emit('result-submitted', this.matchId);
             } catch (err) {
                 console.error(err);

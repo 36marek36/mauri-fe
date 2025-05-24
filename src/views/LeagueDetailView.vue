@@ -29,33 +29,42 @@
             </ul>
         </div>
 
-        <h2>Zápasy ligy</h2>
+<h2>Zápasy ligy</h2>
 
-        <ul v-if="matches.length > 0">
-            <li v-for="match in matches" :key="match.id" style="margin-bottom: 30px;">
-                <div>
-                    <!-- Zobrazenie hráčov -->
-                    <template v-if="league.leagueType === 'SINGLES'">
-                        {{ fullName(match.homePlayer) }} vs {{ fullName(match.awayPlayer) }}
-                    </template>
-                    <template v-else-if="league.leagueType === 'DOUBLES'">
-                        {{ fullName(match.homeTeam.player1) }} a {{ fullName(match.homeTeam.player2) }} vs
-                        {{ fullName(match.awayTeam.player1) }} a {{ fullName(match.awayTeam.player2) }}
-                    </template>
+<ul v-if="matches.length > 0">
+    <li v-for="match in matches" :key="match.id" style="margin-bottom: 30px;">
+        <div>
+            <!-- Zobrazenie hráčov -->
+            <template v-if="league.leagueType === 'SINGLES'">
+                {{ fullName(match.homePlayer) }} vs {{ fullName(match.awayPlayer) }}
+            </template>
+            <template v-else-if="league.leagueType === 'DOUBLES'">
+                {{ fullName(match.homeTeam.player1) }} a {{ fullName(match.homeTeam.player2) }} vs
+                {{ fullName(match.awayTeam.player1) }} a {{ fullName(match.awayTeam.player2) }}
+            </template>
 
-                    <!-- Tlačidlo na otvorenie formulára -->
-                    <AppButton :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
-                        :type="activeMatchId === match.id ? 'delete' : 'create'" icon="📝"
-                        @clicked="toggleForm(match.id)" />
+            <!-- Ak je zápas typu CREATED, zobraz formulár -->
+            <template v-if="match.status === 'CREATED'">
+                <AppButton :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
+                    :type="activeMatchId === match.id ? 'delete' : 'create'" icon="📝"
+                    @clicked="toggleForm(match.id)" />
 
-                    <!-- Komponent formulára -->
-                    <div v-if="activeMatchId === match.id">
-                        <AddMatchResult :matchId="match.id" @result-submitted="fetchMatchesAndClose" />
-                    </div>
+                <div v-if="activeMatchId === match.id">
+                    <AddMatchResult :match="match" @result-submitted="fetchMatchesAndClose" />
                 </div>
-            </li>
-        </ul>
-        <p v-else>Žiadne zápasy pre túto ligu.</p>
+            </template>
+
+            <!-- Ak je zápas typu FINISHED, zobraz výsledok -->
+            <template v-else-if="match.status === 'FINISHED'">
+                <div>
+                    <strong>Výsledok:</strong>
+                    {{ match.result.score1 }} : {{ match.result.score2 }}
+                </div>
+            </template>
+        </div>
+    </li>
+</ul>
+<p v-else>Žiadne zápasy pre túto ligu.</p>
 
         <div v-if="league.leagueType === 'SINGLES'">
             <h2>Všetci nezaradení hráči:</h2>
