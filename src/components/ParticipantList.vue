@@ -41,3 +41,16 @@ export default {
 }
 
 </script>
+
+<style scoped>
+ul {
+    list-style-type: none;
+    border: 1px solid #cdcdcd;
+}
+
+li {
+    padding: .3em .6em;
+    cursor: pointer;
+}
+
+</style>
