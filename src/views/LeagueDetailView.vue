@@ -34,28 +34,38 @@
             <!-- 🎾 Stredný stĺpec: zápasy -->
             <section class="matches">
                 <h3>Zápasy ligy</h3>
-                <ul v-if="matches.length > 0">
-                    <li v-for="match in matches" :key="match.id" class="match-item">
-                        <div>
-                            <span>
-                                {{ league.leagueType === 'SINGLES'
-                                    ? `${fullName(match.homePlayer)} vs ${fullName(match.awayPlayer)}`
-                                    : `${formatTeamName(match.homeTeam)} vs ${formatTeamName(match.awayTeam)}` }}
-                            </span>
-                            <div v-if="match.status === 'CREATED'">
-                                <AppButton :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
-                                    :type="activeMatchId === match.id ? 'delete' : 'create'" icon="📝"
-                                    @clicked="toggleForm(match.id)" />
-                                <AddMatchResult v-if="activeMatchId === match.id" :match="match"
-                                    :leagueType="league.leagueType" @result-submitted="fetchMatchesAndClose" />
-                            </div>
 
-                            <div v-else-if="match.status === 'FINISHED'">
-                                <strong>Výsledok:</strong> {{ match.result?.score1 }} : {{ match.result?.score2 }}
-                            </div>
-                        </div>
-                    </li>
-                </ul>
+                <div v-if="hasMatches">
+                    <div v-for="(roundMatches, roundNumber) in groupedMatches" :key="roundNumber" class="round-group">
+                        <h4>Kolo: {{ roundNumber }}</h4>
+                        <ul>
+                            <li v-for="match in roundMatches" :key="match.id" class="match-item">
+                                <div>
+                                    <span>
+                                        {{ league.leagueType === 'SINGLES'
+                                        ? `${fullName(match.homePlayer)} vs ${fullName(match.awayPlayer)}`
+                                        : `${formatTeamName(match.homeTeam)} vs ${formatTeamName(match.awayTeam)}` }}
+                                    </span>
+
+                                    <div v-if="match.status === 'CREATED'">
+                                        <AppButton
+                                            :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
+                                            :type="activeMatchId === match.id ? 'delete' : 'create'" icon="📝"
+                                            @clicked="toggleForm(match.id)" />
+                                        <AddMatchResult v-if="activeMatchId === match.id" :match="match"
+                                            :leagueType="league.leagueType" @result-submitted="fetchMatchesAndClose" />
+                                    </div>
+
+                                    <div v-else-if="match.status === 'FINISHED'">
+                                        <strong>Výsledok:</strong> {{ match.result?.score1 }} : {{ match.result?.score2
+                                        }}
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
                 <p v-else>Žiadne zápasy pre túto ligu.</p>
             </section>
 
@@ -100,7 +110,7 @@ export default {
             league: {},
             freePlayers: [],
             freeTeams: [],
-            matches: [],
+            groupedMatches: {},
             standings: [],
             selectedParticipants: [],
             message: '',
@@ -147,11 +157,7 @@ export default {
             axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload)
                 .then(() => {
                     this.loadInitialData()
-                    this.message = '✅ Účastníci boli úspešne pridaný do ligy!';
-
-                    setTimeout(() => {
-                        this.message = '';
-                    }, 3000)
+                    this.showMessage('✅ Účastníci boli úspešne pridaný do ligy!')
                     this.selectedParticipants = []
                 })
                 .catch(err => {
@@ -164,7 +170,7 @@ export default {
             axios.delete('/api/rest/leagues/' + leagueId + '/participants/' + id)
                 .then(() => {
                     this.loadInitialData()
-                    console.log('Participant bol úspešne odstánený y ligy')
+                    console.log('Participant bol úspešne odstánený z ligy')
                 })
                 .catch(err => {
                     console.error('Chyba pri mazaní participanta z ligy:', err)
@@ -174,9 +180,9 @@ export default {
         async fetchMatches() {
             const leagueId = this.leagueId
             try {
-                const res = await axios.get('/api/rest/leagues/' + leagueId + '/matches');
-                this.matches = res.data;
-                console.log('Zapasy v lige boli nacitane:', this.matches);
+                const res = await axios.get('/api/rest/matches/' + leagueId + '/grouped-by-round');
+                this.groupedMatches = res.data;
+                console.log('Zapasy v lige boli nacitane:', this.groupedMatches);
             } catch (err) {
                 console.error('Chyba pri nacitavani zapasov', err);
             }
@@ -185,7 +191,7 @@ export default {
             const leagueId = this.leagueId;
             axios.patch('/api/rest/matches/' + leagueId + '/generate-matches')
                 .then(() => {
-                    this.showMessage = '✅ Zápasy boli úspešne vygenerované'
+                    this.showMessage('✅ Zápasy boli úspešne vygenerované')
                     return axios.get('/api/rest/leagues/' + leagueId);
                 })
                 .then((res) => {
@@ -194,10 +200,7 @@ export default {
                 })
                 .catch((err) => {
                     if (err.response && err.response.status === 409) {
-                        this.message = err.response.data;
-                        setTimeout(() => {
-                            this.message = '';
-                        }, 3000);
+                        this.showMessage(err.response.data)
                     }
                     console.log('err.response:', err.response.data);
                 });
@@ -232,6 +235,9 @@ export default {
     computed: {
         leagueId() {
             return this.$route.params.id;
+        },
+        hasMatches() {
+            return Object.keys(this.groupedMatches).length > 0;
         }
     },
     components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm }
