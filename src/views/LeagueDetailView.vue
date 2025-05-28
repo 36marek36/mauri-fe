@@ -1,4 +1,4 @@
-<template>
+[<template>
     <div class="league-detail-container">
         <header class="header">
             <h1>{{ league.name }}</h1>
@@ -43,8 +43,8 @@
                                 <div>
                                     <span>
                                         {{ league.leagueType === 'SINGLES'
-                                        ? `${fullName(match.homePlayer)} vs ${fullName(match.awayPlayer)}`
-                                        : `${formatTeamName(match.homeTeam)} vs ${formatTeamName(match.awayTeam)}` }}
+                                            ? `${fullName(match.homePlayer)} vs ${fullName(match.awayPlayer)}`
+                                            : `${formatTeamName(match.homeTeam)} vs ${formatTeamName(match.awayTeam)}` }}
                                     </span>
 
                                     <div v-if="match.status === 'CREATED'">
@@ -72,22 +72,31 @@
             <!-- 📊 Pravý stĺpec: tabuľka -->
             <aside class="standings">
                 <h3>Tabuľka</h3>
-                <table>
+
+                <table v-if="league.leagueType === 'SINGLES' || league.leagueType === 'DOUBLES'">
                     <thead>
                         <tr>
-                            <th>Hráč</th>
+                            <th>{{ league.leagueType === 'SINGLES' ? 'Hráč' : 'Tím' }}</th>
+                            <th>Zápasy</th>
                             <th>Výhry</th>
                             <th>Prehry</th>
+                            <th>Prehraté sety</th>
+                            <th>Vyhraté sety</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="entry in standings" :key="entry.player.id">
-                            <td>{{ fullName(entry.player) }}</td>
+                        <tr v-for="entry in standings" :key="entry.id">
+                            <td>{{ league.leagueType === 'SINGLES' ? entry.playerName : entry.teamName }}</td>
+                            <td>{{ entry.matches }}</td>
                             <td>{{ entry.wins }}</td>
                             <td>{{ entry.losses }}</td>
+                            <td>{{ entry.setsLost }}</td>
+                            <td>{{ entry.setsWon }}</td>
                         </tr>
                     </tbody>
                 </table>
+
+                <p v-else>Nie je určený typ zápasu.</p>
             </aside>
         </main>
     </div>
@@ -124,7 +133,6 @@ export default {
     },
 
     methods: {
-
         loadInitialData() {
             const leagueId = this.leagueId;
             this.loading = true
@@ -133,12 +141,17 @@ export default {
                 axios.get('/api/rest/leagues/' + leagueId),
                 axios.get('/api/rest/players/not-in-any-league'),
                 axios.get('/api/rest/teams/not-in-any-league'),
-                this.fetchMatches()
+
+
             ])
                 .then(([leagueResponse, playersResponse, teamsResponse]) => {
                     this.league = leagueResponse.data
                     this.freePlayers = playersResponse.data
                     this.freeTeams = teamsResponse.data
+                })
+                .then(() => {
+                    this.fetchMatches(),
+                    this.fetchStats()
                 })
                 .catch((error) => {
                     console.error('Chyba pri načítaní údajov:', error);
@@ -222,8 +235,23 @@ export default {
         },
         async fetchMatchesAndClose() {
             await this.fetchMatches();
+            await this.fetchStats()
             this.activeMatchId = null;
             this.showMessage('✅ Výsledok bol úspešne uložený!');
+        },
+        async fetchStats() {
+            const leagueId = this.leagueId
+            try {
+                const url = this.league.leagueType === 'DOUBLES'
+                    ? '/api/rest/leagues/' + leagueId + '/teams/stats'
+                    : '/api/rest/leagues/' + leagueId + '/players/stats'
+
+                const res = await axios.get(url);
+                this.standings = res.data;
+                console.log('Štatistiky načítané:', this.standings);
+            } catch (err) {
+                console.error('Chyba pri načítavaní štatistík', err);
+            }
         },
         showMessage(msg) {
             this.message = msg;
@@ -303,4 +331,4 @@ export default {
         flex-direction: column;
     }
 }
-</style>
+</style>]
