@@ -3,12 +3,12 @@
         <h3>{{ title }}</h3>
         <ul>
             <li v-for="participant in participants" :key="participant.id">
-                <span>{{ formatName(participant) }}</span>
-                <AppButton
-                    label="Zmazať"
-                    icon="🗑️"
-                    type="delete"
-                    @clicked="()=> remove(participant.id)"/>
+                <div class="participant-content">
+                    <span>{{ formatName(participant) }}</span>
+                    <AppButton label="Zmazať" icon="🗑️" type="delete" @clicked="() => remove(participant.id)" />
+
+                </div>
+
             </li>
         </ul>
     </div>
@@ -19,25 +19,25 @@ import AppButton from './AppButton.vue';
 
 export default {
     name: 'ParticipantList',
-    props:{
-        title:{
+    props: {
+        title: {
             type: String,
             required: true
         },
-        participants:{
+        participants: {
             type: Array,
-            required:true
+            required: true
         },
-        formatName:{
+        formatName: {
             type: Function,
-            required:true
+            required: true
         },
-        remove:{
+        remove: {
             type: Function,
             required: true
         }
     },
-    components:{AppButton}
+    components: { AppButton }
 }
 
 </script>
@@ -45,7 +45,7 @@ export default {
 <style scoped>
 ul {
     list-style-type: none;
-    border: 1px solid #cdcdcd;
+    /* border: 1px solid #cdcdcd; */
 }
 
 li {
@@ -53,4 +53,14 @@ li {
     cursor: pointer;
 }
 
+li:not(:last-child) {
+    border-bottom: 1px solid #ddd;
+}
+
+.participant-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
 </style>

@@ -37,8 +37,15 @@
 
                 <div v-if="hasMatches">
                     <div v-for="(roundMatches, roundNumber) in groupedMatches" :key="roundNumber" class="round-group">
-                        <h4>Kolo: {{ roundNumber }}</h4>
-                        <ul>
+                        <!-- Klikateľný nadpis pre otvorenie/zatvorenie kola -->
+                        <h4 @click="toggleRound(roundNumber)" class="round-header" style="cursor: pointer;">
+                            Kolo: {{ roundNumber }}
+                            <span v-if="openedRounds === roundNumber">▲</span>
+                            <span v-else>▼</span>
+                        </h4>
+
+                        <!-- Obsah zápasov sa zobrazí len ak je toto kolo otvorené -->
+                        <ul v-show="openedRounds.includes(roundNumber)">
                             <li v-for="match in roundMatches" :key="match.id" class="match-item">
                                 <div>
                                     <span>
@@ -76,6 +83,7 @@
                 <table v-if="league.leagueType === 'SINGLES' || league.leagueType === 'DOUBLES'">
                     <thead>
                         <tr>
+                            <th>Poradie</th>
                             <th>{{ league.leagueType === 'SINGLES' ? 'Hráč' : 'Tím' }}</th>
                             <th>Zápasy</th>
                             <th>Výhry</th>
@@ -85,7 +93,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="entry in standings" :key="entry.id">
+                        <tr v-for="(entry, index) in standings" :key="entry.id">
+                            <td>{{ index + 1 }}.</td>
                             <td>{{ league.leagueType === 'SINGLES' ? entry.playerName : entry.teamName }}</td>
                             <td>{{ entry.matches }}</td>
                             <td>{{ entry.wins }}</td>
@@ -124,6 +133,7 @@ export default {
             selectedParticipants: [],
             message: '',
             activeMatchId: null,
+            openedRounds: [],
             loading: true,
             showAddParticipants: false
         }
@@ -151,7 +161,7 @@ export default {
                 })
                 .then(() => {
                     this.fetchMatches(),
-                    this.fetchStats()
+                        this.fetchStats()
                 })
                 .catch((error) => {
                     console.error('Chyba pri načítaní údajov:', error);
@@ -233,6 +243,16 @@ export default {
         toggleForm(matchId) {
             this.activeMatchId = this.activeMatchId === matchId ? null : matchId;
         },
+        toggleRound(roundNumber) {
+            const index = this.openedRounds.indexOf(roundNumber);
+            if (index === -1) {
+                // Kolo zatiaľ nie je otvorené -> pridáme ho
+                this.openedRounds.push(roundNumber);
+            } else {
+                // Kolo je otvorené -> odstránime ho
+                this.openedRounds.splice(index, 1);
+            }
+        },
         async fetchMatchesAndClose() {
             await this.fetchMatches();
             await this.fetchStats()
@@ -304,7 +324,6 @@ export default {
     background: #f9f9f9;
     padding: 1rem;
     border-radius: 8px;
-    min-width: 250px;
 }
 
 .players {
