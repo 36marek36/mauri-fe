@@ -45,7 +45,6 @@ export default {
 <style scoped>
 ul {
     list-style-type: none;
-    /* border: 1px solid #cdcdcd; */
 }
 
 li {
@@ -53,9 +52,9 @@ li {
     cursor: pointer;
 }
 
-li:not(:last-child) {
+/* li:not(:last-child) {
     border-bottom: 1px solid #ddd;
-}
+} */
 
 .participant-content {
     display: flex;

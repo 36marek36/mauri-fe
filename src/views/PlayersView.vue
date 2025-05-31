@@ -5,10 +5,9 @@
     <AppButton label="Vytvoriť hráča" icon="➕" type="create" @clicked="addPlayer" />
 
     <ul v-if="!loading">
-        <li v-for="player in players" @click="goToDetail(player.id)">
+        <li class="player-item" v-for="player in players" @click="goToDetail(player.id)">
 
-            {{ player.firstName + ' ' + player.lastName }}
-
+            <span> {{ player.firstName + ' ' + player.lastName }} </span>
             <AppButton label="Zmazať" icon="🗑️" type="delete" @clicked="() => deletePlayer(player.id)" />
 
         </li>
@@ -72,11 +71,15 @@ export default {
 ul {
     list-style-type: none;
     border: 1px solid #cdcdcd;
+    width: 50%;
 }
 
 li {
     padding: .3em .6em;
     cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 li:not(:last-child) {

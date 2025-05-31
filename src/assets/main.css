@@ -7,16 +7,57 @@
   font-weight: normal;
 }
 
-html, body, #app {
+html,
+body,
+#app {
   height: 100%;
   margin: 0;
   padding: 0;
+  background: radial-gradient(circle at center,
+      #cc9060 0%,
+      #a1582a 70%,
+      #7a4a24 100%);
 }
 
-a,
-.green {
+h1,
+h2 {
+  font-family: 'Merriweather', serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-size: 2.5rem;
+  text-align: center;
+  color: #FFCC00;
+}
+
+h3 {
+  text-align: center;
+  color: #222;
+}
+
+/* 📦 Vizuálny štýl obsahových blokov */
+ul,
+table {
+  background: linear-gradient(
+  to bottom,
+  #f4c27b 0%,
+  #dda15e 100%
+);
+  /* jemný krémový podklad */
+  border: 1px solid #d8c7b0;
+  /* decentný okraj */
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* jemný tieň */
+  color: #3a2f1b;
+  /* tmavohnedý text – dobre čitateľný */
+  padding: 1rem;
+  /* priestor vo vnútri blokov */
+  box-sizing: border-box;
+}
+
+a {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
+  color: rgb(211, 3, 90);
   transition: 0.4s;
   padding: 3px;
 }

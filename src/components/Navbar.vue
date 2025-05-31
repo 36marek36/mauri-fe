@@ -35,10 +35,6 @@
   gap: 15px;
   margin: 0;
   padding: 0;
-}
-
-.navbar a {
-  color: white;
-  text-decoration: none;
+  padding-left: 1.5rem;
 }
 </style>

@@ -1,6 +1,6 @@
 [<template>
     <div class="league-detail-container">
-        <header class="header">
+        <header>
             <h1>{{ league.name }}</h1>
             <h1>{{ league.leagueType }}</h1>
             <button @click="generateMatches" :disabled="loading">Start</button>
@@ -36,15 +36,19 @@
                 <h3>Zápasy ligy</h3>
 
                 <div v-if="hasMatches">
+                    <!-- Tlačidlo na zobrazenie/skrytie všetkých kôl -->
+                    <AppButton :label="areAnyRoundsOpened ? 'Skryť všetky kolá' : 'Zobraziť všetky kolá'"
+                        :icon="areAnyRoundsOpened ? '🔼' : '🔽'" type="default" @clicked="toggleAllRounds" />
+
                     <div v-for="(roundMatches, roundNumber) in groupedMatches" :key="roundNumber" class="round-group">
                         <!-- Klikateľný nadpis pre otvorenie/zatvorenie kola -->
                         <h4 @click="toggleRound(roundNumber)" class="round-header" style="cursor: pointer;">
                             Kolo: {{ roundNumber }}
-                            <span v-if="openedRounds === roundNumber">▲</span>
+                            <span v-if="openedRounds.includes(roundNumber)">▲</span>
                             <span v-else>▼</span>
                         </h4>
 
-                        <!-- Obsah zápasov sa zobrazí len ak je toto kolo otvorené -->
+                        <!-- Obsah zápasov, zobrazí sa len ak je kolo otvorené -->
                         <ul v-show="openedRounds.includes(roundNumber)">
                             <li v-for="match in roundMatches" :key="match.id" class="match-item">
                                 <div>
@@ -80,32 +84,38 @@
             <aside class="standings">
                 <h3>Tabuľka</h3>
 
-                <table v-if="league.leagueType === 'SINGLES' || league.leagueType === 'DOUBLES'">
-                    <thead>
-                        <tr>
-                            <th>Poradie</th>
-                            <th>{{ league.leagueType === 'SINGLES' ? 'Hráč' : 'Tím' }}</th>
-                            <th>Zápasy</th>
-                            <th>Výhry</th>
-                            <th>Prehry</th>
-                            <th>Prehraté sety</th>
-                            <th>Vyhraté sety</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(entry, index) in standings" :key="entry.id">
-                            <td>{{ index + 1 }}.</td>
-                            <td>{{ league.leagueType === 'SINGLES' ? entry.playerName : entry.teamName }}</td>
-                            <td>{{ entry.matches }}</td>
-                            <td>{{ entry.wins }}</td>
-                            <td>{{ entry.losses }}</td>
-                            <td>{{ entry.setsLost }}</td>
-                            <td>{{ entry.setsWon }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-scroll">
+                    <table class="standings-table"
+                        v-if="league.leagueType === 'SINGLES' || league.leagueType === 'DOUBLES'">
+                        <thead>
+                            <tr>
+                                <th>Poradie</th>
+                                <th>{{ league.leagueType === 'SINGLES' ? 'Hráč' : 'Tím' }}</th>
+                                <th>Zápasy</th>
+                                <th>Výhry</th>
+                                <th>Prehry</th>
+                                <th>Prehraté sety</th>
+                                <th>Vyhraté sety</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(entry, index) in standings" :key="entry.id">
+                                <td>{{ index + 1 }}.</td>
+                                <td>{{ league.leagueType === 'SINGLES' ? entry.playerName : entry.teamName }}</td>
+                                <td>{{ entry.matches }}</td>
+                                <td>{{ entry.wins }}</td>
+                                <td>{{ entry.losses }}</td>
+                                <td>{{ entry.setsLost }}</td>
+                                <td>{{ entry.setsWon }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                <p v-else>Nie je určený typ zápasu.</p>
+                    <p v-else>Nie je určený typ zápasu.</p>
+
+                </div>
+
+
             </aside>
         </main>
     </div>
@@ -246,11 +256,18 @@ export default {
         toggleRound(roundNumber) {
             const index = this.openedRounds.indexOf(roundNumber);
             if (index === -1) {
-                // Kolo zatiaľ nie je otvorené -> pridáme ho
                 this.openedRounds.push(roundNumber);
             } else {
-                // Kolo je otvorené -> odstránime ho
                 this.openedRounds.splice(index, 1);
+            }
+        },
+        toggleAllRounds() {
+            if (this.openedRounds.length > 0) {
+                // aspoň jedno kolo otvorené → skryť všetky
+                this.openedRounds = [];
+            } else {
+                // žiadne otvorené → otvoriť všetky
+                this.openedRounds = [...this.allRoundNumbers];
             }
         },
         async fetchMatchesAndClose() {
@@ -286,6 +303,12 @@ export default {
         },
         hasMatches() {
             return Object.keys(this.groupedMatches).length > 0;
+        },
+        allRoundNumbers() {
+            return Object.keys(this.groupedMatches); // ostávajú stringy
+        },
+        areAnyRoundsOpened() {
+            return this.openedRounds.length > 0;
         }
     },
     components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm }
@@ -294,60 +317,85 @@ export default {
 </script>
 
 <style scoped>
+
+/* 🎾 Obal celej ligy */
 .league-detail-container {
-    max-width: 1200px;
+    max-width: 100%;
+    width: 100%;
     margin: 0 auto;
     padding: 1rem;
+    box-sizing: border-box;
 }
 
-.loading-overlay {
-    text-align: center;
-    font-size: 1.5rem;
-    padding: 2rem;
-    color: #555;
-}
-
-.header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
+/* 📦 Layout kontajner */
 .main-flex-layout {
     display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
     flex-wrap: wrap;
-    gap: 2rem;
 }
 
-.players,
-.matches,
-.standings {
-    background: #f9f9f9;
-    padding: 1rem;
-    border-radius: 8px;
-}
-
+/* 🧍‍♂️ Hráči */
 .players {
-    flex: 1;
+    flex: 1 1 220px;
+    padding: 1rem;
 }
 
+/* 🎾 Zápasy */
 .matches {
-    flex: 2;
-    background: #fff;
+    flex: 2 1 350px;
+    padding: 1rem;
 }
 
+/* 📊 Tabuľka */
 .standings {
-    flex: 1;
+    flex: 0 1 300px;
+    padding: 1rem;
 }
 
-.match-item {
-    border-bottom: 1px solid #ddd;
-    padding: 0.5rem 0;
-    margin-bottom: 0.5rem;
+.table-scroll {
+  overflow-x: auto;
+  width: 100%;
 }
 
+.standings-table th,
+.standings-table td {
+    padding: 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.standings-table th {
+    background-color: #dda15e;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: #444;
+}
+
+/* 📱 Mobilné zobrazenie */
 @media (max-width: 768px) {
     .main-flex-layout {
         flex-direction: column;
     }
+
+    .players,
+    .matches,
+    .standings {
+        width: 100%;
+        min-width: unset;
+    }
+
+    /* Voliteľne uprav poradie */
+    .players {
+        order: 1;
+    }
+
+    .matches {
+        order: 2;
+    }
+
+    .standings {
+        order: 3;
+    }
 }
-</style>]
+</style>
