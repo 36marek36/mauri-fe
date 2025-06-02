@@ -11,6 +11,9 @@
         <RouterLink to="/teams">Tými</RouterLink>
       </li>
       <li>
+        <RouterLink to="/participants">Hráči/Tými</RouterLink>
+      </li>
+      <li>
         <RouterLink to="/leagues">Ligy</RouterLink>
       </li>
       <li>

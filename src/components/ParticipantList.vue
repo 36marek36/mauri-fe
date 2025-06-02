@@ -5,8 +5,7 @@
             <li v-for="participant in participants" :key="participant.id">
                 <div class="participant-content">
                     <span>{{ formatName(participant) }}</span>
-                    <AppButton label="Zmazať" icon="🗑️" type="delete" @clicked="() => remove(participant.id)" />
-
+                    <AppButton label="" icon="🗑️" type="delete" @clicked="() => remove(participant.id)" />
                 </div>
 
             </li>
@@ -21,8 +20,7 @@ export default {
     name: 'ParticipantList',
     props: {
         title: {
-            type: String,
-            required: true
+            type: String
         },
         participants: {
             type: Array,
@@ -52,14 +50,25 @@ li {
     cursor: pointer;
 }
 
-/* li:not(:last-child) {
-    border-bottom: 1px solid #ddd;
-} */
+li:hover {
+    background-color: #f5f5f5;
+}
+
+li:not(:last-child) {
+    border-bottom: 1px solid #cdcdcd;
+}
 
 .participant-content {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .participant-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3em;
+    }
 }
 </style>

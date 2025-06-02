@@ -12,6 +12,7 @@
         </div>
 
         <main v-else class="main-flex-layout">
+            
             <!-- 📋 Ľavý stĺpec: hráči alebo tímy -->
             <aside class="players">
 
@@ -120,7 +121,6 @@
         </main>
     </div>
 </template>
-
 
 
 <script>

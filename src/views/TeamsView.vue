@@ -25,15 +25,20 @@
             <AppButton label="Vytvoriť" icon="➕" type="create" @clicked="() => createTeam()" />
         </div>
 
+          <ParticipantList :title="'Tými v lige'"
+                    :participants="teams"
+                    :formatName="formatTeamName"
+                    :remove="deleteTeam" />
 
-
-        <ul>
+        <!-- <ul>
             <li v-for="team in teams" :key="team.id">
-                <strong>Hráč 1:</strong> {{ team.player1.firstName }} {{ team.player1.lastName }}<br>
-                <strong>Hráč 2:</strong> {{ team.player2.firstName }} {{ team.player2.lastName }}
+                <div>
+                    <strong>Hráč 1:</strong> {{ team.player1.firstName }} {{ team.player1.lastName }}<br>
+                    <strong>Hráč 2:</strong> {{ team.player2.firstName }} {{ team.player2.lastName }}
+                </div>
                 <AppButton label="Zmazať" icon="🗑️" type="delete" @clicked="() => deleteTeam(team.id)" />
             </li>
-        </ul>
+        </ul> -->
     </div>
 
     <div v-else>... loading ...</div>
@@ -42,6 +47,7 @@
 <script>
 import axios from 'axios'
 import AppButton from '@/components/AppButton.vue'
+import ParticipantList from '@/components/ParticipantList.vue'
 
 export default {
     name: 'TeamsView',
@@ -118,26 +124,24 @@ export default {
                 .catch(err => {
                     console.error('Chyba pri mazaní tímu:', err)
                 })
-
+        },
+        fullName(player) {
+            if (!player) return 'Neznámy';
+            return `${player.firstName || ''} ${player.lastName || ''}`.trim();
+        },
+        formatTeamName(team) {
+            if (!team || !team.player1 || !team.player2) return '';
+            return `${this.fullName(team.player1)} a ${this.fullName(team.player2)}`;
         }
     },
-    components: { AppButton }
+    components: { AppButton, ParticipantList }
 }
 
 </script>
 
 <style scoped>
-ul {
-    list-style-type: none;
-    border: 1px solid #cdcdcd;
+:deep(ul) {
+    width: 50%;
 }
 
-li {
-    padding: .3em .6em;
-    cursor: pointer;
-}
-
-li:not(:last-child) {
-    border-bottom: 1px solid #cdcdcd;
-}
 </style>

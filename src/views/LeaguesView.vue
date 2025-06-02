@@ -140,4 +140,8 @@ li {
 li:not(:last-child) {
     border-bottom: 1px solid #cdcdcd;
 }
+
+li:hover {
+    background-color: #f5f5f5;
+}
 </style>
