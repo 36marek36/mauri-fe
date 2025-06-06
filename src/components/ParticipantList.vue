@@ -4,7 +4,7 @@
         <ul>
             <li v-for="participant in participants" :key="participant.id">
                 <div class="participant-content">
-                    <span>{{ formatName(participant) }}</span>
+                    <span @click="openDetail(participant.id)">{{ formatName(participant) }}</span>
                     <AppButton label="" icon="🗑️" type="delete" @clicked="() => remove(participant.id)" />
                 </div>
 
@@ -33,6 +33,11 @@ export default {
         remove: {
             type: Function,
             required: true
+        }
+    },
+    methods: {
+        openDetail(participant) {
+            this.$emit('view-detail', participant)
         }
     },
     components: { AppButton }

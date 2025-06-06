@@ -6,12 +6,13 @@
 
             <AppButton label="Vytvoriť hráča" icon="➕" type="create" @clicked="addPlayer" />
 
-            <div v-if="!loading">
-                <ParticipantList :participants="players" :formatName="formatPlayerName" :remove="deletePlayer" />
+            <div v-if="!loadingPlayers">
+                <ParticipantList :participants="players" :formatName="formatPlayerName" :remove="deletePlayer"
+                    @view-detail="goToDetail" />
             </div>
 
             <div v-else>
-                ... loading ...
+                ... loading players...
             </div>
         </div>
 
@@ -19,7 +20,7 @@
         <div class="teams">
             <h1>Zoznam tímov:</h1>
 
-            <div v-if="!loading">
+            <div v-if="!loadingTeams">
                 <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
                     :type="showCreateTeamForm ? 'delete' : 'create'" @clicked="toggleCreateForm" />
 
@@ -46,7 +47,7 @@
                 <ParticipantList :participants="teams" :formatName="formatTeamName" :remove="deleteTeam" />
             </div>
 
-            <div v-else>... loading ...</div>
+            <div v-else>... loading teams...</div>
         </div>
     </div>
 </template>
@@ -62,7 +63,8 @@ export default {
         return {
             players: [],
             teams: [],
-            loading: true,
+            loadingPlayers: true,
+            loadingTeams: true,
             showCreateTeamForm: false,
             newTeam: {
                 player1Id: '',
@@ -79,24 +81,26 @@ export default {
         fetchPlayers() {
             axios.get('/api/rest/players/')
                 .then((response) => {
-                    this.players = response.data
-                    this.loading = false
+                    this.players = response.data;
                 })
-                .catch((err) => {
-                    console.err('Chyba pri načítaní hráčov:', error)
-                    this.loading = false
+                .catch((error) => {
+                    console.error('Chyba pri načítaní hráčov:', error);
                 })
+                .finally(() => {
+                    this.loadingPlayers = false;
+                });
         },
         fetchTeams() {
             axios.get('/api/rest/teams/')
                 .then((response) => {
-                    this.teams = response.data
-                    this.loading = false
+                    this.teams = response.data;
                 })
                 .catch((error) => {
-                    console.error('Chyba pri načítaní týmov', error)
-                    this.loading = false
+                    console.error('Chyba pri načítaní tímov:', error);
                 })
+                .finally(() => {
+                    this.loadingTeams = false;
+                });
         },
         goToDetail(id) {
             this.$router.push('/players/' + id)
