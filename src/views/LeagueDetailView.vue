@@ -22,7 +22,7 @@
                     :remove="removeParticipantFromLeague" />
 
                 <AppButton :label="showAddParticipants ? 'Skryť formulár' : 'Pridať účastníkov do ligy'" icon="➕"
-                    type="create" @clicked="showAddParticipants = !showAddParticipants" />
+                    type="create" htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
 
                 <AddParticipantsForm :show="showAddParticipants"
                     :items="league.leagueType === 'SINGLES' ? freePlayers : freeTeams"
@@ -39,7 +39,7 @@
                 <div v-if="hasMatches">
                     <!-- Tlačidlo na zobrazenie/skrytie všetkých kôl -->
                     <AppButton :label="areAnyRoundsOpened ? 'Skryť všetky kolá' : 'Zobraziť všetky kolá'"
-                        :icon="areAnyRoundsOpened ? '🔼' : '🔽'" type="default" @clicked="toggleAllRounds" />
+                        :icon="areAnyRoundsOpened ? '🔼' : '🔽'" type="default" htmlType="button" @clicked="toggleAllRounds" />
 
                     <div v-for="(roundMatches, roundNumber) in groupedMatches" :key="roundNumber" class="round-group">
                         <!-- Klikateľný nadpis pre otvorenie/zatvorenie kola -->
@@ -62,7 +62,9 @@
                                     <div v-if="match.status === 'CREATED'">
                                         <AppButton
                                             :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
-                                            :type="activeMatchId === match.id ? 'delete' : 'create'" icon="📝"
+                                            :type="activeMatchId === match.id ? 'delete' : 'create'"
+                                            htmlType="button"
+                                            icon="📝"
                                             @clicked="toggleForm(match.id)" />
                                         <AddMatchResult v-if="activeMatchId === match.id" :match="match"
                                             :leagueType="league.leagueType" @result-submitted="fetchMatchesAndClose" />

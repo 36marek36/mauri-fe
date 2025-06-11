@@ -3,7 +3,7 @@
 
     <div v-if="!loading">
         <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
-            :type="showCreateTeamForm ? 'delete' : 'create'" @clicked="toggleCreateForm" />
+            :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" />
 
         <div v-if="showCreateTeamForm">
             <label for="player1">Hráč 1:</label>
@@ -22,13 +22,12 @@
                 </option>
             </select>
 
-            <AppButton label="Vytvoriť" icon="➕" type="create" @clicked="() => createTeam()" />
+            <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button" @clicked="() => createTeam()" />
+                
         </div>
 
-          <ParticipantList :title="'Tými v lige'"
-                    :participants="teams"
-                    :formatName="formatTeamName"
-                    :remove="deleteTeam" />
+        <ParticipantList :title="'Tými v lige'" :participants="teams" :formatName="formatTeamName"
+            :remove="deleteTeam" />
 
         <!-- <ul>
             <li v-for="team in teams" :key="team.id">
@@ -143,5 +142,4 @@ export default {
 :deep(ul) {
     width: 50%;
 }
-
 </style>

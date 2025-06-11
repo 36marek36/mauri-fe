@@ -4,7 +4,7 @@
         <div class="players">
             <h1>Zoznam hráčov:</h1>
 
-            <AppButton label="Vytvoriť hráča" icon="➕" type="create" @clicked="addPlayer" />
+            <AppButton label="Vytvoriť hráča" icon="➕" type="create" htmlType="button" @clicked="addPlayer" />
 
             <div v-if="!loadingPlayers">
                 <ParticipantList :participants="players" :formatName="formatPlayerName" :remove="deletePlayer"
@@ -22,7 +22,7 @@
 
             <div v-if="!loadingTeams">
                 <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
-                    :type="showCreateTeamForm ? 'delete' : 'create'" @clicked="toggleCreateForm" />
+                    :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" />
 
                 <div v-if="showCreateTeamForm">
                     <label for="player1">Hráč 1:</label>
@@ -41,7 +41,7 @@
                         </option>
                     </select>
 
-                    <AppButton label="Vytvoriť" icon="➕" type="create" @clicked="() => createTeam()" />
+                    <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button" @clicked="() => createTeam()" />
                 </div>
 
                 <ParticipantList :participants="teams" :formatName="formatTeamName" :remove="deleteTeam" />

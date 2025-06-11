@@ -46,7 +46,7 @@ export default {
   methods: {
     async submitForm() {
       try {
-        const response = await axios.post('/api/rest/players/create', this.player)
+        const response = await axios.post('/api/rest/players/admin/create', this.player)
         console.log('Hráč: ' + response.data.firstName + ' bol úspešne vytvorený.')
         this.responseMessage = 'Hráč ' + response.data.firstName + ' bol úspešne vytvorený.'
         setTimeout(() => {

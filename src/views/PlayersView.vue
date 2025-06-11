@@ -2,7 +2,7 @@
 
     <h1>Všetci hráči:</h1>
 
-    <AppButton label="Vytvoriť hráča" icon="➕" type="create" @clicked="addPlayer" />
+    <AppButton label="Vytvoriť hráča" icon="➕" type="create" htmlType="button" @clicked="addPlayer" />
 
     <!-- <ul v-if="!loading">
         <li v-for="player in players" @click="goToDetail(player.id)">

@@ -1,19 +1,20 @@
 <template>
     <h1>Sezóny</h1>
     <AppButton :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
-        :type="showCreateSeasonForm ? 'delete' : 'create'" @clicked="toggleCreateForm" icon="➕"/>
+        :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
 
     <div v-if="showCreateSeasonForm">
         <input v-model="newSeason.year" placeholder="Rok sezóny:" />
 
-        <AppButton label="Vytvoriť" type="create" icon="➕" @clicked="createSeason" />
+        <AppButton label="Vytvoriť" type="create" icon="➕" htmlType="button" @clicked="createSeason" />
 
     </div>
     <div v-if="loading">... loading ...</div>
     <ul v-else>
         <li v-for="season in seasons" @click="this.$router.push('/seasons/' + season.id)">
             Sezóna {{ season.year }}
-            <AppButton label="Zmazať" icon="🗑️" type="delete" @clicked="() => deleteSeason(season.id)" />
+            <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
+                @clicked="() => deleteSeason(season.id)" />
         </li>
     </ul>
 

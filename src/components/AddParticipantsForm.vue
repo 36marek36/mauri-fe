@@ -17,6 +17,7 @@
         :label="submitLabel"
         icon="✅"
         type="create"
+        htmlType="button"
         :disabled="selected.length === 0"
         @clicked="submit"/>
     </div>

@@ -11,6 +11,9 @@
         <RouterLink to="/teams">Tými</RouterLink>
       </li>
       <li>
+        <RouterLink to="/users">Users</RouterLink>
+      </li>
+      <li>
         <RouterLink to="/participants">Hráči/Tými</RouterLink>
       </li>
       <li>
@@ -18,6 +21,9 @@
       </li>
       <li>
         <RouterLink to="/seasons">Sezóny</RouterLink>
+      </li>
+      <li>
+        <RouterLink to="/login">Prihlásenie</RouterLink>
       </li>
     </ul>
   </nav>

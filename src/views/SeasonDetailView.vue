@@ -5,7 +5,7 @@
     <div v-else>
         <h1>{{ season.year }}</h1>
         <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
-            :type="showCreateLeagueForm ? 'delete' : 'create'" @clicked="toggleCreateForm" icon="➕" />
+            :type="showCreateLeagueForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
 
         <div v-if="showCreateLeagueForm">
             <input v-model="newLeague.name" placeholder="Názov ligy" />
@@ -14,7 +14,7 @@
                 <option value="DOUBLES">DOUBLES</option>
             </select>
 
-            <AppButton label="Vytvoriť" type="create" icon="➕" @clicked="createLeague" />
+            <AppButton label="Vytvoriť" type="create" htmlType="button" icon="➕" @clicked="createLeague" />
 
         </div>
 

@@ -5,7 +5,7 @@
             <li v-for="participant in participants" :key="participant.id">
                 <div class="participant-content">
                     <span @click="openDetail(participant.id)">{{ formatName(participant) }}</span>
-                    <AppButton label="" icon="🗑️" type="delete" @clicked="() => remove(participant.id)" />
+                    <AppButton label="" icon="🗑️" type="delete" htmlType="button" @clicked="() => remove(participant.id)" />
                 </div>
 
             </li>

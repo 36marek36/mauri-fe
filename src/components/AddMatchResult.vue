@@ -30,7 +30,7 @@
         </div>
 
         <button type="button" @click="addSet">➕ Pridať set</button>
-        <AppButton label="Odoslať výsledok" type="create" icon="✅" @clicked="submitResult" />
+        <AppButton label="Odoslať výsledok" type="create" htmlType="button" icon="✅" @clicked="submitResult" />
     </div>
 </template>
 
