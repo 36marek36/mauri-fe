@@ -1,4 +1,4 @@
-[<template>
+<template>
     <div class="league-detail-container">
         <header>
             <h1>{{ league.name }}</h1>
@@ -365,13 +365,13 @@ export default {
     padding: 0.5rem;
     text-align: left;
     border-bottom: 1px solid #eee;
+    text-shadow: 0 0 1px brown,0 0 2px brown
 }
 
 .standings-table th {
-    background-color: #dda15e;
     text-transform: uppercase;
     font-size: 0.85rem;
-    color: #444;
+    color: whitesmoke;
 }
 
 /* 📱 Mobilné zobrazenie */

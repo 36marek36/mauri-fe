@@ -56,7 +56,7 @@ li {
 }
 
 li:hover {
-    background-color: #f5f5f5;
+    background-color: #363537;
 }
 
 li:not(:last-child) {

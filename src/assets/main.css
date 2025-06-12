@@ -6,17 +6,20 @@
   min-height: 100vh;
   font-weight: normal;
 }
-
+/* 🌌 Hlavné pozadie celej stránky */
 html,
 body,
 #app {
   height: 100%;
   margin: 0;
   padding: 0;
-  background: radial-gradient(circle at center,
-      #cc9060 0%,
-      #a1582a 70%,
-      #7a4a24 100%);
+  background-image: url('/images/background.jpg'); /* uprav cestu podľa projektu */
+  background-size: cover;         /* prispôsobenie veľkosti */
+  background-position: center;    /* zarovnanie */
+  background-repeat: no-repeat;
+  background-attachment: fixed;   /* pozadie sa neposúva pri scrollovaní */
+  color: #FFD700;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 h1,
@@ -27,39 +30,34 @@ h2 {
   font-size: 2.5rem;
   text-align: center;
   color: #FFCC00;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.85);
 }
 
 h3 {
   text-align: center;
-  color: #222;
+  color: #FFD700;
 }
 
 /* 📦 Vizuálny štýl obsahových blokov */
 ul,
 table {
-  background: linear-gradient(
-  to bottom,
-  #f4c27b 0%,
-  #dda15e 100%
-);
-  /* jemný krémový podklad */
-  border: 1px solid #d8c7b0;
-  /* decentný okraj */
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  /* jemný tieň */
-  color: #3a2f1b;
-  /* tmavohnedý text – dobre čitateľný */
+background-color: rgba(255, 255, 255, 0.05); /* skoro neviditeľné pozadie */
+  backdrop-filter: blur(12px); /* silné rozmazanie za tabuľkou */
+  -webkit-backdrop-filter: blur(12px); /* pre Safari */
+  border: none;
+  color: #FFD700;
+  border-radius: 8px;
   padding: 1rem;
-  /* priestor vo vnútri blokov */
-  box-sizing: border-box;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  
 }
 
 a {
   text-decoration: none;
-  color: rgb(211, 3, 90);
+  color: #FFD700;
   transition: 0.4s;
-  padding: 3px;
+  padding: 3px
+
 }
 
 @media (hover: hover) {

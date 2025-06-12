@@ -34,16 +34,23 @@
 
 <style scoped>
 .navbar {
-  background-color: #333;
-  padding: 10px;
+  padding: 1rem;
+  text-align: center;
 }
 
 .navbar ul {
-  list-style: none;
+background: transparent;
+  backdrop-filter: none;
+   border: 1px solid rgba(255, 255, 255, 0.3); /* jemne biely okraj */
+  padding: 0.5rem 1rem;
+  width: fit-content;
+  margin: auto;
   display: flex;
-  gap: 15px;
-  margin: 0;
-  padding: 0;
-  padding-left: 1.5rem;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  list-style: none;
+    text-shadow: 0 0 1px black, 0 0 2px black, 0 0 4px black;
 }
+
 </style>

@@ -11,17 +11,20 @@
             <option value="DOUBLES">DOUBLES</option>
         </select>
 
-        <AppButton label="Vytvoriť" type="create" htmlType="button" icon="➕" @clicked="createLeague"/>
-        
+        <AppButton label="Vytvoriť" type="create" htmlType="button" icon="➕" @clicked="createLeague" />
+
     </div>
 
     <div v-if="loading">... loading ...</div>
 
-    <ul v-else>
+    <ul v-else style="width: fit-content">
         <li v-for="league in sortedLeagues" @click="this.$router.push('/leagues/' + league.id)">
-            {{ league.name }} {{ league.leagueType }}
-
-            <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button" @clicked="() => deleteLeague(league.id)" />
+            {{ league.name }} {{ league.leagueType }} {{ league.progress+'%' }}
+            <div class="league-progress-bar">
+                <div class="league-progress-fill" :style="{ width: league.progress+'%'}"></div>
+            </div>
+            <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
+                @clicked="() => deleteLeague(league.id)" />
 
         </li>
     </ul>
@@ -63,17 +66,32 @@ export default {
     methods: {
         fetchLeagues() {
             axios.get('/api/rest/leagues/')
-                .then((res) => {
-                    this.leagues = res.data
-                    this.loading = false
+                .then(async (res) => {
+                    const leagues = res.data; // pole líg bez progressu
+
+                    // Pre každú ligu zavoláme fetchLeagueProgress a pridáme progress
+                    for (const league of leagues) {
+                        league.progress = await this.fetchLeagueProgress(league.id);
+                    }
+
+                    this.leagues = leagues;   // nastavíme ligy vrátane progressu
+                    this.loading = false;
                 })
                 .catch((error) => {
-                    console.error('Chyba pri nacitavani lig:', error)
-                    this.loading = false
+                    console.error('Chyba pri načítavaní líg:', error);
+                    this.loading = false;
                 })
         },
+        fetchLeagueProgress(leagueId) {
+            return axios.get(`/api/rest/leagues/${leagueId}/progress`)
+                .then(response => response.data)
+                .catch(error => {
+                    console.error('Chyba pri načítaní progressu:', error);
+                    return 0; // fallback hodnota, ak sa niečo pokazí
+                });
+        },
         toggleCreateForm() {
-            
+
             this.showCreateLeagueForm = !this.showCreateLeagueForm
         },
 
@@ -142,6 +160,21 @@ li:not(:last-child) {
 }
 
 li:hover {
-    background-color: #f5f5f5;
+    background-color: #363537;
+}
+
+.league-progress-bar {
+    height: 8px;
+    width: 200px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.league-progress-fill {
+    height: 100%;
+    background-color: #FFCC00;
+    /* zlatožltá */
+    transition: width 0.3s ease-in-out;
 }
 </style>

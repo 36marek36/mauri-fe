@@ -125,6 +125,25 @@ export default {
         toggleCreateForm() {
             this.showCreateTeamForm = !this.showCreateTeamForm
         },
+        async createTeam() {
+            const payload = {
+                player1Id: this.newTeam.player1Id,
+                player2Id: this.newTeam.player2Id
+            };
+
+            try {
+                const res = await axios.post('/api/rest/teams/create', payload);
+                console.log('Tim: ' + res.data.id + ' bol úspešne vytvoreny.')
+
+                // Resetovanie výberu hráčov
+                this.newTeam = { player1Id: '', player2Id: '' }
+
+                // Načítanie aktualizovaného zoznamu tímov
+                this.fetchTeams();
+            } catch (error) {
+                console.error('Chyba pri vytváraní tímu:', error);
+            }
+        },
         deleteTeam(id) {
             console.log('Mažem tým s ID:', id)
             axios.delete('/api/rest/teams/' + id)
