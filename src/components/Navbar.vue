@@ -8,13 +8,13 @@
         <RouterLink to="/players">Hráči</RouterLink>
       </li>
       <li>
-        <RouterLink to="/teams">Tými</RouterLink>
+        <RouterLink to="/teams">Tímy</RouterLink>
       </li>
       <li>
         <RouterLink to="/users">Users</RouterLink>
       </li>
       <li>
-        <RouterLink to="/participants">Hráči/Tými</RouterLink>
+        <RouterLink to="/participants">Hráči/Tímy</RouterLink>
       </li>
       <li>
         <RouterLink to="/leagues">Ligy</RouterLink>

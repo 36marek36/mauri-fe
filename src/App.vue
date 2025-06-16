@@ -1,21 +1,19 @@
 <template>
     <div class="app-layout">
         <Navbar />
-        
-        <Header />
+
+        <AppHeader/>
 
         <main class="main-content">
             <RouterView />
         </main>
 
-        <Footer />
     </div>
 </template>
 
 <script setup>
 import Navbar from '@/components/Navbar.vue'
-import Header from '@/components/Header.vue'
-import Footer from '@/components/Footer.vue'
+import AppHeader from './components/AppHeader.vue';
 </script>
 
 <style scoped>
@@ -25,8 +23,10 @@ import Footer from '@/components/Footer.vue'
     min-height: 100vh;
 }
 
+
 .main-content {
     flex-grow: 1;
     padding: 20px;
 }
+
 </style>
