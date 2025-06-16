@@ -1,18 +1,16 @@
 <template>
+    <AppHeader :title="league.name" :subtitle="league.leagueType" />
     <div class="league-detail-container">
-        <header>
-            <h1>{{ league.name }}</h1>
-            <h1>{{ league.leagueType }}</h1>
-            <button @click="generateMatches" :disabled="loading">Start</button>
-            <p v-if="message">{{ message }}</p>
-        </header>
+
+        <button @click="generateMatches" :disabled="loading">Start</button>
+        <p v-if="message">{{ message }}</p>
 
         <div v-if="loading" class="loading-overlay">
             Načítavam...
         </div>
 
         <main v-else class="main-flex-layout">
-            
+
             <!-- 📋 Ľavý stĺpec: hráči alebo tímy -->
             <aside class="players">
 
@@ -39,7 +37,8 @@
                 <div v-if="hasMatches">
                     <!-- Tlačidlo na zobrazenie/skrytie všetkých kôl -->
                     <AppButton :label="areAnyRoundsOpened ? 'Skryť všetky kolá' : 'Zobraziť všetky kolá'"
-                        :icon="areAnyRoundsOpened ? '🔼' : '🔽'" type="default" htmlType="button" @clicked="toggleAllRounds" />
+                        :icon="areAnyRoundsOpened ? '🔼' : '🔽'" type="default" htmlType="button"
+                        @clicked="toggleAllRounds" />
 
                     <div v-for="(roundMatches, roundNumber) in groupedMatches" :key="roundNumber" class="round-group">
                         <!-- Klikateľný nadpis pre otvorenie/zatvorenie kola -->
@@ -62,10 +61,8 @@
                                     <div v-if="match.status === 'CREATED'">
                                         <AppButton
                                             :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
-                                            :type="activeMatchId === match.id ? 'delete' : 'create'"
-                                            htmlType="button"
-                                            icon="📝"
-                                            @clicked="toggleForm(match.id)" />
+                                            :type="activeMatchId === match.id ? 'delete' : 'create'" htmlType="button"
+                                            icon="📝" @clicked="toggleForm(match.id)" />
                                         <AddMatchResult v-if="activeMatchId === match.id" :match="match"
                                             :leagueType="league.leagueType" @result-submitted="fetchMatchesAndClose" />
                                     </div>
@@ -131,6 +128,7 @@ import AddMatchResult from '@/components/AddMatchResult.vue';
 import axios from 'axios';
 import ParticipantList from '@/components/ParticipantList.vue';
 import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
+import AppHeader from '@/components/AppHeader.vue';
 
 
 export default {
@@ -313,13 +311,12 @@ export default {
             return this.openedRounds.length > 0;
         }
     },
-    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm }
+    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader }
 }
 
 </script>
 
 <style scoped>
-
 /* 🎾 Obal celej ligy */
 .league-detail-container {
     max-width: 100%;
@@ -356,8 +353,8 @@ export default {
 }
 
 .table-scroll {
-  overflow-x: auto;
-  width: 100%;
+    overflow-x: auto;
+    width: 100%;
 }
 
 .standings-table th,
@@ -365,7 +362,7 @@ export default {
     padding: 0.5rem;
     text-align: left;
     border-bottom: 1px solid #eee;
-    text-shadow: 0 0 1px brown,0 0 2px brown
+    text-shadow: 0 0 1px brown, 0 0 2px brown
 }
 
 .standings-table th {

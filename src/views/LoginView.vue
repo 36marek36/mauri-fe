@@ -16,23 +16,22 @@
 </template> -->
 
 <template>
+   <AppHeader :title="isLogin ? 'Prihlásenie' : 'Registrácia'" />
   <div>
-    <h2>{{ isLogin ? 'Login' : 'Signup' }}</h2>
-
     <form @submit.prevent="handleSubmit">
-      <input v-model="username" placeholder="Username" required />
-      <input v-model="password" type="password" placeholder="Password" required />
+      <input v-model="username" placeholder="Užívatelské meno" required />
+      <input v-model="password" type="password" placeholder="Heslo" required />
 
       <input
         v-if="!isLogin"
         v-model="confirmPassword"
         type="password"
-        placeholder="Confirm Password"
+        placeholder="Potvrdenie hesla"
         required
       />
 
       <AppButton
-        :label="isLogin ? 'Login' : 'Sign Up'"
+        :label="isLogin ? 'Prihlásiť' : 'Registrovať'"
         htmlType="submit"
         type="primary"
       />
@@ -42,13 +41,14 @@
 
     <p style="margin-top: 1rem;">
       <a href="#" @click.prevent="toggleMode">
-        {{ isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in" }}
+        {{ isLogin ? "Ešte nemáš účet? Registruj sa" : "Už máš účet? Prihlás sa" }}
       </a>
     </p>
   </div>
 </template>
 <script>
 import AppButton from '@/components/AppButton.vue'
+import AppHeader from '@/components/AppHeader.vue'
 import axios from 'axios'
 
 export default {
@@ -113,6 +113,6 @@ export default {
       // }
     }
   },
-  components:{AppButton}
+  components:{AppButton,AppHeader}
 }
 </script>

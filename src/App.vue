@@ -2,8 +2,6 @@
     <div class="app-layout">
         <Navbar />
 
-        <AppHeader/>
-
         <main class="main-content">
             <RouterView />
         </main>
@@ -26,7 +24,7 @@ import AppHeader from './components/AppHeader.vue';
 
 .main-content {
     flex-grow: 1;
-    padding: 20px;
+    padding: 0 20px; /* 0 hore/dole, 20px vľavo/vpravo */
 }
 
 </style>

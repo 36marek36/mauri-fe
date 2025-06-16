@@ -1,5 +1,5 @@
 <template>
-    <h1>Všetky tými:</h1>
+    <AppHeader title="Zoznam tímov" />
 
     <div v-if="!loading">
         <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
@@ -23,7 +23,7 @@
             </select>
 
             <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button" @clicked="() => createTeam()" />
-                
+
         </div>
 
         <ParticipantList :title="'Tými v lige'" :participants="teams" :formatName="formatTeamName"
@@ -47,6 +47,7 @@
 import axios from 'axios'
 import AppButton from '@/components/AppButton.vue'
 import ParticipantList from '@/components/ParticipantList.vue'
+import AppHeader from '@/components/AppHeader.vue'
 
 export default {
     name: 'TeamsView',
@@ -133,7 +134,7 @@ export default {
             return `${this.fullName(team.player1)} a ${this.fullName(team.player2)}`;
         }
     },
-    components: { AppButton, ParticipantList }
+    components: { AppButton, ParticipantList, AppHeader }
 }
 
 </script>

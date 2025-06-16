@@ -1,6 +1,6 @@
 <template>
 
-    <h1>Všetci hráči:</h1>
+    <AppHeader title="Zoznam hráčov" />
 
     <AppButton label="Vytvoriť hráča" icon="➕" type="create" htmlType="button" @clicked="addPlayer" />
 
@@ -28,6 +28,7 @@
 
 <script>
 import AppButton from '@/components/AppButton.vue';
+import AppHeader from '@/components/AppHeader.vue';
 import ParticipantList from '@/components/ParticipantList.vue';
 import axios from 'axios';
 
@@ -43,7 +44,7 @@ export default {
         this.fetchPlayers()
     },
     methods: {
-        
+
         fetchPlayers() {
             axios.get('/api/rest/players/')
                 .then((response) => {
@@ -76,7 +77,7 @@ export default {
             return player.firstName + ' ' + player.lastName
         }
     },
-    components: { AppButton, ParticipantList }
+    components: { AppButton, ParticipantList, AppHeader }
 }
 
 </script>
@@ -85,5 +86,4 @@ export default {
 :deep(ul) {
     width: 50%;
 }
-
 </style>

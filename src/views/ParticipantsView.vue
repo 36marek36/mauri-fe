@@ -1,8 +1,11 @@
 <template>
+    <AppHeader title="Zoznam hráčov a tímov" />
+    
     <div class="container">
+
         <!-- Ľavý stĺpec: Hráči -->
         <div class="players">
-            <h1>Zoznam hráčov:</h1>
+            <h3>Zoznam hráčov:</h3>
 
             <AppButton label="Vytvoriť hráča" icon="➕" type="create" htmlType="button" @clicked="addPlayer" />
 
@@ -18,7 +21,7 @@
 
         <!-- Pravý stĺpec: Tímy -->
         <div class="teams">
-            <h1>Zoznam tímov:</h1>
+            <h3>Zoznam tímov:</h3>
 
             <div v-if="!loadingTeams">
                 <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
@@ -41,7 +44,8 @@
                         </option>
                     </select>
 
-                    <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button" @clicked="() => createTeam()" />
+                    <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button"
+                        @clicked="() => createTeam()" />
                 </div>
 
                 <ParticipantList :participants="teams" :formatName="formatTeamName" :remove="deleteTeam" />
@@ -56,6 +60,7 @@
 import axios from 'axios'
 import ParticipantList from '@/components/ParticipantList.vue'
 import AppButton from '@/components/AppButton.vue'
+import AppHeader from '@/components/AppHeader.vue'
 
 export default {
     name: 'ParticipantsView',
@@ -160,7 +165,7 @@ export default {
             return `${this.formatPlayerName(team.player1)} a ${this.formatPlayerName(team.player2)}`;
         }
     },
-    components: { AppButton, ParticipantList }
+    components: { AppButton, ParticipantList, AppHeader }
 }
 
 </script>

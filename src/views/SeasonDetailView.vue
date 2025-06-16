@@ -3,7 +3,7 @@
     <div v-if="loading">... loading ...</div>
 
     <div v-else>
-        <h1>{{ season.year }}</h1>
+        <AppHeader :title="season.year" />
         <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
             :type="showCreateLeagueForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
 
@@ -42,6 +42,7 @@
 <script>
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
+import AppHeader from '@/components/AppHeader.vue';
 
 
 export default {
@@ -118,7 +119,7 @@ export default {
                 });
         }
     },
-    components: { AppButton }
+    components: { AppButton, AppHeader }
 }
 
 </script>

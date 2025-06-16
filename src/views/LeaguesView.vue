@@ -1,5 +1,5 @@
 <template>
-    <h1>Všetky ligy</h1>
+    <AppHeader title="Všetky ligy:"/>
 
     <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
         :type="showCreateLeagueForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
@@ -33,6 +33,7 @@
 
 <script>
 import AppButton from '@/components/AppButton.vue';
+import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
 
 
@@ -138,7 +139,7 @@ export default {
 
         }
     },
-    components: { AppButton }
+    components: { AppButton,AppHeader }
 }
 
 

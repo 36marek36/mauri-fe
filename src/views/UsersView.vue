@@ -1,6 +1,6 @@
 <template>
 
-    <h1>Všetci users:</h1>
+    <AppHeader title="Zoznam používatelov:" />
 
     <ul v-if="!loading">
         <li v-for="user in users">
@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
 
 export default {
@@ -33,7 +34,7 @@ export default {
         this.fetchUsers()
     },
     methods: {
-        
+
         fetchUsers() {
             axios.get('/api/rest/users/')
                 .then((response) => {
@@ -45,7 +46,8 @@ export default {
                     this.loading = false
                 })
         }
-    }
+    },
+    components: { AppHeader }
 }
 
 </script>
@@ -54,5 +56,4 @@ export default {
 :deep(ul) {
     width: 50%;
 }
-
 </style>

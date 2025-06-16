@@ -1,5 +1,7 @@
 <template>
 
+    <AppHeader title="Detail hráča" />
+
     <div v-if="loading">... loading ...</div>
 
     <ul v-else>
@@ -19,6 +21,7 @@
 
 <script>
 
+import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
 
 export default {
@@ -48,8 +51,8 @@ export default {
                     })
             }
         }
-        
-    }
+    },
+    components: { AppHeader }
 }
 
 </script>

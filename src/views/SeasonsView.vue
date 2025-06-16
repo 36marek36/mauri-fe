@@ -1,5 +1,5 @@
 <template>
-    <h1>Sezóny</h1>
+    <AppHeader title="Sezóny" />
     <AppButton :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
         :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
 
@@ -23,6 +23,7 @@
 <script>
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
+import AppHeader from '@/components/AppHeader.vue';
 
 
 export default {
@@ -80,7 +81,7 @@ export default {
 
         }
     },
-    components: { AppButton }
+    components: { AppButton, AppHeader }
 }
 </script>
 
