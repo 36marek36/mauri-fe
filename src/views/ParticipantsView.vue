@@ -1,6 +1,6 @@
 <template>
     <AppHeader title="Zoznam hráčov a tímov" />
-    
+
     <div class="container">
 
         <!-- Ľavý stĺpec: Hráči -->
@@ -9,50 +9,70 @@
 
             <AppButton label="Vytvoriť hráča" icon="➕" type="create" htmlType="button" @clicked="addPlayer" />
 
-            <div v-if="!loadingPlayers">
-                <ParticipantList :participants="players" :formatName="formatPlayerName" :remove="deletePlayer"
-                    @view-detail="goToDetail" />
+            <div v-if="loadingPlayers">
+                ... loading players...
+            </div>
+
+            <div v-else-if="players.length === 0">
+                <p>Žiadni hráči nie sú k dispozícii.</p>
             </div>
 
             <div v-else>
-                ... loading players...
+                <ParticipantList :participants="players" :formatName="formatPlayerName" :remove="deletePlayer"
+                    @view-detail="goToDetail" />
             </div>
         </div>
 
         <!-- Pravý stĺpec: Tímy -->
-        <div class="teams">
-            <h3>Zoznam tímov:</h3>
+<div class="teams">
+  <h3>Zoznam tímov:</h3>
 
-            <div v-if="!loadingTeams">
-                <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
-                    :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" />
+  <div v-if="loadingTeams">
+    ... loading teams...
+  </div>
 
-                <div v-if="showCreateTeamForm">
-                    <label for="player1">Hráč 1:</label>
-                    <select id="player1" v-model="newTeam.player1Id">
-                        <option disabled value="">-- Vyber hráča --</option>
-                        <option v-for="player in players" :value="player.id">
-                            {{ player.firstName }} {{ player.lastName }}
-                        </option>
-                    </select>
+  <div v-else>
+    <AppButton
+      :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'"
+      icon="➕"
+      :type="showCreateTeamForm ? 'delete' : 'create'"
+      htmlType="button"
+      @clicked="toggleCreateForm"
+    />
 
-                    <label for="player2">Hráč 2:</label>
-                    <select id="player2" v-model="newTeam.player2Id">
-                        <option disabled value="">-- Vyber hráča --</option>
-                        <option v-for="player in players" :value="player.id">
-                            {{ player.firstName }} {{ player.lastName }}
-                        </option>
-                    </select>
+    <div v-if="showCreateTeamForm">
+      <label for="player1">Hráč 1:</label>
+      <select id="player1" v-model="newTeam.player1Id">
+        <option disabled value="">-- Vyber hráča --</option>
+        <option v-for="player in players" :key="player.id" :value="player.id">
+          {{ player.firstName }} {{ player.lastName }}
+        </option>
+      </select>
 
-                    <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button"
-                        @clicked="() => createTeam()" />
-                </div>
+      <label for="player2">Hráč 2:</label>
+      <select id="player2" v-model="newTeam.player2Id">
+        <option disabled value="">-- Vyber hráča --</option>
+        <option v-for="player in players" :key="player.id" :value="player.id">
+          {{ player.firstName }} {{ player.lastName }}
+        </option>
+      </select>
 
-                <ParticipantList :participants="teams" :formatName="formatTeamName" :remove="deleteTeam" />
-            </div>
+      <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button" @clicked="createTeam" />
+    </div>
 
-            <div v-else>... loading teams...</div>
-        </div>
+    <div v-if="teams.length === 0">
+      <p>Žiadne tímy neboli zatiaľ vytvorené.</p>
+    </div>
+
+    <div v-else>
+      <ParticipantList
+        :participants="teams"
+        :formatName="formatTeamName"
+        :remove="deleteTeam"
+      />
+    </div>
+  </div>
+</div>
     </div>
 </template>
 

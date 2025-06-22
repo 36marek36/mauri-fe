@@ -9,14 +9,24 @@
         <AppButton label="Vytvoriť" type="create" icon="➕" htmlType="button" @clicked="createSeason" />
 
     </div>
-    <div v-if="loading">... loading ...</div>
-    <ul v-else>
-        <li v-for="season in seasons" @click="this.$router.push('/seasons/' + season.id)">
-            Sezóna {{ season.year }}
-            <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
-                @clicked="() => deleteSeason(season.id)" />
-        </li>
-    </ul>
+    <div v-if="loading">
+        ... loading ...
+    </div>
+
+    <div v-else>
+        <div v-if="seasons.length === 0">
+            <p>Žiadne sezóny nie sú k dispozícii.</p>
+        </div>
+
+        <ul v-else>
+            <li v-for="season in seasons" :key="season.id" @click="$router.push('/seasons/' + season.id)">
+                Sezóna {{ season.year }}
+
+                <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
+                    @clicked="() => deleteSeason(season.id)" />
+            </li>
+        </ul>
+    </div>
 
 </template>
 

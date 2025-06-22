@@ -1,5 +1,5 @@
 <template>
-    <AppHeader title="Všetky ligy:"/>
+    <AppHeader title="Všetky ligy:" />
 
     <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
         :type="showCreateLeagueForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
@@ -15,19 +15,28 @@
 
     </div>
 
-    <div v-if="loading">... loading ...</div>
+    <div v-if="loading">
+        ... loading ...
+    </div>
 
-    <ul v-else style="width: fit-content">
-        <li v-for="league in sortedLeagues" @click="this.$router.push('/leagues/' + league.id)">
-            {{ league.name }} {{ league.leagueType }} {{ league.progress+'%' }}
-            <div class="league-progress-bar">
-                <div class="league-progress-fill" :style="{ width: league.progress+'%'}"></div>
-            </div>
-            <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
-                @clicked="() => deleteLeague(league.id)" />
+    <div v-else>
+        <div v-if="sortedLeagues.length === 0">
+            <p>Žiadne ligy neboli nájdené.</p>
+        </div>
 
-        </li>
-    </ul>
+        <ul v-else style="width: fit-content">
+            <li v-for="league in sortedLeagues" :key="league.id" @click="$router.push('/leagues/' + league.id)">
+                {{ league.name }} {{ league.leagueType }} {{ league.progress + '%' }}
+
+                <div class="league-progress-bar">
+                    <div class="league-progress-fill" :style="{ width: league.progress + '%' }"></div>
+                </div>
+
+                <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
+                    @clicked="() => deleteLeague(league.id)" />
+            </li>
+        </ul>
+    </div>
 
 </template>
 
@@ -139,7 +148,7 @@ export default {
 
         }
     },
-    components: { AppButton,AppHeader }
+    components: { AppButton, AppHeader }
 }
 
 
@@ -176,6 +185,6 @@ li:hover {
     height: 100%;
     background-color: #FFCC00;
     /* zlatožltá */
-    transition: width 0.3s ease-in-out;
+    transition: width 0.3sease-in-out;
 }
 </style>
