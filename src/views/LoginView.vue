@@ -16,25 +16,15 @@
 </template> -->
 
 <template>
-   <AppHeader :title="isLogin ? 'Prihlásenie' : 'Registrácia'" />
+  <AppHeader :title="isLogin ? 'Prihlásenie' : 'Registrácia'" />
   <div>
     <form @submit.prevent="handleSubmit">
       <input v-model="username" placeholder="Užívatelské meno" required />
       <input v-model="password" type="password" placeholder="Heslo" required />
 
-      <input
-        v-if="!isLogin"
-        v-model="confirmPassword"
-        type="password"
-        placeholder="Potvrdenie hesla"
-        required
-      />
+      <input v-if="!isLogin" v-model="confirmPassword" type="password" placeholder="Potvrdenie hesla" required />
 
-      <AppButton
-        :label="isLogin ? 'Prihlásiť' : 'Registrovať'"
-        htmlType="submit"
-        type="primary"
-      />
+      <AppButton :label="isLogin ? 'Prihlásiť' : 'Registrovať'" htmlType="submit" type="primary" />
     </form>
 
     <p v-if="error" style="color: red">{{ error }}</p>
@@ -50,6 +40,7 @@
 import AppButton from '@/components/AppButton.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import axios from 'axios'
+import { useUserStore } from '@/user'
 
 export default {
   data() {
@@ -62,7 +53,7 @@ export default {
     }
   },
   methods: {
-     toggleMode() {
+    toggleMode() {
       this.isLogin = !this.isLogin
       this.error = null
       this.username = ''
@@ -71,11 +62,12 @@ export default {
     },
     async handleSubmit() {
       this.error = null
-       if (!this.isLogin && this.password !== this.confirmPassword) {
+      if (!this.isLogin && this.password !== this.confirmPassword) {
         this.error = 'Passwords do not match'
         return
       }
-  try {
+      const userStore = useUserStore()
+      try {
         if (this.isLogin) {
           // Login API call
           const res = await axios.post('/api/rest/auth/login', {
@@ -86,6 +78,10 @@ export default {
           // ulož token, presmeruj atď.
           localStorage.setItem('jwt', token)
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+          await userStore.fetchCurrentUser()
+
+          // Vypíš do konzoly
+          console.log('Prihlásený používateľ:', userStore.user)
           this.$router.push('/')
         } else {
           // Signup API call
@@ -113,6 +109,6 @@ export default {
       // }
     }
   },
-  components:{AppButton,AppHeader}
+  components: { AppButton, AppHeader }
 }
 </script>

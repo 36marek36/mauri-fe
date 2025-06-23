@@ -1,28 +1,20 @@
 <template>
   <nav class="navbar">
     <ul>
-      <li>
-        <RouterLink to="/">Domov</RouterLink>
+      <li><RouterLink to="/">Domov</RouterLink></li>
+      <li><RouterLink to="/players">Hráči</RouterLink></li>
+      <li><RouterLink to="/teams">Tímy</RouterLink></li>
+      <li><RouterLink to="/users">Users</RouterLink></li>
+      <li><RouterLink to="/participants">Hráči/Tímy</RouterLink></li>
+      <li><RouterLink to="/leagues">Ligy</RouterLink></li>
+      <li><RouterLink to="/seasons">Sezóny</RouterLink></li>
+
+      <li v-if="isLoggedIn" class="user-info">
+        Prihlásený ako: <strong>{{ userStore.user.username }}</strong> |
+        <button @click="logout">Odhlásiť sa</button>
       </li>
-      <li>
-        <RouterLink to="/players">Hráči</RouterLink>
-      </li>
-      <li>
-        <RouterLink to="/teams">Tímy</RouterLink>
-      </li>
-      <li>
-        <RouterLink to="/users">Users</RouterLink>
-      </li>
-      <li>
-        <RouterLink to="/participants">Hráči/Tímy</RouterLink>
-      </li>
-      <li>
-        <RouterLink to="/leagues">Ligy</RouterLink>
-      </li>
-      <li>
-        <RouterLink to="/seasons">Sezóny</RouterLink>
-      </li>
-      <li>
+
+      <li v-else>
         <RouterLink to="/login">Prihlásenie</RouterLink>
       </li>
     </ul>
@@ -30,6 +22,25 @@
 </template>
 
 <script>
+import { useUserStore } from '@/user'
+
+export default {
+  name: 'Navbar',
+  computed: {
+    userStore() {
+      return useUserStore()
+    },
+    isLoggedIn() {
+      return this.userStore.isLoggedIn
+    }
+  },
+  methods: {
+    logout() {
+      this.userStore.logout()
+      this.$router.push('/login')
+    }
+  }
+}
 </script>
 
 <style scoped>
