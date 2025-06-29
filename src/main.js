@@ -13,6 +13,7 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
+// uzivatel ostane prihlaseny aj po restarte
 const userStore = useUserStore()
 
 const token = localStorage.getItem('jwt')

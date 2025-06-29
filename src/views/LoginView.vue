@@ -52,6 +52,12 @@ export default {
       error: null
     }
   },
+  mounted() {
+    if (this.$route.query.message === 'logout') {
+      this.error = 'Boli ste úspešne odhlásený.'
+      this.clearErrorAfterDelay()
+    }
+  },
   methods: {
     toggleMode() {
       this.isLogin = !this.isLogin
@@ -91,6 +97,7 @@ export default {
           })
           this.toggleMode()
           this.error = 'Účet bol vytvorený. Teraz sa môžete prihlásiť.'
+          this.clearErrorAfterDelay()
         }
       } catch (err) {
         this.error = err.response?.data?.message || 'Unexpected error occurred'
@@ -107,6 +114,11 @@ export default {
       // } catch (e) {
       //   this.error = 'Zlé prihlasovacie údaje'
       // }
+    },
+    clearErrorAfterDelay() {
+      setTimeout(() => {
+        this.error = null
+      }, 3000)
     }
   },
   components: { AppButton, AppHeader }

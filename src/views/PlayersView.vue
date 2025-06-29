@@ -60,15 +60,17 @@ export default {
             this.$router.push('/players/' + id)
         },
         deletePlayer(id) {
-            console.log('Mažem hráča s ID:', id)
-            axios.delete('/api/rest/players/' + id)
-                .then(() => {
-                    this.fetchPlayers()
-                    console.log('Hráč bol úspešne zmazaný.')
-                })
-                .catch(err => {
-                    console.error('Chyba pri mazaní hráča:', err)
-                })
+            if (confirm('Naozaj chceš vymazať tohto hráča?')) {
+                axios.delete('/api/rest/players/' + id)
+                    .then(() => {
+                        alert('Hráč bol vymazaný.');
+                        this.$router.push('/players/');
+                    })
+                    .catch((error) => {
+                        alert('Nepodarilo sa vymazať hráča.');
+                        console.error('Chyba pri mazaní hráča:', error);
+                    });
+            }
         },
         addPlayer() {
             this.$router.push('/players/create')

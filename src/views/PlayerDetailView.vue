@@ -13,9 +13,26 @@
             <span>last name: </span>
             <span>{{ player.lastName }}</span>
         </li>
+        <li>
+            <span>email: </span>
+            <span>{{ player.email ? player.email : 'nezadaný' }}</span>
+        </li>
+        <li>
+            <span>telefón: </span>
+            <span>{{ player.phone ? player.phone : 'nezadaný' }}</span>
+        </li>
+        <li>
+            <span>dátum registrácie: </span>
+            <span>{{ formatDate(player.registrationDate) }}</span>
+        </li>
+        <li>
+            <span>zoznam líg:</span>
+            <span class="league-names">
+                <span v-for="league in playerLeagues" :key="league.leagueName">
+                    {{ league.leagueName }} ({{ league.seasonYear }})</span>
+            </span>
+        </li>
     </ul>
-
-    <button @click="deletePlayer(player.id)">🗑️ Vymazať</button>
 
 </template>
 
@@ -29,6 +46,7 @@ export default {
     data() {
         return {
             player: null,
+            playerLeagues: [],
             loading: true
         }
     },
@@ -36,20 +54,27 @@ export default {
         axios.get('/api/rest/players/' + this.$route.params.id)
             .then((response) => {
                 this.player = response.data
+                this.loadPlayerLeagues()
                 this.loading = false
             })
     },
     methods: {
-        deletePlayer(id) {
-            if (confirm('Naozaj chceš vymazať tohto hráča?')) {
-                axios.delete('/api/rest/players/' + id)
-                    .then(() => {
-                        this.$router.push('/players/')
-                    })
-                    .catch((error) => {
-                        console.error('Chyba pri mazaní hráča:', error)
-                    })
-            }
+        formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('sk-SK', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        },
+        loadPlayerLeagues() {
+            axios.get(`/api/rest/players/${this.player.id}/leagues`)
+                .then(response => {
+                    this.playerLeagues = response.data;
+                })
+                .catch(err => {
+                    console.error('Chyba pri načítaní líg hráča:', err);
+                });
         }
     },
     components: { AppHeader }
@@ -69,6 +94,17 @@ li {
 }
 
 li span:nth-child(2) {
+    font-weight: bold;
+}
+
+.league-names {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    /* Toto zarovná vnútorné span-y doprava */
+}
+
+.league-names span {
     font-weight: bold;
 }
 </style>

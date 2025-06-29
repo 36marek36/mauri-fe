@@ -3,7 +3,7 @@
     <div v-if="loading">... loading ...</div>
 
     <div v-else>
-        <AppHeader :title="season.year" />
+        <AppHeader :title="season.year.toString()" />
         <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
             :type="showCreateLeagueForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
 

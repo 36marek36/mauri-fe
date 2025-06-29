@@ -18,11 +18,20 @@ export const useUserStore = defineStore('user', {
                 this.user = null
                 return
             }
+
             this.isLoading = true
+
             try {
                 const response = await axios.get('/api/rest/users/me')
                 this.user = response.data
             } catch (err) {
+                // 🔽 Ak token expiroval alebo nie je platný
+                if (err.response?.status === 401) {
+                    localStorage.removeItem('jwt')
+                    delete axios.defaults.headers.common['Authorization']
+                    console.warn('Token expiroval alebo nie je platný – odstránený z localStorage')
+                }
+
                 this.user = null
                 this.error = err.response?.data?.message || 'Chyba pri načítaní používateľa'
             } finally {
@@ -30,9 +39,10 @@ export const useUserStore = defineStore('user', {
             }
         },
         logout() {
-            localStorage.removeItem('jwt')
-            delete axios.defaults.headers.common['Authorization']
-            this.user = null
+            localStorage.removeItem('jwt')  // odstráni token zo storage
+            delete axios.defaults.headers.common['Authorization']    // odstráni token z hlavičiek pre ďalšie požiadavky
+            this.user = null    // resetuje používateľa
+            console.log('Uzivatel odhlaseny')
         }
     }
 })
