@@ -23,14 +23,18 @@
         <RouterLink to="/seasons">Sezóny</RouterLink>
       </li>
 
-      <!-- <li v-if="isLoggedIn">
-        <strong>{{ userStore.user.username }}</strong> |
-        <button @click="logout">Odhlásiť sa</button>
-      </li> -->
       <li v-if="isLoggedIn" class="user-dropdown">
         <span class="username" @click="toggleDropdown">{{ userStore.user.username }}</span>
         <ul v-if="showDropdown" class="dropdown-menu">
-          <li><button @click="logout">Odhlásiť sa</button></li>
+          <li v-if="playerId">
+            <AppButton label="Detail hráča" type="create" @clicked="goToPlayerDetail" />
+          </li>
+          <li v-else>
+            <AppButton label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" />
+          </li>
+          <li>
+            <AppButton label="Odhlásiť sa" type="delete" @clicked="logout" />
+          </li>
         </ul>
       </li>
 
@@ -38,11 +42,17 @@
         <RouterLink to="/login">Prihlásenie</RouterLink>
       </li>
     </ul>
+
+    <div v-if="userStore.error" class="error-message">
+      {{ userStore.error }}
+    </div>
+
   </nav>
 </template>
 
 <script>
 import { useUserStore } from '@/user'
+import AppButton from './AppButton.vue'
 
 export default {
   name: 'Navbar',
@@ -61,18 +71,33 @@ export default {
     },
     isAdmin() {
       return this.userStore.isAdmin
+    },
+    playerId() {
+      return this.userStore.playerId
     }
   },
   methods: {
     toggleDropdown() {
       this.showDropdown = !this.showDropdown
     },
+    closeDropdown() {
+      this.showDropdown = false
+    },
+    goToCreatePlayer() {
+      this.closeDropdown()
+      this.$router.push('/players/create')
+    },
+    goToPlayerDetail() {
+      this.closeDropdown()
+      this.$router.push(`/players/${this.playerId}`)
+    },
     logout() {
-      this.showDropdown=false
+      this.closeDropdown()
       this.userStore.logout()
       this.$router.push({ path: '/login', query: { message: 'logout' } })
     }
-  }
+  },
+  components: { AppButton }
 }
 </script>
 
@@ -109,5 +134,24 @@ export default {
 
 .dropdown-menu {
   position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.dropdown-menu li {
+  list-style: none;
+  margin: 0;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
 }
 </style>

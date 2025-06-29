@@ -9,7 +9,8 @@ export const useUserStore = defineStore('user', {
     }),
     getters: {
         isLoggedIn: (state) => !!state.user,
-        isAdmin: (state) => state.user?.role?.includes('ADMIN')
+        isAdmin: (state) => state.user?.role?.includes('ADMIN'),
+        playerId: (state) => state.user?.playerId || null
     },
     actions: {
         async fetchCurrentUser() {
@@ -24,6 +25,8 @@ export const useUserStore = defineStore('user', {
             try {
                 const response = await axios.get('/api/rest/users/me')
                 this.user = response.data
+                this.error = null
+                // console.log('User fetched:', this.user)
             } catch (err) {
                 // 🔽 Ak token expiroval alebo nie je platný
                 if (err.response?.status === 401) {

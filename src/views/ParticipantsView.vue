@@ -24,55 +24,46 @@
         </div>
 
         <!-- Pravý stĺpec: Tímy -->
-<div class="teams">
-  <h3>Zoznam tímov:</h3>
+        <div class="teams">
+            <h3>Zoznam tímov:</h3>
 
-  <div v-if="loadingTeams">
-    ... loading teams...
-  </div>
+            <div v-if="loadingTeams">
+                ... loading teams...
+            </div>
 
-  <div v-else>
-    <AppButton
-      :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'"
-      icon="➕"
-      :type="showCreateTeamForm ? 'delete' : 'create'"
-      htmlType="button"
-      @clicked="toggleCreateForm"
-    />
+            <div v-else>
+                <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
+                    :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" />
 
-    <div v-if="showCreateTeamForm">
-      <label for="player1">Hráč 1:</label>
-      <select id="player1" v-model="newTeam.player1Id">
-        <option disabled value="">-- Vyber hráča --</option>
-        <option v-for="player in players" :key="player.id" :value="player.id">
-          {{ player.firstName }} {{ player.lastName }}
-        </option>
-      </select>
+                <div v-if="showCreateTeamForm">
+                    <label for="player1">Hráč 1:</label>
+                    <select id="player1" v-model="newTeam.player1Id">
+                        <option disabled value="">-- Vyber hráča --</option>
+                        <option v-for="player in players" :key="player.id" :value="player.id">
+                            {{ player.firstName }} {{ player.lastName }}
+                        </option>
+                    </select>
 
-      <label for="player2">Hráč 2:</label>
-      <select id="player2" v-model="newTeam.player2Id">
-        <option disabled value="">-- Vyber hráča --</option>
-        <option v-for="player in players" :key="player.id" :value="player.id">
-          {{ player.firstName }} {{ player.lastName }}
-        </option>
-      </select>
+                    <label for="player2">Hráč 2:</label>
+                    <select id="player2" v-model="newTeam.player2Id">
+                        <option disabled value="">-- Vyber hráča --</option>
+                        <option v-for="player in players" :key="player.id" :value="player.id">
+                            {{ player.firstName }} {{ player.lastName }}
+                        </option>
+                    </select>
 
-      <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button" @clicked="createTeam" />
-    </div>
+                    <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button" @clicked="createTeam" />
+                </div>
 
-    <div v-if="teams.length === 0">
-      <p>Žiadne tímy neboli zatiaľ vytvorené.</p>
-    </div>
+                <div v-if="teams.length === 0">
+                    <p>Žiadne tímy neboli zatiaľ vytvorené.</p>
+                </div>
 
-    <div v-else>
-      <ParticipantList
-        :participants="teams"
-        :formatName="formatTeamName"
-        :remove="deleteTeam"
-      />
-    </div>
-  </div>
-</div>
+                <div v-else>
+                    <ParticipantList :participants="teams" :formatName="formatTeamName" :remove="deleteTeam" />
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -103,6 +94,7 @@ export default {
             this.fetchTeams()
     },
     methods: {
+
         fetchPlayers() {
             axios.get('/api/rest/players/')
                 .then((response) => {
@@ -131,15 +123,17 @@ export default {
             this.$router.push('/players/' + id)
         },
         deletePlayer(id) {
-            console.log('Mažem hráča s ID:', id)
-            axios.delete('/api/rest/players/' + id)
-                .then(() => {
-                    this.fetchPlayers()
-                    console.log('Hráč bol úspešne zmazaný.')
-                })
-                .catch(err => {
-                    console.error('Chyba pri mazaní hráča:', err)
-                })
+            if (confirm('Naozaj chceš vymazať tohto hráča?')) {
+                axios.delete('/api/rest/players/' + id)
+                    .then(() => {
+                        alert('Hráč bol vymazaný.');
+                        this.fetchPlayers()
+                    })
+                    .catch((error) => {
+                        alert('Nepodarilo sa vymazať hráča.');
+                        console.error('Chyba pri mazaní hráča:', error);
+                    });
+            }
         },
         addPlayer() {
             this.$router.push('/players/create')
@@ -165,20 +159,25 @@ export default {
 
                 // Načítanie aktualizovaného zoznamu tímov
                 this.fetchTeams();
+
+                // ⬇️ Zatvorenie formulára
+                this.toggleCreateForm();
             } catch (error) {
                 console.error('Chyba pri vytváraní tímu:', error);
             }
         },
         deleteTeam(id) {
-            console.log('Mažem tým s ID:', id)
-            axios.delete('/api/rest/teams/' + id)
-                .then(() => {
-                    this.fetchTeams()
-                    console.log('Tým bol úspešne zmazaný.')
-                })
-                .catch(err => {
-                    console.error('Chyba pri mazaní tímu:', err)
-                })
+            if (confirm('Naozaj chceš vymazať tento tým?')) {
+                axios.delete('/api/rest/teams/' + id)
+                    .then(() => {
+                        alert('Tým bol vymazaný.');
+                        this.fetchTeams()
+                    })
+                    .catch((error) => {
+                        alert('Nepodarilo sa vymazať tým.');
+                        console.error('Chyba pri mazaní týmu:', error);
+                    });
+            }
         },
         formatTeamName(team) {
             if (!team || !team.player1 || !team.player2) return '';

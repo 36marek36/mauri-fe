@@ -32,6 +32,7 @@
 <script>
 import AppHeader from '@/components/AppHeader.vue'
 import axios from 'axios'
+import { useUserStore } from '@/user'
 
 export default {
   name: 'CreatePlayer',
@@ -46,14 +47,29 @@ export default {
       responseMessage: ''
     }
   },
+  computed: {
+    userStore() {
+      return useUserStore()
+    },
+    isAdmin() {
+      return this.userStore.isAdmin
+    }
+  },
   methods: {
     async submitForm() {
+      const endpoint = this.isAdmin
+        ? '/api/rest/players/admin/createPlayer'
+        : '/api/rest/players/user/createPlayer'
+
       try {
-        const response = await axios.post('/api/rest/players/admin/create', this.player)
+        const response = await axios.post(endpoint, this.player)
         console.log('Hráč: ' + response.data.firstName + ' bol úspešne vytvorený.')
         this.responseMessage = 'Hráč ' + response.data.firstName + ' bol úspešne vytvorený.'
+
+        await this.userStore.fetchCurrentUser()
+
         setTimeout(() => {
-          this.$router.push('/players/')
+          this.$router.push('/participants')
         }, 2000)
       } catch (error) {
         this.responseMessage = 'Chyba pri vytváraní hráča.'
