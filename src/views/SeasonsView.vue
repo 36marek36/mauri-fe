@@ -1,6 +1,6 @@
 <template>
     <AppHeader title="Sezóny" />
-    <AppButton :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
+    <AppButton v-if="isAdmin" :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
         :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
 
     <div v-if="showCreateSeasonForm">
@@ -22,7 +22,7 @@
             <li v-for="season in seasons" :key="season.id" @click="$router.push('/seasons/' + season.id)">
                 Sezóna {{ season.year }}
 
-                <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
+                <AppButton v-if="isAdmin" label="Zmazať" icon="🗑️" type="delete" htmlType="button"
                     @clicked="() => deleteSeason(season.id)" />
             </li>
         </ul>
@@ -34,6 +34,7 @@
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useUserStore } from '@/user';
 
 
 export default {
@@ -89,6 +90,14 @@ export default {
                     console.error('Chyba pri mazaní sezóny:', err)
                 })
 
+        }
+    },
+    computed: {
+        userStore() {
+            return useUserStore()
+        },
+        isAdmin() {
+            return this.userStore.isAdmin
         }
     },
     components: { AppButton, AppHeader }

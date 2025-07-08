@@ -5,9 +5,10 @@
 
         <!-- Ľavý stĺpec: Hráči -->
         <div class="players">
-            <h3>Zoznam hráčov:</h3>
+            <h2>Zoznam hráčov:</h2>
 
-            <AppButton label="Vytvoriť hráča" icon="➕" type="create" htmlType="button" @clicked="addPlayer" />
+            <AppButton v-if="isAdmin" label="Vytvoriť hráča" icon="➕" type="create" htmlType="button"
+                @clicked="addPlayer" />
 
             <div v-if="loadingPlayers">
                 ... loading players...
@@ -18,21 +19,22 @@
             </div>
 
             <div v-else>
-                <ParticipantList :participants="players" :formatName="formatPlayerName" :remove="deletePlayer"
-                    @view-detail="goToDetail" />
+                <ParticipantList :participants="players" :formatName="formatPlayerName"
+                    :remove="isAdmin ? deletePlayer : null" @view-detail="goToDetail" />
             </div>
         </div>
 
         <!-- Pravý stĺpec: Tímy -->
         <div class="teams">
-            <h3>Zoznam tímov:</h3>
+            <h2>Zoznam tímov:</h2>
 
             <div v-if="loadingTeams">
                 ... loading teams...
             </div>
 
             <div v-else>
-                <AppButton :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
+                <AppButton v-if="isAdmin"
+                    :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
                     :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" />
 
                 <div v-if="showCreateTeamForm">
@@ -60,7 +62,8 @@
                 </div>
 
                 <div v-else>
-                    <ParticipantList :participants="teams" :formatName="formatTeamName" :remove="deleteTeam" />
+                    <ParticipantList :participants="teams" :formatName="formatTeamName"
+                        :remove="isAdmin ? deleteTeam : null" />
                 </div>
             </div>
         </div>
@@ -72,6 +75,7 @@ import axios from 'axios'
 import ParticipantList from '@/components/ParticipantList.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppHeader from '@/components/AppHeader.vue'
+import { useUserStore } from '@/user'
 
 export default {
     name: 'ParticipantsView',
@@ -182,6 +186,14 @@ export default {
         formatTeamName(team) {
             if (!team || !team.player1 || !team.player2) return '';
             return `${this.formatPlayerName(team.player1)} a ${this.formatPlayerName(team.player2)}`;
+        }
+    },
+    computed: {
+        userStore() {
+            return useUserStore()
+        },
+        isAdmin() {
+            return this.userStore.isAdmin
         }
     },
     components: { AppButton, ParticipantList, AppHeader }

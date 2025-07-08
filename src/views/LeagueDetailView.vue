@@ -2,7 +2,14 @@
     <AppHeader :title="league.name" :subtitle="league.leagueType" />
     <div class="league-detail-container">
 
-        <button @click="generateMatches" :disabled="loading">Start</button>
+        <!-- <button @click="generateMatches" :disabled="loading">Start</button> -->
+
+        <div class="startLeague-button">
+            <AppButton v-if="isAdmin && league.players?.length > 0 || league.teams?.length > 0" label="Odštartovať ligu"
+                icon="➕" type="create" htmlType="button" :disabled="leagueStarted" @clicked="generateMatches" />
+        </div>
+
+
         <p v-if="message">{{ message }}</p>
 
         <div v-if="loading" class="loading-overlay">
@@ -17,10 +24,10 @@
                 <ParticipantList :title="league.leagueType === 'SINGLES' ? 'Hráči v lige' : 'Tými v lige'"
                     :participants="league.leagueType === 'SINGLES' ? league.players : league.teams"
                     :formatName="league.leagueType === 'SINGLES' ? fullName : formatTeamName"
-                    :remove="removeParticipantFromLeague" />
+                    :remove="isAdmin ? removeParticipantFromLeague : null" @view-detail="goToDetail" />
 
-                <AppButton :label="showAddParticipants ? 'Skryť formulár' : 'Pridať účastníkov do ligy'" icon="➕"
-                    type="create" htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
+                <AppButton v-if="isAdmin" :label="showAddParticipants ? 'Skryť formulár' : 'Pridať účastníkov do ligy'"
+                    icon="➕" type="create" htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
 
                 <AddParticipantsForm :show="showAddParticipants"
                     :items="league.leagueType === 'SINGLES' ? freePlayers : freeTeams"
@@ -129,6 +136,7 @@ import axios from 'axios';
 import ParticipantList from '@/components/ParticipantList.vue';
 import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useUserStore } from '@/user';
 
 
 export default {
@@ -170,8 +178,8 @@ export default {
                     this.freeTeams = teamsResponse.data
                 })
                 .then(() => {
-                    this.fetchMatches(),
-                        this.fetchStats()
+                    this.fetchMatches();
+                    this.fetchStats();
                 })
                 .catch((error) => {
                     console.error('Chyba pri načítaní údajov:', error);
@@ -209,6 +217,9 @@ export default {
                     console.error('Chyba pri mazaní participanta z ligy:', err)
                 })
 
+        },
+        goToDetail(id) {
+            this.$router.push('/players/' + id)
         },
         async fetchMatches() {
             const leagueId = this.leagueId
@@ -305,10 +316,20 @@ export default {
             return Object.keys(this.groupedMatches).length > 0;
         },
         allRoundNumbers() {
-            return Object.keys(this.groupedMatches); // ostávajú stringy
+            return Object.keys(this.groupedMatches);
         },
         areAnyRoundsOpened() {
             return this.openedRounds.length > 0;
+        },
+        leagueStarted() {
+            // Liga je spustená, ak status NIE JE 'CREATED'
+            return this.league.status !== 'CREATED';
+        },
+        userStore() {
+            return useUserStore()
+        },
+        isAdmin() {
+            return this.userStore.isAdmin
         }
     },
     components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader }
@@ -369,6 +390,11 @@ export default {
     text-transform: uppercase;
     font-size: 0.85rem;
     color: whitesmoke;
+}
+
+.startLeague-button {
+    display: flex;
+    justify-content: center;
 }
 
 /* 📱 Mobilné zobrazenie */

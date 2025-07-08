@@ -4,7 +4,7 @@
 
     <div v-else>
         <AppHeader :title="season.year.toString()" />
-        <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
+        <AppButton v-if="isAdmin" :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
             :type="showCreateLeagueForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
 
         <div v-if="showCreateLeagueForm">
@@ -27,15 +27,15 @@
         </ul>
     </div>
 
-    <h2>Všetky dostupné ligy</h2>
-    <ul>
-        <li v-for="league in noSeasonLeagues" :key="league.id">
-            {{ league.name }}
-            <button @click="addLeagueToSeason(league.id)">Pridať do sezóny</button>
-        </li>
-    </ul>
-
-
+    <div v-if="isAdmin">
+        <h2>Všetky dostupné ligy</h2>
+        <ul>
+            <li v-for="league in noSeasonLeagues" :key="league.id">
+                {{ league.name }}
+                <button @click="addLeagueToSeason(league.id)">Pridať do sezóny</button>
+            </li>
+        </ul>
+    </div>
 
 </template>
 
@@ -43,6 +43,7 @@
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useUserStore } from '@/user';
 
 
 export default {
@@ -117,6 +118,14 @@ export default {
                 .catch(err => {
                     console.error('Chyba pri priraďovaní ligy:', err);
                 });
+        }
+    },
+    computed: {
+        userStore() {
+            return useUserStore()
+        },
+        isAdmin() {
+            return this.userStore.isAdmin
         }
     },
     components: { AppButton, AppHeader }

@@ -1,7 +1,7 @@
 <template>
     <AppHeader title="Všetky ligy:" />
 
-    <AppButton :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
+    <AppButton v-if="isAdmin" :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
         :type="showCreateLeagueForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
 
     <div v-if="showCreateLeagueForm">
@@ -32,7 +32,7 @@
                     <div class="league-progress-fill" :style="{ width: league.progress + '%' }"></div>
                 </div>
 
-                <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
+                <AppButton v-if="isAdmin" label="Zmazať" icon="🗑️" type="delete" htmlType="button"
                     @clicked="() => deleteLeague(league.id)" />
             </li>
         </ul>
@@ -44,6 +44,7 @@
 import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
+import { useUserStore } from '@/user';
 
 
 export default {
@@ -70,6 +71,12 @@ export default {
 
                 return a.name.localeCompare(b.name)
             })
+        },
+        userStore() {
+            return useUserStore()
+        },
+        isAdmin() {
+            return this.userStore.isAdmin
         }
     },
 
