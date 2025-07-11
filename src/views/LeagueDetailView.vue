@@ -12,7 +12,7 @@
 
         <p v-if="message">{{ message }}</p>
 
-        <div v-if="loading" class="loading-overlay">
+        <div v-if="loading">
             Načítavam...
         </div>
 
@@ -47,9 +47,9 @@
                         :icon="areAnyRoundsOpened ? '🔼' : '🔽'" type="default" htmlType="button"
                         @clicked="toggleAllRounds" />
 
-                    <div v-for="(roundMatches, roundNumber) in groupedMatches" :key="roundNumber" class="round-group">
+                    <div v-for="(roundMatches, roundNumber) in groupedMatches" :key="roundNumber">
                         <!-- Klikateľný nadpis pre otvorenie/zatvorenie kola -->
-                        <h4 @click="toggleRound(roundNumber)" class="round-header" style="cursor: pointer;">
+                        <h4 @click="toggleRound(roundNumber)" style="cursor: pointer">
                             Kolo: {{ roundNumber }}
                             <span v-if="openedRounds.includes(roundNumber)">▲</span>
                             <span v-else>▼</span>
@@ -68,15 +68,24 @@
                                     <div v-if="match.status === 'CREATED'">
                                         <AppButton
                                             :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
-                                            :type="activeMatchId === match.id ? 'delete' : 'create'" htmlType="button"
+                                            :type="activeMatchId === match.id ? 'delete' : 'default'" htmlType="button"
                                             icon="📝" @clicked="toggleForm(match.id)" />
                                         <AddMatchResult v-if="activeMatchId === match.id" :match="match"
                                             :leagueType="league.leagueType" @result-submitted="fetchMatchesAndClose" />
                                     </div>
 
                                     <div v-else-if="match.status === 'FINISHED'">
-                                        <strong>Výsledok:</strong> {{ match.result?.score1 }} : {{ match.result?.score2
-                                        }}
+                                        <strong>Výsledok:</strong>
+                                        {{ match.result?.score1 }} : {{ match.result?.score2 }}
+
+                                        <span v-if="match.result?.setScores?.length">
+                                            (
+                                            <span v-for="(set, index) in match.result.setScores" :key="index">
+                                                {{ set.score1 }}:{{ set.score2 }}<span
+                                                    v-if="index < match.result.setScores.length - 1">, </span>
+                                            </span>
+                                            )
+                                        </span>
                                     </div>
                                 </div>
                             </li>
@@ -365,6 +374,14 @@ export default {
 .matches {
     flex: 2 1 350px;
     padding: 1rem;
+}
+.match-item {
+    list-style: none;
+    padding: 12px 0;
+    border-bottom: 1px solid #ddd;
+}
+.match-item:last-child {
+    border-bottom: none;
 }
 
 /* 📊 Tabuľka */

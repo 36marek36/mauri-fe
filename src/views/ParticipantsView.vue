@@ -33,9 +33,9 @@
             </div>
 
             <div v-else>
-                <AppButton v-if="isAdmin"
-                    :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
-                    :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" />
+                <AppButton v-if="isAdmin" :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'"
+                    icon="➕" :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button"
+                    @clicked="toggleCreateForm" />
 
                 <div v-if="showCreateTeamForm">
                     <label for="player1">Hráč 1:</label>
@@ -94,8 +94,8 @@ export default {
 
     },
     created() {
-        this.fetchPlayers(),
-            this.fetchTeams()
+        this.fetchPlayers();
+        this.fetchTeams();
     },
     methods: {
 
