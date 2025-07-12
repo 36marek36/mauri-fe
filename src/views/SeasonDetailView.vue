@@ -18,17 +18,19 @@
 
         </div>
 
-        <ul>
+        <ul v-if="hasLeagues">
             <li v-for="league in season.leagues" :key="league.id" @click="this.$router.push('/leagues/' + league.id)">
                 <span>
                     {{ league.name }} {{ league.leagueType }}
                 </span>
             </li>
         </ul>
+
+        <p v-else>Sezóna neobsahuje žiadne ligy.</p>
     </div>
 
     <div v-if="isAdmin">
-        <h2>Všetky dostupné ligy</h2>
+        <h3>Všetky dostupné ligy</h3>
         <ul>
             <li v-for="league in noSeasonLeagues" :key="league.id">
                 {{ league.name }}
@@ -126,6 +128,9 @@ export default {
         },
         isAdmin() {
             return this.userStore.isAdmin
+        },
+        hasLeagues() {
+            return this.season.leagues.length > 0;
         }
     },
     components: { AppButton, AppHeader }

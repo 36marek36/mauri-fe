@@ -1,83 +1,72 @@
 <template>
     <AppHeader :title="league.name" :subtitle="league.leagueType" />
+
     <div class="league-detail-container">
-
-        <!-- <button @click="generateMatches" :disabled="loading">Start</button> -->
-
+        <!-- 🟢 Štart ligy -->
         <div class="start-finishLeague-button">
-            <AppButton
-                v-if="isAdmin && (league.players?.length > 0 || league.teams?.length > 0) && leagueStatus === 'CREATED'"
-                label="Odštartovať ligu" icon="➕" type="create" htmlType="button" @clicked="generateMatches" />
+            <AppButton v-if="isAdmin && hasParticipants && leagueStatus === 'CREATED'" label="Odštartovať ligu"
+                icon="🏁" type="create" htmlType="button" @clicked="generateMatches" />
         </div>
 
+        <!-- 🔴 Ukončenie ligy -->
         <div class="start-finishLeague-button">
-            <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Ukončiť ligu" icon="➕" type="delete"
+            <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Ukončiť ligu" icon="🛑" type="delete"
                 htmlType="button" @clicked="finishLeague" />
         </div>
 
-
+        <!-- ℹ️ Info hlásenia -->
         <p v-if="message">{{ message }}</p>
+        <div v-if="loading">Načítavam...</div>
 
-        <div v-if="loading">
-            Načítavam...
-        </div>
-
+        <!-- 🧱 Hlavné rozloženie -->
         <main v-else class="main-flex-layout">
 
-            <!-- 📋 Ľavý stĺpec: hráči alebo tímy -->
+            <!-- 🎽 Účastníci -->
             <aside class="players">
-
-                <ParticipantList v-if="hasParticipants"
-                    :title="league.leagueType === 'SINGLES' ? 'Hráči v lige' : 'Tými v lige'"
-                    :participants="league.leagueType === 'SINGLES' ? league.players : league.teams"
-                    :formatName="league.leagueType === 'SINGLES' ? fullName : formatTeamName"
+                <ParticipantList v-if="hasParticipants" :title="isSingles ? 'Hráči v lige' : 'Tímy v lige'"
+                    :participants="isSingles ? league.players : league.teams"
+                    :formatName="isSingles ? fullName : formatTeamName"
                     :remove="isAdmin ? removeParticipantFromLeague : null" @view-detail="goToDetail" />
-
-
                 <h3 v-else>{{ noParticipantsMessage }}</h3>
-
 
                 <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
                     :label="showAddParticipants ? 'Skryť formulár' : 'Pridať účastníkov do ligy'" icon="➕" type="create"
                     htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
 
-                <AddParticipantsForm :show="showAddParticipants"
-                    :items="league.leagueType === 'SINGLES' ? freePlayers : freeTeams"
-                    :formatName="league.leagueType === 'SINGLES' ? fullName : formatTeamName"
-                    :title="league.leagueType === 'SINGLES' ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
-                    :submitLabel="league.leagueType === 'SINGLES' ? 'Pridať hráčov' : 'Pridať tímy'"
-                    @submit="handleAddParticipants" />
+                <AddParticipantsForm :show="showAddParticipants" :items="isSingles ? freePlayers : freeTeams"
+                    :formatName="isSingles ? fullName : formatTeamName"
+                    :title="isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
+                    :submitLabel="isSingles ? 'Pridať hráčov' : 'Pridať tímy'" @submit="handleAddParticipants" />
             </aside>
 
-            <!-- 🎾 Stredný stĺpec: zápasy -->
+            <!-- 🏓 Zápasy -->
             <section class="matches">
                 <h3>Zápasy ligy</h3>
 
                 <div v-if="hasMatches">
-                    <!-- Tlačidlo na zobrazenie/skrytie všetkých kôl -->
                     <AppButton :label="areAnyRoundsOpened ? 'Skryť všetky kolá' : 'Zobraziť všetky kolá'"
                         :icon="areAnyRoundsOpened ? '🔼' : '🔽'" type="default" htmlType="button"
                         @clicked="toggleAllRounds" />
 
                     <div v-for="(roundMatches, roundNumber) in groupedMatches" :key="roundNumber">
-                        <!-- Klikateľný nadpis pre otvorenie/zatvorenie kola -->
                         <h4 @click="toggleRound(roundNumber)" style="cursor: pointer">
                             Kolo: {{ roundNumber }}
                             <span v-if="openedRounds.includes(roundNumber)">▲</span>
                             <span v-else>▼</span>
                         </h4>
 
-                        <!-- Obsah zápasov, zobrazí sa len ak je kolo otvorené -->
                         <ul v-show="openedRounds.includes(roundNumber)">
                             <li v-for="match in roundMatches" :key="match.id" class="match-item">
                                 <div>
                                     <span>
-                                        {{ league.leagueType === 'SINGLES'
+                                        {{ isSingles
                                             ? `${fullName(match.homePlayer)} vs ${fullName(match.awayPlayer)}`
                                             : `${formatTeamName(match.homeTeam)} vs ${formatTeamName(match.awayTeam)}` }}
                                     </span>
 
-                                    <div v-if="match.status === 'CREATED'">
+                                    <!-- Pridanie výsledku (admin alebo hráč) -->
+                                    <div
+                                        v-if="(isAdmin || isUserPlayerInMatch(match)) && match.status === 'CREATED' && leagueStatus === 'ACTIVE'">
                                         <AppButton
                                             :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
                                             :type="activeMatchId === match.id ? 'delete' : 'default'" htmlType="button"
@@ -86,10 +75,10 @@
                                             :leagueType="league.leagueType" @result-submitted="fetchMatchesAndClose" />
                                     </div>
 
+                                    <!-- Výsledok zápasu -->
                                     <div v-else-if="match.status === 'FINISHED'">
                                         <strong>Výsledok:</strong>
                                         {{ match.result?.score1 }} : {{ match.result?.score2 }}
-
                                         <span v-if="match.result?.setScores?.length">
                                             (
                                             <span v-for="(set, index) in match.result.setScores" :key="index">
@@ -108,17 +97,16 @@
                 <p v-else>Žiadne zápasy pre túto ligu.</p>
             </section>
 
-            <!-- 📊 Pravý stĺpec: tabuľka -->
+            <!-- 📊 Tabuľka -->
             <aside class="standings">
                 <h3>Tabuľka</h3>
 
                 <div class="table-scroll">
-                    <table class="standings-table"
-                        v-if="league.leagueType === 'SINGLES' || league.leagueType === 'DOUBLES'">
+                    <table class="standings-table" v-if="isSingles || isDoubles">
                         <thead>
                             <tr>
                                 <th>Poradie</th>
-                                <th>{{ league.leagueType === 'SINGLES' ? 'Hráč' : 'Tím' }}</th>
+                                <th>{{ isSingles ? 'Hráč' : 'Tím' }}</th>
                                 <th>Zápasy</th>
                                 <th>Výhry</th>
                                 <th>Prehry</th>
@@ -129,7 +117,7 @@
                         <tbody>
                             <tr v-for="(entry, index) in standings" :key="entry.id">
                                 <td>{{ index + 1 }}.</td>
-                                <td>{{ league.leagueType === 'SINGLES' ? entry.playerName : entry.teamName }}</td>
+                                <td>{{ isSingles ? entry.playerName : entry.teamName }}</td>
                                 <td>{{ entry.matches }}</td>
                                 <td>{{ entry.wins }}</td>
                                 <td>{{ entry.losses }}</td>
@@ -140,10 +128,7 @@
                     </table>
 
                     <p v-else>Nie je určený typ zápasu.</p>
-
                 </div>
-
-
             </aside>
         </main>
     </div>
@@ -183,28 +168,31 @@ export default {
 
     methods: {
         async loadInitialData() {
-            const leagueId = this.leagueId;
             this.loading = true;
-
             try {
-                const [leagueResponse, playersResponse, teamsResponse] = await Promise.all([
-                    axios.get('/api/rest/leagues/' + leagueId),
-                    axios.get('/api/rest/players/not-in-any-active-league'),
-                    axios.get('/api/rest/teams/not-in-any-active-league'),
-                ]);
-
-                this.league = leagueResponse.data;
-                this.freePlayers = playersResponse.data;
-                this.freeTeams = teamsResponse.data;
-
+                await this.fetchLeague();
+                await this.fetchFreeParticipants();
                 await this.fetchMatches();
                 await this.fetchStats();
-
             } catch (error) {
                 console.error('Chyba pri načítaní údajov:', error);
             } finally {
                 this.loading = false;
             }
+        },
+        async fetchLeague() {
+            const res = await axios.get('/api/rest/leagues/' + this.leagueId);
+            this.league = res.data;
+        },
+
+        async fetchFreeParticipants() {
+            const [playersRes, teamsRes] = await Promise.all([
+                axios.get('/api/rest/players/not-in-any-active-league'),
+                axios.get('/api/rest/teams/not-in-any-active-league')
+            ]);
+
+            this.freePlayers = playersRes.data;
+            this.freeTeams = teamsRes.data;
         },
 
         async addSelectedParticipantsToLeague() {
@@ -358,25 +346,46 @@ export default {
             setTimeout(() => {
                 this.message = '';
             }, 3000);
+        },
+        isUserPlayerInMatch(match) {
+            const playerId = this.userStore.playerId;
+
+            if (this.isSingles) {
+                return match.homePlayer?.id === playerId || match.awayPlayer?.id === playerId;
+            }
+
+            if (this.isDoubles) {
+                return (
+                    match.homeTeam?.player1?.id === playerId ||
+                    match.homeTeam?.player2?.id === playerId ||
+                    match.awayTeam?.player1?.id === playerId ||
+                    match.awayTeam?.player2?.id === playerId
+                );
+            }
+
+            return false;
         }
     },
     computed: {
         leagueId() {
             return this.$route.params.id;
         },
+        isSingles() {
+            return this.league.leagueType === 'SINGLES';
+        },
+        isDoubles() {
+            return this.league.leagueType === 'DOUBLES';
+        },
         hasMatches() {
             return Object.keys(this.groupedMatches).length > 0;
         },
         hasParticipants() {
-            if (this.league.leagueType === 'SINGLES') {
-                return this.league.players.length > 0;
-            } else if (this.league.leagueType === 'DOUBLES') {
-                return this.league.teams.length > 0;
-            }
-            return false;
+            return this.isSingles
+                ? this.league.players?.length > 0
+                : this.league.teams?.length > 0;
         },
         noParticipantsMessage() {
-            return this.league.leagueType === 'SINGLES'
+            return this.isSingles
                 ? 'Liga nemá žiadnych hráčov.'
                 : 'Liga nemá žiadne tímy.';
         },
@@ -390,10 +399,10 @@ export default {
             return this.league.status;
         },
         userStore() {
-            return useUserStore()
+            return useUserStore();
         },
         isAdmin() {
-            return this.userStore.isAdmin
+            return this.userStore.isAdmin;
         }
     },
     components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader }
