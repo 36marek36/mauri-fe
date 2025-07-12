@@ -4,9 +4,15 @@
 
         <!-- <button @click="generateMatches" :disabled="loading">Start</button> -->
 
-        <div class="startLeague-button">
-            <AppButton v-if="isAdmin && league.players?.length > 0 || league.teams?.length > 0" label="Odštartovať ligu"
-                icon="➕" type="create" htmlType="button" :disabled="leagueStarted" @clicked="generateMatches" />
+        <div class="start-finishLeague-button">
+            <AppButton
+                v-if="isAdmin && (league.players?.length > 0 || league.teams?.length > 0) && leagueStatus === 'CREATED'"
+                label="Odštartovať ligu" icon="➕" type="create" htmlType="button" @clicked="generateMatches" />
+        </div>
+
+        <div class="start-finishLeague-button">
+            <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Ukončiť ligu" icon="➕" type="delete"
+                htmlType="button" @clicked="finishLeague" />
         </div>
 
 
@@ -21,13 +27,19 @@
             <!-- 📋 Ľavý stĺpec: hráči alebo tímy -->
             <aside class="players">
 
-                <ParticipantList :title="league.leagueType === 'SINGLES' ? 'Hráči v lige' : 'Tými v lige'"
+                <ParticipantList v-if="hasParticipants"
+                    :title="league.leagueType === 'SINGLES' ? 'Hráči v lige' : 'Tými v lige'"
                     :participants="league.leagueType === 'SINGLES' ? league.players : league.teams"
                     :formatName="league.leagueType === 'SINGLES' ? fullName : formatTeamName"
                     :remove="isAdmin ? removeParticipantFromLeague : null" @view-detail="goToDetail" />
 
-                <AppButton v-if="isAdmin" :label="showAddParticipants ? 'Skryť formulár' : 'Pridať účastníkov do ligy'"
-                    icon="➕" type="create" htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
+
+                <h3 v-else>{{ noParticipantsMessage }}</h3>
+
+
+                <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
+                    :label="showAddParticipants ? 'Skryť formulár' : 'Pridať účastníkov do ligy'" icon="➕" type="create"
+                    htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
 
                 <AddParticipantsForm :show="showAddParticipants"
                     :items="league.leagueType === 'SINGLES' ? freePlayers : freeTeams"
@@ -170,62 +182,55 @@ export default {
     },
 
     methods: {
-        loadInitialData() {
+        async loadInitialData() {
             const leagueId = this.leagueId;
-            this.loading = true
+            this.loading = true;
 
-            Promise.all([
-                axios.get('/api/rest/leagues/' + leagueId),
-                axios.get('/api/rest/players/not-in-any-league'),
-                axios.get('/api/rest/teams/not-in-any-league'),
+            try {
+                const [leagueResponse, playersResponse, teamsResponse] = await Promise.all([
+                    axios.get('/api/rest/leagues/' + leagueId),
+                    axios.get('/api/rest/players/not-in-any-active-league'),
+                    axios.get('/api/rest/teams/not-in-any-active-league'),
+                ]);
 
+                this.league = leagueResponse.data;
+                this.freePlayers = playersResponse.data;
+                this.freeTeams = teamsResponse.data;
 
-            ])
-                .then(([leagueResponse, playersResponse, teamsResponse]) => {
-                    this.league = leagueResponse.data
-                    this.freePlayers = playersResponse.data
-                    this.freeTeams = teamsResponse.data
-                })
-                .then(() => {
-                    this.fetchMatches();
-                    this.fetchStats();
-                })
-                .catch((error) => {
-                    console.error('Chyba pri načítaní údajov:', error);
-                })
-                .finally(() => {
-                    this.loading = false;
-                });
+                await this.fetchMatches();
+                await this.fetchStats();
+
+            } catch (error) {
+                console.error('Chyba pri načítaní údajov:', error);
+            } finally {
+                this.loading = false;
+            }
         },
 
-        addSelectedParticipantsToLeague() {
+        async addSelectedParticipantsToLeague() {
             const leagueId = this.leagueId;
             const payload = {
                 participantIds: this.selectedParticipants
             };
 
-            axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload)
-                .then(() => {
-                    this.loadInitialData()
-                    this.showMessage('✅ Účastníci boli úspešne pridaný do ligy!')
-                    this.selectedParticipants = []
-                })
-                .catch(err => {
-                    console.error('Chyba pri hromadnom pridávaní:', err);
-                });
+            try {
+                await axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload);
+                await this.loadInitialData();
+                this.showMessage('✅ Účastníci boli úspešne pridaní do ligy!');
+                this.selectedParticipants = [];
+            } catch (err) {
+                console.error('Chyba pri hromadnom pridávaní:', err);
+            }
         },
-        removeParticipantFromLeague(id) {
+        async removeParticipantFromLeague(id) {
             const leagueId = this.leagueId;
-            console.log('Mažem participanta z ligy:')
-            axios.delete('/api/rest/leagues/' + leagueId + '/participants/' + id)
-                .then(() => {
-                    this.loadInitialData()
-                    console.log('Participant bol úspešne odstánený z ligy')
-                })
-                .catch(err => {
-                    console.error('Chyba pri mazaní participanta z ligy:', err)
-                })
-
+            try {
+                await axios.delete(`/api/rest/leagues/${leagueId}/participants/${id}`);
+                await this.loadInitialData();
+                console.log('Participant bol úspešne odstránený z ligy');
+            } catch (err) {
+                console.error('Chyba pri mazaní participanta z ligy:', err);
+            }
         },
         goToDetail(id) {
             this.$router.push('/players/' + id)
@@ -240,23 +245,28 @@ export default {
                 console.error('Chyba pri nacitavani zapasov', err);
             }
         },
-        generateMatches() {
-            const leagueId = this.leagueId;
-            axios.patch('/api/rest/matches/' + leagueId + '/generate-matches')
-                .then(() => {
-                    this.showMessage('✅ Zápasy boli úspešne vygenerované')
-                    return axios.get('/api/rest/leagues/' + leagueId);
-                })
-                .then((res) => {
-                    this.league = res.data;
-                    return this.fetchMatches();
-                })
-                .catch((err) => {
-                    if (err.response && err.response.status === 409) {
-                        this.showMessage(err.response.data)
-                    }
-                    console.log('err.response:', err.response.data);
-                });
+        async generateMatches() {
+            this.loading = true;
+
+            try {
+                const leagueId = this.leagueId;
+
+                // Vygenerovanie zápasov
+                await axios.patch(`/api/rest/matches/${leagueId}/generate-matches`);
+                this.showMessage('✅ Zápasy boli úspešne vygenerované');
+
+                await this.loadInitialData();
+
+            } catch (err) {
+                if (err.response && err.response.status === 409) {
+                    this.showMessage(`⚠️ ${err.response.data}`);
+                } else {
+                    this.showMessage('❌ Nastala chyba pri generovaní zápasov.');
+                    console.error('Chyba pri generovaní zápasov:', err);
+                }
+            } finally {
+                this.loading = false;
+            }
         },
         fullName(player) {
             if (!player) return 'Neznámy';
@@ -266,9 +276,17 @@ export default {
             if (!team || !team.player1 || !team.player2) return '';
             return `${this.fullName(team.player1)} a ${this.fullName(team.player2)}`;
         },
-        handleAddParticipants(selectedIds) {
-            this.selectedParticipants = selectedIds
-            this.addSelectedParticipantsToLeague()
+        async handleAddParticipants(selectedIds) {
+            this.loading = true;
+            try {
+                this.selectedParticipants = selectedIds;
+                await this.addSelectedParticipantsToLeague();
+                this.showAddParticipants = false;
+            } catch (error) {
+                console.error('Nepodarilo sa pridať účastníkov:', error);
+            } finally {
+                this.loading = false;
+            }
         },
         toggleForm(matchId) {
             this.activeMatchId = this.activeMatchId === matchId ? null : matchId;
@@ -310,6 +328,31 @@ export default {
                 console.error('Chyba pri načítavaní štatistík', err);
             }
         },
+        async finishLeague() {
+            this.loading = true;
+
+            try {
+                const leagueId = this.leagueId;
+
+                // Ukončenie ligy
+                await axios.patch(`/api/rest/leagues/${leagueId}/finish`);
+                this.showMessage('✅ Liga bola úspešne ukončená');
+
+                await this.loadInitialData();
+
+            } catch (err) {
+                if (err.response && err.response.status === 409) {
+                    // Konflikt
+                    this.showMessage(`⚠️ ${err.response.data}`);
+                } else {
+                    // Neznáma chyba
+                    this.showMessage('❌ Nastala chyba pri ukončovaní ligy.');
+                    console.error('Chyba pri ukončení ligy:', err);
+                }
+            } finally {
+                this.loading = false;
+            }
+        },
         showMessage(msg) {
             this.message = msg;
             setTimeout(() => {
@@ -324,15 +367,27 @@ export default {
         hasMatches() {
             return Object.keys(this.groupedMatches).length > 0;
         },
+        hasParticipants() {
+            if (this.league.leagueType === 'SINGLES') {
+                return this.league.players.length > 0;
+            } else if (this.league.leagueType === 'DOUBLES') {
+                return this.league.teams.length > 0;
+            }
+            return false;
+        },
+        noParticipantsMessage() {
+            return this.league.leagueType === 'SINGLES'
+                ? 'Liga nemá žiadnych hráčov.'
+                : 'Liga nemá žiadne tímy.';
+        },
         allRoundNumbers() {
             return Object.keys(this.groupedMatches);
         },
         areAnyRoundsOpened() {
             return this.openedRounds.length > 0;
         },
-        leagueStarted() {
-            // Liga je spustená, ak status NIE JE 'CREATED'
-            return this.league.status !== 'CREATED';
+        leagueStatus() {
+            return this.league.status;
         },
         userStore() {
             return useUserStore()
@@ -375,11 +430,13 @@ export default {
     flex: 2 1 350px;
     padding: 1rem;
 }
+
 .match-item {
     list-style: none;
     padding: 12px 0;
     border-bottom: 1px solid #ddd;
 }
+
 .match-item:last-child {
     border-bottom: none;
 }
@@ -409,7 +466,7 @@ export default {
     color: whitesmoke;
 }
 
-.startLeague-button {
+.start-finishLeague-button {
     display: flex;
     justify-content: center;
 }

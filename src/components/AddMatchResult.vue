@@ -37,7 +37,9 @@
 <template>
     <div v-if="match">
         <div class="scratched">
-            <label>Skrečovaný hráč:</label>
+            <label>
+                {{ leagueType === 'SINGLES' ? 'Skrečovaný hráč: ' : 'Skrečovaný tím: ' }}
+            </label>
             <select v-model="formData.scratchedId">
                 <option value="">-- vyberte hráča alebo tím --</option>
 
