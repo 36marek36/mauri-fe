@@ -82,11 +82,24 @@
                                         <span v-if="match.result?.setScores?.length">
                                             (
                                             <span v-for="(set, index) in match.result.setScores" :key="index">
-                                                {{ set.score1 }}:{{ set.score2 }}<span
-                                                    v-if="index < match.result.setScores.length - 1">, </span>
+                                                {{ set.score1 }}:{{ set.score2 }}
+                                                <span v-if="index < match.result.setScores.length - 1">, </span>
                                             </span>
                                             )
                                         </span>
+                                        <!-- 🔧 Admin môže upraviť výsledok -->
+                                        <div v-if="isAdmin && leagueStatus === 'ACTIVE'">
+                                            <AppButton
+                                                :label="activeMatchId === match.id ? 'Zavrieť úpravu' : 'Upraviť výsledok'"
+                                                :type="activeMatchId === match.id ? 'delete' : 'default'"
+                                                htmlType="button" icon="✏️" @clicked="toggleForm(match.id)" />
+                                            <AddMatchResult v-if="activeMatchId === match.id" :match="match"
+                                                :leagueType="league.leagueType"
+                                                @result-submitted="fetchMatchesAndClose" />
+                                        </div>
+                                        <!-- Tlačidlo pre admina na zrušenie výsledku -->
+                                        <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Zrušiť výsledok" icon="❌" type="delete"
+                                            htmlType="button" @clicked="cancelMatchResult(match.id)" :disabled="activeMatchId === match.id" />
                                     </div>
                                 </div>
                             </li>
@@ -364,7 +377,21 @@ export default {
             }
 
             return false;
-        }
+        },
+        async cancelMatchResult(matchId) {
+            this.loading = true;
+            try {
+                // Predpokladám, že máš endpoint na zrušenie výsledku zápasu
+                await axios.patch(`/api/rest/matches/${matchId}/cancel-result`);
+                this.showMessage('✅ Výsledok zápasu bol zrušený');
+                await this.loadInitialData();
+            } catch (error) {
+                console.error('Chyba pri rušení výsledku:', error);
+                this.showMessage('❌ Nepodarilo sa zrušiť výsledok.');
+            } finally {
+                this.loading = false;
+            }
+        },
     },
     computed: {
         leagueId() {
