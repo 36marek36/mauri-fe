@@ -10,8 +10,8 @@
         <div v-if="showCreateLeagueForm">
             <input v-model="newLeague.name" placeholder="Názov ligy" />
             <select v-model="newLeague.leagueType">
-                <option value="SINGLES">SINGLES</option>
-                <option value="DOUBLES">DOUBLES</option>
+                <option value="SINGLES">DVOJ-HRA</option>
+                <option value="DOUBLES">ŠTVOR-HRA</option>
             </select>
 
             <AppButton label="Vytvoriť" type="create" htmlType="button" icon="➕" @clicked="createLeague" />

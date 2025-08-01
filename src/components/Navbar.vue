@@ -33,6 +33,9 @@
             <AppButton label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" />
           </li>
           <li>
+            <AppButton label="Zmeniť heslo" type="default" @clicked="goToChangePassword" />
+          </li>
+          <li>
             <AppButton label="Odhlásiť sa" type="delete" @clicked="logout" />
           </li>
         </ul>
@@ -95,6 +98,10 @@ export default {
       this.closeDropdown()
       this.userStore.logout()
       this.$router.push({ path: '/login', query: { message: 'logout' } })
+    },
+    goToChangePassword() {
+      this.closeDropdown()
+      this.$router.push('/change-password')
     }
   },
   components: { AppButton }

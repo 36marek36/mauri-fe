@@ -19,7 +19,7 @@ const router = createRouter({
       name: 'teams',
       component: () => import('../views/TeamsView.vue'),
     },
-     {
+    {
       path: '/users',
       name: 'users',
       component: () => import('../views/UsersView.vue'),
@@ -27,25 +27,29 @@ const router = createRouter({
     {
       path: '/participants',
       name: 'participants',
-      component:() => import('../views/ParticipantsView.vue')
+      component: () => import('../views/ParticipantsView.vue')
     },
-
-           {
+    {
       path: '/players/:id',
       name: 'playerDetail',
       component: () => import('../views/PlayerDetailView.vue'),
     },
-            {
+    {
+      path: '/teams/:id',
+      name: 'teamDetail',
+      component: () => import('../views/TeamDetailView.vue'),
+    },
+    {
       path: '/players/create',
       name: 'newPlayer',
       component: () => import('../views/PlayerFormView.vue'),
     },
-     {
+    {
       path: '/seasons',
       name: 'seasons',
       component: () => import('../views/SeasonsView.vue'),
     },
-      {
+    {
       path: '/seasons/:id',
       name: 'seasonDetail',
       component: () => import('../views/SeasonDetailView.vue'),
@@ -55,7 +59,7 @@ const router = createRouter({
       name: 'leagues',
       component: () => import('../views/LeaguesView.vue'),
     },
-     {
+    {
       path: '/leagues/:id',
       name: 'leagueDetail',
       component: () => import('../views/LeagueDetailView.vue'),
@@ -64,6 +68,12 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('../views/LoginView.vue'),
+    },
+    {
+      path: '/change-password',
+      name: 'ChangePassword',
+      component: () => import('../views/ChangePassword.vue'),
+      meta: { requiresAuth: true }
     }
   ],
 })

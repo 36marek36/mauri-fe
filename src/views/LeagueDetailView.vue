@@ -26,7 +26,8 @@
                 <ParticipantList v-if="hasParticipants" :title="isSingles ? 'Hráči v lige' : 'Tímy v lige'"
                     :participants="isSingles ? league.players : league.teams"
                     :formatName="isSingles ? fullName : formatTeamName"
-                    :remove="isAdmin ? removeParticipantFromLeague : null" @view-detail="goToDetail" />
+                    :remove="isAdmin ? removeParticipantFromLeague : null" 
+                    @view-detail="(participantId) => isSingles ? goToPlayerDetail(participantId) : goToTeamDetail(participantId)" />
                 <h3 v-else>{{ noParticipantsMessage }}</h3>
 
                 <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
@@ -233,8 +234,11 @@ export default {
                 console.error('Chyba pri mazaní participanta z ligy:', err);
             }
         },
-        goToDetail(id) {
+        goToPlayerDetail(id) {
             this.$router.push('/players/' + id)
+        },
+        goToTeamDetail(id) {
+            this.$router.push('/teams/' + id)
         },
         async fetchMatches() {
             const leagueId = this.leagueId
@@ -381,7 +385,6 @@ export default {
         async cancelMatchResult(matchId) {
             this.loading = true;
             try {
-                // Predpokladám, že máš endpoint na zrušenie výsledku zápasu
                 await axios.patch(`/api/rest/matches/${matchId}/cancel-result`);
                 this.showMessage('✅ Výsledok zápasu bol zrušený');
                 await this.loadInitialData();
