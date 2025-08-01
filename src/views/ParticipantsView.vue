@@ -20,7 +20,7 @@
 
             <div v-else>
                 <ParticipantList :participants="players" :formatName="formatPlayerName"
-                    :remove="isAdmin ? deletePlayer : null" @view-detail="goToDetail" />
+                    :remove="isAdmin ? deletePlayer : null" @view-detail="(id) => goToDetail('players', id)" />
             </div>
         </div>
 
@@ -63,7 +63,7 @@
 
                 <div v-else>
                     <ParticipantList :participants="teams" :formatName="formatTeamName"
-                        :remove="isAdmin ? deleteTeam : null" />
+                        :remove="isAdmin ? deleteTeam : null" @view-detail="(id) => goToDetail('teams', id)" />
                 </div>
             </div>
         </div>
@@ -123,8 +123,12 @@ export default {
                     this.loadingTeams = false;
                 });
         },
-        goToDetail(id) {
-            this.$router.push('/players/' + id)
+        goToDetail(type, id) {
+            if (!this.isLoggedIn) {
+                alert("Musíte sa prihlásiť.");
+                return;
+            }
+            this.$router.push(`/${type}/${id}`);
         },
         deletePlayer(id) {
             if (confirm('Naozaj chceš vymazať tohto hráča?')) {
@@ -194,6 +198,9 @@ export default {
         },
         isAdmin() {
             return this.userStore.isAdmin
+        },
+        isLoggedIn() {
+            return this.userStore.isLoggedIn
         }
     },
     components: { AppButton, ParticipantList, AppHeader }

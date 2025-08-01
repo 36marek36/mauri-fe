@@ -4,12 +4,6 @@
       <li>
         <RouterLink to="/">Domov</RouterLink>
       </li>
-      <li>
-        <RouterLink to="/players">Hráči</RouterLink>
-      </li>
-      <li>
-        <RouterLink to="/teams">Tímy</RouterLink>
-      </li>
       <li v-if="isAdmin">
         <RouterLink to="/users">Users</RouterLink>
       </li>

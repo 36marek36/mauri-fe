@@ -22,12 +22,12 @@
         <main v-else class="main-flex-layout">
 
             <!-- 🎽 Účastníci -->
-            <aside class="players">
+            <aside class="participants">
                 <ParticipantList v-if="hasParticipants" :title="isSingles ? 'Hráči v lige' : 'Tímy v lige'"
                     :participants="isSingles ? league.players : league.teams"
                     :formatName="isSingles ? fullName : formatTeamName"
-                    :remove="isAdmin ? removeParticipantFromLeague : null" 
-                    @view-detail="(participantId) => isSingles ? goToPlayerDetail(participantId) : goToTeamDetail(participantId)" />
+                    :remove="isAdmin ? removeParticipantFromLeague : null"
+                    @view-detail="(participantId) => isSingles ?  goToDetail('players', participantId) :  goToDetail('teams', participantId)" />
                 <h3 v-else>{{ noParticipantsMessage }}</h3>
 
                 <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
@@ -99,8 +99,10 @@
                                                 @result-submitted="fetchMatchesAndClose" />
                                         </div>
                                         <!-- Tlačidlo pre admina na zrušenie výsledku -->
-                                        <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Zrušiť výsledok" icon="❌" type="delete"
-                                            htmlType="button" @clicked="cancelMatchResult(match.id)" :disabled="activeMatchId === match.id" />
+                                        <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Zrušiť výsledok"
+                                            icon="❌" type="delete" htmlType="button"
+                                            @clicked="cancelMatchResult(match.id)"
+                                            :disabled="activeMatchId === match.id" />
                                     </div>
                                 </div>
                             </li>
@@ -234,11 +236,12 @@ export default {
                 console.error('Chyba pri mazaní participanta z ligy:', err);
             }
         },
-        goToPlayerDetail(id) {
-            this.$router.push('/players/' + id)
-        },
-        goToTeamDetail(id) {
-            this.$router.push('/teams/' + id)
+        goToDetail(type, id) {
+            if (!this.isLoggedIn) {
+                alert("Musíte sa prihlásiť.");
+                return;
+            }
+            this.$router.push(`/${type}/${id}`);
         },
         async fetchMatches() {
             const leagueId = this.leagueId
@@ -433,6 +436,9 @@ export default {
         },
         isAdmin() {
             return this.userStore.isAdmin;
+        },
+        isLoggedIn() {
+            return this.userStore.isLoggedIn
         }
     },
     components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader }
@@ -458,8 +464,8 @@ export default {
     flex-wrap: wrap;
 }
 
-/* 🧍‍♂️ Hráči */
-.players {
+/* 🧍‍♂️ Účastníci */
+.participants {
     flex: 1 1 220px;
     padding: 1rem;
 }
