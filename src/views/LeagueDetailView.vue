@@ -27,14 +27,14 @@
                     :participants="isSingles ? league.players : league.teams"
                     :formatName="isSingles ? fullName : formatTeamName"
                     :remove="isAdmin ? removeParticipantFromLeague : null"
-                    @view-detail="(participantId) => isSingles ?  goToDetail('players', participantId) :  goToDetail('teams', participantId)" />
+                    @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
                 <h3 v-else>{{ noParticipantsMessage }}</h3>
 
                 <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
                     :label="showAddParticipants ? 'Skryť formulár' : 'Pridať účastníkov do ligy'" icon="➕" type="create"
                     htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
 
-                <AddParticipantsForm :show="showAddParticipants" :items="isSingles ? freePlayers : freeTeams"
+                <AddParticipantsForm v-if="isAdmin" :show="showAddParticipants" :items="isSingles ? freePlayers : freeTeams"
                     :formatName="isSingles ? fullName : formatTeamName"
                     :title="isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
                     :submitLabel="isSingles ? 'Pridať hráčov' : 'Pridať tímy'" @submit="handleAddParticipants" />
@@ -202,13 +202,26 @@ export default {
         },
 
         async fetchFreeParticipants() {
-            const [playersRes, teamsRes] = await Promise.all([
-                axios.get('/api/rest/players/not-in-any-active-league'),
-                axios.get('/api/rest/teams/not-in-any-active-league')
-            ]);
+            if (!this.isAdmin) {
+                // Nepokúšaj sa volať chránené endpointy, vyčisti zoznamy
+                this.freePlayers = [];
+                this.freeTeams = [];
+                return;
+            }
 
-            this.freePlayers = playersRes.data;
-            this.freeTeams = teamsRes.data;
+            try {
+                const [playersRes, teamsRes] = await Promise.all([
+                    axios.get('/api/rest/players/not-in-any-active-league'),
+                    axios.get('/api/rest/teams/not-in-any-active-league')
+                ]);
+
+                this.freePlayers = playersRes.data;
+                this.freeTeams = teamsRes.data;
+            } catch (error) {
+                console.error('Chyba pri načítaní voľných účastníkov:', error);
+                this.freePlayers = [];
+                this.freeTeams = [];
+            }
         },
 
         async addSelectedParticipantsToLeague() {

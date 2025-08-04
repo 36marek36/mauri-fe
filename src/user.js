@@ -28,13 +28,6 @@ export const useUserStore = defineStore('user', {
                 this.error = null
                 // console.log('User fetched:', this.user)
             } catch (err) {
-                // 🔽 Ak token expiroval alebo nie je platný
-                if (err.response?.status === 401) {
-                    localStorage.removeItem('jwt')
-                    delete axios.defaults.headers.common['Authorization']
-                    console.warn('Token expiroval alebo nie je platný – odstránený z localStorage')
-                }
-
                 this.user = null
                 this.error = err.response?.data?.message || 'Chyba pri načítaní používateľa'
             } finally {
