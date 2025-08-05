@@ -10,33 +10,45 @@
         <div v-if="showCreateLeagueForm">
             <input v-model="newLeague.name" placeholder="Názov ligy" />
             <select v-model="newLeague.leagueType">
-                <option value="SINGLES">DVOJ-HRA</option>
-                <option value="DOUBLES">ŠTVOR-HRA</option>
+                <option value="SINGLES">DVOJHRA</option>
+                <option value="DOUBLES">ŠTVORHRA</option>
             </select>
 
             <AppButton label="Vytvoriť" type="create" htmlType="button" icon="➕" @clicked="createLeague" />
 
         </div>
 
-        <ul v-if="hasLeagues">
-            <li v-for="league in season.leagues" :key="league.id" @click="this.$router.push('/leagues/' + league.id)">
-                <span>
-                    {{ league.name }} {{ league.leagueType }}
-                </span>
-            </li>
-        </ul>
+        <table v-if="hasLeagues" class="league-table">
+            <thead>
+                <tr>
+                    <th>Názov ligy</th>
+                    <th>Typ ligy</th>
+                    <th>Status</th>
+                    <th>Progres</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="league in season.leagues" :key="league.id" @click="$router.push('/leagues/' + league.id)"
+                    style="cursor: pointer;">
+                    <td>{{ league.name }}</td>
+                    <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
+                    <td>{{ league.status }}</td>
+                    <td>
+                        <span>{{ league.progress }}%</span>
+                        <div class="league-progress-bar">
+                            <div class="league-progress-fill" :style="{ width: league.progress + '%' }"></div>
+                        </div>
+                    </td>
+                    <td>
+                        <AppButton v-if="isAdmin" label="Zmazať" icon="🗑️" type="delete" htmlType="button"
+                            @clicked="() => deleteLeague(league.id)" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
         <p v-else>Sezóna neobsahuje žiadne ligy.</p>
-    </div>
 
-    <div v-if="isAdmin">
-        <h3>Všetky dostupné ligy</h3>
-        <ul>
-            <li v-for="league in noSeasonLeagues" :key="league.id">
-                {{ league.name }}
-                <button @click="addLeagueToSeason(league.id)">Pridať do sezóny</button>
-            </li>
-        </ul>
     </div>
 
 </template>
@@ -53,7 +65,7 @@ export default {
     data() {
         return {
             season: {},
-            noSeasonLeagues: [],
+            seasonId: null,
             showCreateLeagueForm: false,
             newLeague: {
                 name: '',
@@ -64,37 +76,32 @@ export default {
         }
     },
     created() {
-        const seasonId = this.$route.params.id;
-        this.fetchSeason(seasonId);
-        this.fetchNoSeasonLeagues();
+        this.seasonId = this.$route.params.id;
+        this.fetchSeason(this.seasonId);
     },
 
     methods: {
+        async fetchSeason(seasonId) {
+            try {
+                const response = await axios.get('/api/rest/seasons/' + seasonId);
+                const season = response.data;
 
-        fetchSeason(seasonId) {
-            axios.get('/api/rest/seasons/' + seasonId)
-                .then((response) => {
-                    this.season = response.data
-                    this.loading = false
-                })
-                .catch((err) => {
-                    console.error('Chyba pri nacitavani sezony', err)
-                })
+                for (const league of season.leagues) {
+                    league.progress = await this.fetchLeagueProgress(league.id)
+                }
+
+                this.season = season;
+                this.loading = false;
+            } catch (err) {
+                console.error('Chyba pri načítavaní sezóny:', err);
+                this.loading = false;
+            }
         },
 
-        fetchNoSeasonLeagues() {
-            axios.get('/api/rest/leagues/no-season')
-                .then(res => {
-                    this.noSeasonLeagues = res.data;
-                })
-                .catch((err) => {
-                    console.error('Chyba pri nacitavani lig', err)
-                })
-        },
         async createLeague() {
             try {
                 const res = await axios.post('/api/rest/leagues/create', this.newLeague);
-                this.addLeagueToSeason(res.data.id)
+                await this.addLeagueToSeason(res.data.id)
                 console.log('Liga: ' + res.data.name + ' bola úspešne vytvorená.')
                 this.showCreateLeagueForm = false;
                 this.newLeague = { name: '', leagueType: 'SINGLES', seasonId: '' };
@@ -103,24 +110,44 @@ export default {
             }
         },
         toggleCreateForm() {
-
             this.showCreateLeagueForm = !this.showCreateLeagueForm
         },
-
-        addLeagueToSeason(leagueId) {
-            const seasonId = this.$route.params.id;
-            axios.patch('/api/rest/seasons/' + seasonId + '/addLeague', {
-                leagueId: leagueId
-            })
-                .then(() => {
-                    console.log('Liga bola pridaná do sezóny.')
-                    this.fetchSeason(seasonId); // znovu načítaj sezónu
-                    this.fetchNoSeasonLeagues();
-                })
-                .catch(err => {
-                    console.error('Chyba pri priraďovaní ligy:', err);
+        async addLeagueToSeason(leagueId) {
+            try {
+                await axios.patch('/api/rest/seasons/' + this.seasonId + '/addLeague', {
+                    leagueId: leagueId
                 });
-        }
+                console.log('Liga bola pridaná do sezóny.');
+                await this.fetchSeason(this.seasonId);
+            } catch (err) {
+                console.error('Chyba pri priraďovaní ligy:', err);
+            }
+        },
+
+        async fetchLeagueProgress(leagueId) {
+            try {
+                const response = await axios.get(`/api/rest/leagues/${leagueId}/progress`);
+                return response.data;
+            } catch (error) {
+                console.error('Chyba pri načítaní progressu:', error);
+                return 0;
+            }
+        },
+        async deleteLeague(leagueId) {
+            if (!confirm('Naozaj chcete zmazať túto ligu?')) {
+                return;  // používateľ stlačil Zrušiť, metóda sa ukončí
+            }
+
+            try {
+                console.log('Mažem ligu s ID:', leagueId);
+                await axios.delete('/api/rest/leagues/' + leagueId);
+                await this.fetchSeason(this.seasonId);
+                console.log('Liga bola úspešne zmazaná.');
+                alert('Liga bola vymazaná.')
+            } catch (err) {
+                console.error('Chyba pri mazaní ligy:', err);
+            }
+        },
     },
     computed: {
         userStore() {
@@ -131,6 +158,12 @@ export default {
         },
         hasLeagues() {
             return this.season.leagues.length > 0;
+        },
+        leagueTypeLabels() {
+            return {
+                SINGLES: 'DVOJHRA',
+                DOUBLES: 'ŠTVORHRA',
+            };
         }
     },
     components: { AppButton, AppHeader }
@@ -139,13 +172,40 @@ export default {
 </script>
 
 <style scoped>
-ul {
-    list-style-type: none;
-    display: flex;
+.league-table {
+    width: 50%;
+    border-collapse: collapse;
 }
 
-li {
-    padding: .3em .6em;
-    cursor: pointer;
+.league-table th,
+.league-table td {
+    border-bottom: 1px solid #eee;
+    padding: 0.5rem;
+    text-align: left;
+
+}
+
+.league-table th {
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: whitesmoke;
+}
+
+.league-table tbody tr:hover {
+    background-color: #363537;
+}
+
+.league-progress-bar {
+    height: 8px;
+    width: 200px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.league-progress-fill {
+    height: 100%;
+    background-color: #FFCC00;
+    transition: width 0.3sease-in-out;
 }
 </style>

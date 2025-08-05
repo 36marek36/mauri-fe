@@ -11,7 +11,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="user in users" :key="user.username">
+                <tr v-for="user in users" :key="user.id">
                     <td>{{ user.username }}</td>
                     <td>{{ user.role }}</td>
                     <td>
@@ -19,6 +19,10 @@
                             {{ user.player.firstName }} {{ user.player.lastName }}
                         </RouterLink>
                         <span v-else>Užívateľ nemá svojho hráča</span>
+                    </td>
+                    <td>
+                        <AppButton v-if="user.role==='USER'" label="Vymazat" icon="🗑️" type="delete" html-type="button"
+                            @clicked="() => deleteUser(user.id)" />
                     </td>
                 </tr>
             </tbody>
@@ -31,6 +35,7 @@
 <script>
 import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
+import AppButton from '@/components/AppButton.vue';
 
 export default {
     name: 'UsersView',
@@ -52,12 +57,25 @@ export default {
                     this.loading = false
                 })
                 .catch((error) => {
-                    console.error('Chyba pri načítaní userov:', error)
+                    console.error('Chyba pri načítaní používatelov:', error)
                     this.loading = false
                 })
+        },
+        deleteUser(userId) {
+            if (confirm('Naozaj chceš vymazať tohto používatela?')) {
+                axios.delete('/api/rest/users/' + userId)
+                    .then(() => {
+                        alert('Používatel bol vymazaný.')
+                        this.fetchUsers()
+                    })
+                    .catch((error) => {
+                        alert('Nepodarilo sa vymazať používatela.')
+                        console.error('Chyba pri mazaní používatela:', error);
+                    })
+            }
         }
     },
-    components: { AppHeader }
+    components: { AppHeader, AppButton }
 }
 
 </script>
@@ -74,5 +92,4 @@ export default {
     padding: 8px;
     text-align: left;
 }
-
 </style>
