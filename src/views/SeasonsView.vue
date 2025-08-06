@@ -23,11 +23,12 @@
                 Sezóna {{ season.year }}
 
                 <AppButton v-if="isAdmin" label="Zmazať" icon="🗑️" type="delete" htmlType="button"
-                    @clicked="() => deleteSeason(season.id)" />
+                    @clicked="() => confirmDeleteSeason(season)" />
             </li>
         </ul>
     </div>
-
+    <ConfirmModal :visible="showConfirmModal" :message="`Naozaj chcete zmazať sezónu: ${season?.year}?`"
+        @confirm="deleteSeason" @cancel="cancelDelete" />
 </template>
 
 <script>
@@ -35,6 +36,7 @@ import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 
 
 export default {
@@ -46,6 +48,8 @@ export default {
             newSeason: {
                 year: ''
             },
+            showConfirmModal: false,
+            season: null,
             loading: true
         }
     },
@@ -79,17 +83,24 @@ export default {
                 console.error('Chyba pri vytváraní sezóny:', err);
             }
         },
-        deleteSeason(id) {
-            console.log('Mažem sezónu s ID:', id)
-            axios.delete('/api/rest/seasons/' + id)
-                .then(() => {
-                    this.fetchSeasons()
-                    console.log('Sezóna bola úspešne zmazaná.')
-                })
-                .catch(err => {
-                    console.error('Chyba pri mazaní sezóny:', err)
-                })
-
+        async deleteSeason() {
+            try {
+                await axios.delete('/api/rest/seasons/' + this.season?.id);
+                this.fetchSeasons();
+                console.log('Sezóna bola úspešne zmazaná.');
+            } catch (err) {
+                console.error('Chyba pri mazaní sezóny:', err);
+            } finally {
+                this.cancelDelete();
+            }
+        },
+        confirmDeleteSeason(season) {
+            this.season = season;
+            this.showConfirmModal = true;
+        },
+        cancelDelete() {
+            this.season = null;
+            this.showConfirmModal = false;
         }
     },
     computed: {
@@ -100,7 +111,7 @@ export default {
             return this.userStore.isAdmin
         }
     },
-    components: { AppButton, AppHeader }
+    components: { AppButton, AppHeader,ConfirmModal }
 }
 </script>
 

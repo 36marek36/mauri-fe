@@ -11,9 +11,6 @@
         <RouterLink to="/participants">Hráči/Tímy</RouterLink>
       </li>
       <li>
-        <RouterLink to="/leagues">Ligy</RouterLink>
-      </li>
-      <li>
         <RouterLink to="/seasons">Sezóny</RouterLink>
       </li>
 

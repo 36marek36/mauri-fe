@@ -20,7 +20,8 @@
 
             <div v-else>
                 <ParticipantList :participants="players" :formatName="formatPlayerName"
-                    :remove="isAdmin ? deletePlayer : null" @view-detail="(id) => goToDetail('players', id)" />
+                    :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
+                    @view-detail="(id) => goToDetail('players', id)" />
             </div>
         </div>
 
@@ -63,11 +64,15 @@
 
                 <div v-else>
                     <ParticipantList :participants="teams" :formatName="formatTeamName"
-                        :remove="isAdmin ? deleteTeam : null" @view-detail="(id) => goToDetail('teams', id)" />
+                        :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
+                        @view-detail="(id) => goToDetail('teams', id)" />
                 </div>
             </div>
         </div>
     </div>
+    <ConfirmModal :visible="showConfirmModal"
+        :message="`Naozaj chcete zmazať ${participant?.type === 'players' ? 'hráča' : 'tím'}: ${participant?.name}?`"
+        @confirm="deleteParticipant" @cancel="cancelDelete" />
 </template>
 
 <script>
@@ -76,6 +81,7 @@ import ParticipantList from '@/components/ParticipantList.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import { useUserStore } from '@/user'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 
 export default {
     name: 'ParticipantsView',
@@ -89,7 +95,9 @@ export default {
             newTeam: {
                 player1Id: '',
                 player2Id: ''
-            }
+            },
+            showConfirmModal: false,
+            participant: null
         }
 
     },
@@ -100,6 +108,7 @@ export default {
     methods: {
 
         fetchPlayers() {
+            this.loadingPlayers = true;
             axios.get('/api/rest/players/')
                 .then((response) => {
                     this.players = response.data;
@@ -112,6 +121,7 @@ export default {
                 });
         },
         fetchTeams() {
+            this.loadingTeams = true;
             axios.get('/api/rest/teams/')
                 .then((response) => {
                     this.teams = response.data;
@@ -130,24 +140,8 @@ export default {
             }
             this.$router.push(`/${type}/${id}`);
         },
-        deletePlayer(id) {
-            if (confirm('Naozaj chceš vymazať tohto hráča?')) {
-                axios.delete('/api/rest/players/' + id)
-                    .then(() => {
-                        alert('Hráč bol vymazaný.');
-                        this.fetchPlayers()
-                    })
-                    .catch((error) => {
-                        alert('Nepodarilo sa vymazať hráča.');
-                        console.error('Chyba pri mazaní hráča:', error);
-                    });
-            }
-        },
         addPlayer() {
             this.$router.push('/players/create')
-        },
-        formatPlayerName(player) {
-            return player.firstName + ' ' + player.lastName
         },
         toggleCreateForm() {
             this.showCreateTeamForm = !this.showCreateTeamForm
@@ -174,18 +168,42 @@ export default {
                 console.error('Chyba pri vytváraní tímu:', error);
             }
         },
-        deleteTeam(id) {
-            if (confirm('Naozaj chceš vymazať tento tým?')) {
-                axios.delete('/api/rest/teams/' + id)
-                    .then(() => {
-                        alert('Tým bol vymazaný.');
-                        this.fetchTeams()
-                    })
-                    .catch((error) => {
-                        alert('Nepodarilo sa vymazať tým.');
-                        console.error('Chyba pri mazaní týmu:', error);
-                    });
+        async deleteParticipant() {
+            try {
+                await axios.delete('/api/rest/' + this.participant.type + '/' + this.participant.id);
+                console.log(`${this.participant.type.slice(0, -1)} bol vymazaný.`);
+
+                if (this.participant.type === 'teams') {
+                    this.fetchTeams();
+                } else if (this.participant.type === 'players') {
+                    this.fetchPlayers();
+                }
+            } catch (err) {
+                console.error(`Chyba pri mazaní ${this.participant.type.slice(0, -1)}a:`, err);
+            } finally {
+                this.cancelDelete();
             }
+        },
+        confirmDeleteParticipant(type, id) {
+            let name = '';
+
+            if (type === 'players') {
+                const player = this.players.find(p => p.id === id);
+                name = player ? this.formatPlayerName(player) : '';
+            } else if (type === 'teams') {
+                const team = this.teams.find(t => t.id === id);
+                name = team ? this.formatTeamName(team) : '';
+            }
+
+            this.participant = { id, type, name };
+            this.showConfirmModal = true;
+        },
+        cancelDelete() {
+            this.participant = null;
+            this.showConfirmModal = false;
+        },
+        formatPlayerName(player) {
+            return player.firstName + ' ' + player.lastName
         },
         formatTeamName(team) {
             if (!team || !team.player1 || !team.player2) return '';
@@ -203,7 +221,7 @@ export default {
             return this.userStore.isLoggedIn
         }
     },
-    components: { AppButton, ParticipantList, AppHeader }
+    components: { AppButton, ParticipantList, AppHeader, ConfirmModal }
 }
 
 </script>

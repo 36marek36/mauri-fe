@@ -21,8 +21,8 @@
                         <span v-else>Užívateľ nemá svojho hráča</span>
                     </td>
                     <td>
-                        <AppButton v-if="user.role==='USER'" label="Vymazat" icon="🗑️" type="delete" html-type="button"
-                            @clicked="() => deleteUser(user.id)" />
+                        <AppButton v-if="user.role === 'USER'" label="Vymazat" icon="🗑️" type="delete"
+                            htmltype="button" @clicked="() => confirmDeleteUser(user)" />
                     </td>
                 </tr>
             </tbody>
@@ -30,18 +30,24 @@
     </div>
 
     <div v-else>Načítavam používateľov...</div>
+
+    <ConfirmModal :visible="showConfirmModal" :message="`Naozaj chcete zmazať používateľa: ${user?.username}?`"
+        @confirm="deleteUser" @cancel="cancelDelete" />
 </template>
 
 <script>
 import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 
 export default {
     name: 'UsersView',
     data() {
         return {
             users: [],
+            showConfirmModal: false,
+            user: null,
             loading: true
         }
     },
@@ -61,21 +67,27 @@ export default {
                     this.loading = false
                 })
         },
-        deleteUser(userId) {
-            if (confirm('Naozaj chceš vymazať tohto používatela?')) {
-                axios.delete('/api/rest/users/' + userId)
-                    .then(() => {
-                        alert('Používatel bol vymazaný.')
-                        this.fetchUsers()
-                    })
-                    .catch((error) => {
-                        alert('Nepodarilo sa vymazať používatela.')
-                        console.error('Chyba pri mazaní používatela:', error);
-                    })
+        async deleteUser() {
+            try {
+                await axios.delete('/api/rest/users/' + this.user?.id);
+                this.fetchUsers();
+                console.log('Používatel vymazaný.');
+            } catch (err) {
+                console.error('Chyba pri mazaní používateľa:', err);
+            } finally {
+                this.cancelDelete();
             }
+        },
+        confirmDeleteUser(user) {
+            this.user = user;
+            this.showConfirmModal = true;
+        },
+        cancelDelete() {
+            this.user = null;
+            this.showConfirmModal = false;
         }
     },
-    components: { AppHeader, AppButton }
+    components: { AppHeader, AppButton, ConfirmModal }
 }
 
 </script>

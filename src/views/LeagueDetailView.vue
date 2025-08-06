@@ -26,7 +26,7 @@
                 <ParticipantList v-if="hasParticipants" :title="isSingles ? 'Hráči v lige' : 'Tímy v lige'"
                     :participants="isSingles ? league.players : league.teams"
                     :formatName="isSingles ? fullName : formatTeamName"
-                    :remove="isAdmin ? removeParticipantFromLeague : null"
+                    :remove="isAdmin ? (id => confirmDeleteParticipant(isSingles ? 'players' : 'teams', id)) : null"
                     @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
                 <h3 v-else>{{ noParticipantsMessage }}</h3>
 
@@ -34,8 +34,8 @@
                     :label="showAddParticipants ? 'Skryť formulár' : 'Pridať účastníkov do ligy'" icon="➕" type="create"
                     htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
 
-                <AddParticipantsForm v-if="isAdmin" :show="showAddParticipants" :items="isSingles ? freePlayers : freeTeams"
-                    :formatName="isSingles ? fullName : formatTeamName"
+                <AddParticipantsForm v-if="isAdmin" :show="showAddParticipants"
+                    :items="isSingles ? freePlayers : freeTeams" :formatName="isSingles ? fullName : formatTeamName"
                     :title="isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
                     :submitLabel="isSingles ? 'Pridať hráčov' : 'Pridať tímy'" @submit="handleAddParticipants" />
             </aside>
@@ -148,6 +148,9 @@
             </aside>
         </main>
     </div>
+    <ConfirmModal :visible="showConfirmModal"
+        :message="`Naozaj chcete odstrániť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy?`"
+        @confirm="() => removeParticipantFromLeague(participant?.id)" @cancel="cancelDelete" />
 </template>
 
 
@@ -159,6 +162,7 @@ import ParticipantList from '@/components/ParticipantList.vue';
 import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 
 
 export default {
@@ -175,7 +179,10 @@ export default {
             activeMatchId: null,
             openedRounds: [],
             loading: true,
-            showAddParticipants: false
+            showAddParticipants: false,
+            showConfirmModal: false,
+            participant: null,
+
         }
     },
     created() {
@@ -247,6 +254,8 @@ export default {
                 console.log('Participant bol úspešne odstránený z ligy');
             } catch (err) {
                 console.error('Chyba pri mazaní participanta z ligy:', err);
+            } finally {
+                this.cancelDelete();
             }
         },
         goToDetail(type, id) {
@@ -288,6 +297,24 @@ export default {
             } finally {
                 this.loading = false;
             }
+        },
+        confirmDeleteParticipant(type, id) {
+            let name = '';
+
+            if (type === 'players') {
+                const player = this.league.players.find(p => p.id === id);
+                name = player ? this.fullName(player) : '';
+            } else if (type === 'teams') {
+                const team = this.league.teams.find(t => t.id === id);
+                name = team ? this.formatTeamName(team) : '';
+            }
+
+            this.participant = { id, type, name };
+            this.showConfirmModal = true;
+        },
+        cancelDelete() {
+            this.participant = null;
+            this.showConfirmModal = false;
         },
         fullName(player) {
             if (!player) return 'Neznámy';
@@ -454,7 +481,7 @@ export default {
             return this.userStore.isLoggedIn
         }
     },
-    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader }
+    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader, ConfirmModal }
 }
 
 </script>

@@ -25,6 +25,7 @@
                     <th>Typ ligy</th>
                     <th>Status</th>
                     <th>Progres</th>
+                    <th>Účasť</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,7 +33,7 @@
                     style="cursor: pointer;">
                     <td>{{ league.name }}</td>
                     <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
-                    <td>{{ league.status }}</td>
+                    <td>{{ leagueStatusLabels[league.status] }}</td>
                     <td>
                         <span>{{ league.progress }}%</span>
                         <div class="league-progress-bar">
@@ -40,8 +41,11 @@
                         </div>
                     </td>
                     <td>
+                        {{  inflection(league) }}
+                    </td>
+                    <td>
                         <AppButton v-if="isAdmin" label="Zmazať" icon="🗑️" type="delete" htmlType="button"
-                            @clicked="() => deleteLeague(league.id)" />
+                            @clicked="() => confirmDeleteLeague(league)" />
                     </td>
                 </tr>
             </tbody>
@@ -51,6 +55,9 @@
 
     </div>
 
+    <ConfirmModal :visible="showConfirmModal" :message="`Naozaj chcete zmazať ligu ${leagueToDelete?.name}?`"
+        @confirm="deleteLeague" @cancel="cancelDelete" />
+
 </template>
 
 <script>
@@ -58,6 +65,7 @@ import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 
 
 export default {
@@ -72,6 +80,8 @@ export default {
                 leagueType: 'SINGLES',
                 seasonId: ''
             },
+            showConfirmModal: false,
+            leagueToDelete: null,
             loading: true
         }
     },
@@ -133,21 +143,42 @@ export default {
                 return 0;
             }
         },
-        async deleteLeague(leagueId) {
-            if (!confirm('Naozaj chcete zmazať túto ligu?')) {
-                return;  // používateľ stlačil Zrušiť, metóda sa ukončí
-            }
-
+        // vyvoláš modál, keď chceš zmazať ligu
+        confirmDeleteLeague(league) {
+            this.leagueToDelete = league;
+            this.showConfirmModal = true;
+        },
+        async deleteLeague() {
             try {
-                console.log('Mažem ligu s ID:', leagueId);
-                await axios.delete('/api/rest/leagues/' + leagueId);
+                await axios.delete('/api/rest/leagues/' + this.leagueToDelete.id);
                 await this.fetchSeason(this.seasonId);
                 console.log('Liga bola úspešne zmazaná.');
-                alert('Liga bola vymazaná.')
             } catch (err) {
                 console.error('Chyba pri mazaní ligy:', err);
+            } finally {
+                this.cancelDelete();
             }
         },
+
+        cancelDelete() {
+            this.showConfirmModal = false;
+            this.leagueToDelete = null;
+        },
+        inflection(league) {
+            const count = league.leagueType === 'SINGLES'
+                ? league.players.length
+                : league.teams.length;
+
+            if (league.leagueType === 'SINGLES') {
+                if (count === 1) return '1 hráč';
+                if (count >= 2 && count <= 4) return `${count} hráči`;
+                return `${count} hráčov`;
+            } else {
+                if (count === 1) return '1 tím';
+                if (count >= 2 && count <= 4) return `${count} tímy`;
+                return `${count} tímov`;
+            }
+        }
     },
     computed: {
         userStore() {
@@ -164,9 +195,16 @@ export default {
                 SINGLES: 'DVOJHRA',
                 DOUBLES: 'ŠTVORHRA',
             };
+        },
+        leagueStatusLabels() {
+            return {
+                CREATED: 'VYTVORENÁ',
+                ACTIVE: 'PRIEBEHA',
+                FINISHED: 'UKONČENÁ'
+            };
         }
     },
-    components: { AppButton, AppHeader }
+    components: { AppButton, AppHeader, ConfirmModal }
 }
 
 </script>
