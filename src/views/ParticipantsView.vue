@@ -19,9 +19,16 @@
             </div>
 
             <div v-else>
-                <ParticipantList :participants="players" :formatName="formatPlayerName"
+                <ParticipantList :participants="paginatedPlayers" :formatName="formatPlayerName"
                     :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
                     @view-detail="(id) => goToDetail('players', id)" />
+                <div class="pagination">
+                    <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
+                        @clicked="currentPagePlayers--" :disabled="currentPagePlayers === 1" />
+                    <span>Strana {{ currentPagePlayers }} z {{ totalPagesPlayers }}</span>
+                    <AppButton label="Ďalšia" icon="→" type="default" htmlType="button" @clicked="currentPagePlayers++"
+                        :disabled="currentPagePlayers === totalPagesPlayers" />
+                </div>
             </div>
         </div>
 
@@ -63,9 +70,16 @@
                 </div>
 
                 <div v-else>
-                    <ParticipantList :participants="teams" :formatName="formatTeamName"
+                    <ParticipantList :participants="paginatedTeams" :formatName="formatTeamName"
                         :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
                         @view-detail="(id) => goToDetail('teams', id)" />
+                    <div class="pagination">
+                        <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
+                            @clicked="currentPageTeams--" :disabled="currentPageTeams === 1" />
+                        <span>Strana {{ currentPageTeams }} z {{ totalPagesTeams }}</span>
+                        <AppButton label="Ďalšia" icon="→" type="default" htmlType="button" @clicked="currentPageTeams++"
+                        :disabled="currentPageTeams === totalPagesTeams" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -97,7 +111,10 @@ export default {
                 player2Id: ''
             },
             showConfirmModal: false,
-            participant: null
+            participant: null,
+            participantsPerPage: 5,
+            currentPagePlayers: 1,
+            currentPageTeams: 1
         }
 
     },
@@ -174,8 +191,10 @@ export default {
                 console.log(`${this.participant.type.slice(0, -1)} bol vymazaný.`);
 
                 if (this.participant.type === 'teams') {
+                    this.currentPageTeams = 1;
                     this.fetchTeams();
                 } else if (this.participant.type === 'players') {
+                    this.currentPagePlayers = 1;
                     this.fetchPlayers();
                 }
             } catch (err) {
@@ -219,6 +238,22 @@ export default {
         },
         isLoggedIn() {
             return this.userStore.isLoggedIn
+        },
+        totalPagesPlayers() {
+            return Math.ceil(this.players.length / this.participantsPerPage);
+        },
+        paginatedPlayers() {
+            const start = (this.currentPagePlayers - 1) * this.participantsPerPage;
+            const end = start + this.participantsPerPage;
+            return this.players.slice(start, end);
+        },
+        totalPagesTeams() {
+            return Math.ceil(this.teams.length / this.participantsPerPage);
+        },
+        paginatedTeams() {
+            const start = (this.currentPageTeams - 1) * this.participantsPerPage;
+            const end = start + this.participantsPerPage;
+            return this.teams.slice(start, end);
         }
     },
     components: { AppButton, ParticipantList, AppHeader, ConfirmModal }
@@ -249,6 +284,33 @@ export default {
 
 :deep(ul) {
     width: 50%;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    font-family: Arial, sans-serif;
+}
+
+.pagination button {
+    background-color: #3498db;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.pagination button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.pagination span {
+    font-size: 1rem;
 }
 
 @media (max-width: 768px) {

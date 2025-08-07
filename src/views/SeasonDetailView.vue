@@ -26,6 +26,7 @@
                     <th>Status</th>
                     <th>Progres</th>
                     <th>Účasť</th>
+                    <th v-if="isAdmin">Akcie</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,9 +42,9 @@
                         </div>
                     </td>
                     <td>
-                        {{  inflection(league) }}
+                        {{ inflection(league) }}
                     </td>
-                    <td>
+                    <td v-if="isAdmin">
                         <AppButton v-if="isAdmin" label="Zmazať" icon="🗑️" type="delete" htmlType="button"
                             @clicked="() => confirmDeleteLeague(league)" />
                     </td>

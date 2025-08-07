@@ -18,14 +18,39 @@
             <p>Žiadne sezóny nie sú k dispozícii.</p>
         </div>
 
-        <ul v-else>
+        <div v-else>
+            <table class="season-table">
+                <thead>
+                    <tr>
+                        <th>Rok</th>
+                        <th>Počet líg</th>
+                        <th>Status</th>
+                        <th v-if="isAdmin">Akcie</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="season in seasons" :key="season.id" @click="$router.push('/seasons/' + season.id)"
+                        style="cursor: pointer;">
+                        <td>{{ season.year }}</td>
+                        <td>{{ season.leagues.length }}</td>
+                        <td>{{ season.status }}</td>
+                        <td v-if="isAdmin">
+                            <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
+                                @clicked="() => confirmDeleteSeason(season)"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- <ul v-else>
             <li v-for="season in seasons" :key="season.id" @click="$router.push('/seasons/' + season.id)">
                 Sezóna {{ season.year }}
 
                 <AppButton v-if="isAdmin" label="Zmazať" icon="🗑️" type="delete" htmlType="button"
                     @clicked="() => confirmDeleteSeason(season)" />
             </li>
-        </ul>
+        </ul> -->
     </div>
     <ConfirmModal :visible="showConfirmModal" :message="`Naozaj chcete zmazať sezónu: ${season?.year}?`"
         @confirm="deleteSeason" @cancel="cancelDelete" />
@@ -111,7 +136,7 @@ export default {
             return this.userStore.isAdmin
         }
     },
-    components: { AppButton, AppHeader,ConfirmModal }
+    components: { AppButton, AppHeader, ConfirmModal }
 }
 </script>
 
@@ -128,5 +153,28 @@ li {
 
 li:not(:last-child) {
     border-bottom: 1px solid #cdcdcd;
+}
+
+.season-table {
+    width: 50%;
+    border-collapse: collapse;
+}
+
+.season-table th,
+.season-table td {
+    border-bottom: 1px solid #eee;
+    padding: 0.5rem;
+    text-align: left;
+
+}
+
+.season-table th {
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: whitesmoke;
+}
+
+.season-table tbody tr:hover {
+    background-color: #363537;
 }
 </style>
