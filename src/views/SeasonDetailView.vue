@@ -26,15 +26,16 @@
                     <th>Status</th>
                     <th>Progres</th>
                     <th>Účasť</th>
+                    <th>Víťaz</th>
                     <th v-if="isAdmin">Akcie</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="league in season.leagues" :key="league.id" @click="$router.push('/leagues/' + league.id)"
+                <tr v-for="league in season.leagues" :key="league.id" @click="$router.push('/leagues/' + league.leagueId)"
                     style="cursor: pointer;">
-                    <td>{{ league.name }}</td>
+                    <td>{{ league.leagueName }}</td>
                     <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
-                    <td>{{ leagueStatusLabels[league.status] }}</td>
+                    <td>{{ leagueStatusLabels[league.leagueStatus] }}</td>
                     <td>
                         <span>{{ league.progress }}%</span>
                         <div class="league-progress-bar">
@@ -43,6 +44,12 @@
                     </td>
                     <td>
                         {{ inflection(league) }}
+                    </td>
+
+                    <td>
+                        <span v-if="league.leagueStatus === 'FINISHED' && league.winner">
+                            🏆 {{ league.winner }}
+                        </span>
                     </td>
                     <td v-if="isAdmin">
                         <AppButton v-if="isAdmin" label="Zmazať" icon="🗑️" type="delete" htmlType="button"
@@ -56,7 +63,7 @@
 
     </div>
 
-    <ConfirmModal :visible="showConfirmModal" :message="`Naozaj chcete zmazať ligu ${leagueToDelete?.name}?`"
+    <DeleteModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať ligu ${leagueToDelete?.leagueName}?`"
         @confirm="deleteLeague" @cancel="cancelDelete" />
 
 </template>
@@ -66,7 +73,7 @@ import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
-import ConfirmModal from '@/components/ConfirmModal.vue';
+import DeleteModal from '@/components/DeleteModal.vue';
 
 
 export default {
@@ -78,10 +85,9 @@ export default {
             showCreateLeagueForm: false,
             newLeague: {
                 name: '',
-                leagueType: 'SINGLES',
-                seasonId: ''
+                leagueType: 'SINGLES'
             },
-            showConfirmModal: false,
+            showDeleteModal: false,
             leagueToDelete: null,
             loading: true
         }
@@ -94,11 +100,11 @@ export default {
     methods: {
         async fetchSeason(seasonId) {
             try {
-                const response = await axios.get('/api/rest/seasons/' + seasonId);
+                const response = await axios.get('/api/rest/seasons/' + seasonId + '/stats');
                 const season = response.data;
 
                 for (const league of season.leagues) {
-                    league.progress = await this.fetchLeagueProgress(league.id)
+                    league.progress = await this.fetchLeagueProgress(league.leagueId)
                 }
 
                 this.season = season;
@@ -147,11 +153,11 @@ export default {
         // vyvoláš modál, keď chceš zmazať ligu
         confirmDeleteLeague(league) {
             this.leagueToDelete = league;
-            this.showConfirmModal = true;
+            this.showDeleteModal = true;
         },
         async deleteLeague() {
             try {
-                await axios.delete('/api/rest/leagues/' + this.leagueToDelete.id);
+                await axios.delete('/api/rest/leagues/' + this.leagueToDelete.leagueId);
                 await this.fetchSeason(this.seasonId);
                 console.log('Liga bola úspešne zmazaná.');
             } catch (err) {
@@ -162,13 +168,14 @@ export default {
         },
 
         cancelDelete() {
-            this.showConfirmModal = false;
+            this.showDeleteModal = false;
             this.leagueToDelete = null;
         },
+
         inflection(league) {
             const count = league.leagueType === 'SINGLES'
-                ? league.players.length
-                : league.teams.length;
+                ? league.totalPlayers
+                : league.totalTeams;
 
             if (league.leagueType === 'SINGLES') {
                 if (count === 1) return '1 hráč';
@@ -205,7 +212,7 @@ export default {
             };
         }
     },
-    components: { AppButton, AppHeader, ConfirmModal }
+    components: { AppButton, AppHeader, DeleteModal }
 }
 
 </script>

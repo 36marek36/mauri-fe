@@ -24,6 +24,8 @@
                     <tr>
                         <th>Rok</th>
                         <th>Počet líg</th>
+                        <th>Počet hráčov</th>
+                        <th>Počet tímov</th>
                         <th>Status</th>
                         <th v-if="isAdmin">Akcie</th>
                     </tr>
@@ -33,26 +35,19 @@
                         style="cursor: pointer;">
                         <td>{{ season.year }}</td>
                         <td>{{ season.leagues.length }}</td>
-                        <td>{{ season.status }}</td>
+                        <td>{{ season.totalPlayers }}</td>
+                        <td>{{ season.totalTeams }}</td>
+                          <td>{{ season.status }}</td>
                         <td v-if="isAdmin">
                             <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
-                                @clicked="() => confirmDeleteSeason(season)"/>
+                                @clicked="() => confirmDeleteSeason(season)" />
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-
-        <!-- <ul v-else>
-            <li v-for="season in seasons" :key="season.id" @click="$router.push('/seasons/' + season.id)">
-                Sezóna {{ season.year }}
-
-                <AppButton v-if="isAdmin" label="Zmazať" icon="🗑️" type="delete" htmlType="button"
-                    @clicked="() => confirmDeleteSeason(season)" />
-            </li>
-        </ul> -->
     </div>
-    <ConfirmModal :visible="showConfirmModal" :message="`Naozaj chcete zmazať sezónu: ${season?.year}?`"
+    <DeleteModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať sezónu: ${season?.year}?`"
         @confirm="deleteSeason" @cancel="cancelDelete" />
 </template>
 
@@ -61,7 +56,7 @@ import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
-import ConfirmModal from '@/components/ConfirmModal.vue';
+import DeleteModal from '@/components/DeleteModal.vue';
 
 
 export default {
@@ -73,7 +68,7 @@ export default {
             newSeason: {
                 year: ''
             },
-            showConfirmModal: false,
+            showDeleteModal: false,
             season: null,
             loading: true
         }
@@ -118,14 +113,15 @@ export default {
             } finally {
                 this.cancelDelete();
             }
+
         },
         confirmDeleteSeason(season) {
             this.season = season;
-            this.showConfirmModal = true;
+            this.showDeleteModal = true;
         },
         cancelDelete() {
             this.season = null;
-            this.showConfirmModal = false;
+            this.showDeleteModal = false;
         }
     },
     computed: {
@@ -136,7 +132,7 @@ export default {
             return this.userStore.isAdmin
         }
     },
-    components: { AppButton, AppHeader, ConfirmModal }
+    components: { AppButton, AppHeader, DeleteModal }
 }
 </script>
 

@@ -31,7 +31,7 @@
 
     <div v-else>Načítavam používateľov...</div>
 
-    <ConfirmModal :visible="showConfirmModal" :message="`Naozaj chcete zmazať používateľa: ${user?.username}?`"
+    <DeleteModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať používateľa: ${user?.username}?`"
         @confirm="deleteUser" @cancel="cancelDelete" />
 </template>
 
@@ -39,14 +39,14 @@
 import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
-import ConfirmModal from '@/components/ConfirmModal.vue';
+import DeleteModal from '@/components/DeleteModal.vue';
 
 export default {
     name: 'UsersView',
     data() {
         return {
             users: [],
-            showConfirmModal: false,
+            showDeleteModal: false,
             user: null,
             loading: true
         }
@@ -80,14 +80,14 @@ export default {
         },
         confirmDeleteUser(user) {
             this.user = user;
-            this.showConfirmModal = true;
+            this.showDeleteModal = true;
         },
         cancelDelete() {
             this.user = null;
-            this.showConfirmModal = false;
+            this.showDeleteModal = false;
         }
     },
-    components: { AppHeader, AppButton, ConfirmModal }
+    components: { AppHeader, AppButton, DeleteModal }
 }
 
 </script>

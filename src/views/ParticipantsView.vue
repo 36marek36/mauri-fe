@@ -22,7 +22,7 @@
                 <ParticipantList :participants="paginatedPlayers" :formatName="formatPlayerName"
                     :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
                     @view-detail="(id) => goToDetail('players', id)" />
-                <div class="pagination">
+                <div v-if="totalPagesPlayers > 1" class="pagination">
                     <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
                         @clicked="currentPagePlayers--" :disabled="currentPagePlayers === 1" />
                     <span>Strana {{ currentPagePlayers }} z {{ totalPagesPlayers }}</span>
@@ -73,7 +73,7 @@
                     <ParticipantList :participants="paginatedTeams" :formatName="formatTeamName"
                         :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
                         @view-detail="(id) => goToDetail('teams', id)" />
-                    <div class="pagination">
+                    <div v-if="totalPagesTeams > 1" class="pagination">
                         <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
                             @clicked="currentPageTeams--" :disabled="currentPageTeams === 1" />
                         <span>Strana {{ currentPageTeams }} z {{ totalPagesTeams }}</span>
@@ -84,7 +84,7 @@
             </div>
         </div>
     </div>
-    <ConfirmModal :visible="showConfirmModal"
+    <DeleteModal :visible="showDeleteModal"
         :message="`Naozaj chcete zmazať ${participant?.type === 'players' ? 'hráča' : 'tím'}: ${participant?.name}?`"
         @confirm="deleteParticipant" @cancel="cancelDelete" />
 </template>
@@ -95,7 +95,7 @@ import ParticipantList from '@/components/ParticipantList.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import { useUserStore } from '@/user'
-import ConfirmModal from '@/components/ConfirmModal.vue'
+import DeleteModal from '@/components/DeleteModal.vue'
 
 export default {
     name: 'ParticipantsView',
@@ -110,7 +110,7 @@ export default {
                 player1Id: '',
                 player2Id: ''
             },
-            showConfirmModal: false,
+            showDeleteModal: false,
             participant: null,
             participantsPerPage: 5,
             currentPagePlayers: 1,
@@ -215,11 +215,11 @@ export default {
             }
 
             this.participant = { id, type, name };
-            this.showConfirmModal = true;
+            this.showDeleteModal = true;
         },
         cancelDelete() {
             this.participant = null;
-            this.showConfirmModal = false;
+            this.showDeleteModal = false;
         },
         formatPlayerName(player) {
             return player.firstName + ' ' + player.lastName
@@ -256,7 +256,7 @@ export default {
             return this.teams.slice(start, end);
         }
     },
-    components: { AppButton, ParticipantList, AppHeader, ConfirmModal }
+    components: { AppButton, ParticipantList, AppHeader, DeleteModal }
 }
 
 </script>

@@ -148,7 +148,7 @@
             </aside>
         </main>
     </div>
-    <ConfirmModal :visible="showConfirmModal"
+    <DeleteModal :visible="showDeleteModal"
         :message="`Naozaj chcete odstrániť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy?`"
         @confirm="() => removeParticipantFromLeague(participant?.id)" @cancel="cancelDelete" />
 </template>
@@ -162,7 +162,7 @@ import ParticipantList from '@/components/ParticipantList.vue';
 import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
-import ConfirmModal from '@/components/ConfirmModal.vue';
+import DeleteModal from '@/components/DeleteModal.vue';
 
 
 export default {
@@ -180,7 +180,7 @@ export default {
             openedRounds: [],
             loading: true,
             showAddParticipants: false,
-            showConfirmModal: false,
+            showDeleteModal: false,
             participant: null,
 
         }
@@ -310,11 +310,11 @@ export default {
             }
 
             this.participant = { id, type, name };
-            this.showConfirmModal = true;
+            this.showDeleteModal = true;
         },
         cancelDelete() {
             this.participant = null;
-            this.showConfirmModal = false;
+            this.showDeleteModal = false;
         },
         fullName(player) {
             if (!player) return 'Neznámy';
@@ -481,7 +481,7 @@ export default {
             return this.userStore.isLoggedIn
         }
     },
-    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader, ConfirmModal }
+    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader, DeleteModal }
 }
 
 </script>
