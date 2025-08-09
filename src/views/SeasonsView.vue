@@ -1,5 +1,8 @@
 <template>
     <AppHeader title="Sezóny" />
+
+    <FlashMessage :message="message" :messageType="messageType" />
+
     <AppButton v-if="isAdmin" :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
         :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
 
@@ -37,7 +40,7 @@
                         <td>{{ season.leagues.length }}</td>
                         <td>{{ season.totalPlayers }}</td>
                         <td>{{ season.totalTeams }}</td>
-                          <td>{{ season.status }}</td>
+                        <td>{{ season.status }}</td>
                         <td v-if="isAdmin">
                             <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
                                 @clicked="() => confirmDeleteSeason(season)" />
@@ -57,7 +60,8 @@ import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
 import DeleteModal from '@/components/DeleteModal.vue';
-
+import { flashMessageMixin } from '@/flashMessageMixin';
+import FlashMessage from '@/components/FlashMessage.vue';
 
 export default {
     name: 'SeasonsView',
@@ -76,6 +80,7 @@ export default {
     created() {
         this.fetchSeasons()
     },
+    mixins: [flashMessageMixin],
     methods: {
         fetchSeasons() {
             axios.get('/api/rest/seasons/')
@@ -89,24 +94,45 @@ export default {
                 })
         },
         toggleCreateForm() {
-
             this.showCreateSeasonForm = !this.showCreateSeasonForm
         },
         async createSeason() {
             try {
                 const res = await axios.post('/api/rest/seasons/create', this.newSeason);
                 console.log('Sezóna: ' + res.data.year + ' bola úspešne vytvorená.')
+                this.showMessage('Sezóna bola úspešne vytvorená','success');
                 this.showCreateSeasonForm = false;
                 this.newSeason = { year: '' };
                 this.fetchSeasons();
             } catch (err) {
-                console.error('Chyba pri vytváraní sezóny:', err);
+                if (err.response && err.response.status === 400) {
+                    const data = err.response.data;
+
+                    // 👉 1. Validácia polí – napr. { "year": "Year is required" }
+                    if (data.year) {
+                        this.showMessage(data.year,'warning');
+
+                        // 👉 2. Iná chyba – napr. { "message": "Invalid value for field 'year'. Expected a number." }
+                    } else if (data.message) {
+                        this.showMessage(data.message,'warning');
+
+                        // 👉 3. Neznáma 400 chyba
+                    } else {
+                        this.showMessage('Chyba: neplatné dáta.','warning');
+                    }
+
+                } else {
+                    // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
+                    this.showMessage('Neznáma chyba pri vytváraní sezóny.','error');
+                    console.error('Chyba pri vytváraní sezóny:', err);
+                }
             }
         },
         async deleteSeason() {
             try {
                 await axios.delete('/api/rest/seasons/' + this.season?.id);
                 this.fetchSeasons();
+                this.showMessage('Sezóna bola úspešne zmazaná.','success')
                 console.log('Sezóna bola úspešne zmazaná.');
             } catch (err) {
                 console.error('Chyba pri mazaní sezóny:', err);
@@ -132,7 +158,7 @@ export default {
             return this.userStore.isAdmin
         }
     },
-    components: { AppButton, AppHeader, DeleteModal }
+    components: { AppButton, AppHeader, DeleteModal, FlashMessage }
 }
 </script>
 

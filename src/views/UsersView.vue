@@ -1,6 +1,8 @@
 <template>
     <AppHeader title="Zoznam používateľov:" />
 
+    <FlashMessage :message="message" :messageType="messageType" />
+
     <div v-if="!loading">
         <table class="users-table">
             <thead>
@@ -40,6 +42,8 @@ import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import DeleteModal from '@/components/DeleteModal.vue';
+import { flashMessageMixin } from '@/flashMessageMixin';
+import FlashMessage from '@/components/FlashMessage.vue';
 
 export default {
     name: 'UsersView',
@@ -54,6 +58,7 @@ export default {
     created() {
         this.fetchUsers()
     },
+    mixins:[flashMessageMixin],
     methods: {
 
         fetchUsers() {
@@ -71,6 +76,7 @@ export default {
             try {
                 await axios.delete('/api/rest/users/' + this.user?.id);
                 this.fetchUsers();
+                this.showMessage('Užívatel ' + this.user?.username +' úspešne vymazaný','success')
                 console.log('Používatel vymazaný.');
             } catch (err) {
                 console.error('Chyba pri mazaní používateľa:', err);
@@ -87,7 +93,7 @@ export default {
             this.showDeleteModal = false;
         }
     },
-    components: { AppHeader, AppButton, DeleteModal }
+    components: { AppHeader, AppButton, DeleteModal,FlashMessage }
 }
 
 </script>

@@ -2,6 +2,8 @@
 
   <AppHeader title="Vytvorenie nového hráča" />
 
+  <FlashMessage :message="message" :messageType="messageType" />
+
   <div class="create-player">
 
     <form @submit.prevent="submitForm">
@@ -24,8 +26,6 @@
       <button type="submit">Vytvoriť</button>
     </form>
 
-    <p v-if="responseMessage">{{ responseMessage }}</p>
-
   </div>
 </template>
 
@@ -33,6 +33,8 @@
 import AppHeader from '@/components/AppHeader.vue'
 import axios from 'axios'
 import { useUserStore } from '@/user'
+import { flashMessageMixin } from '@/flashMessageMixin'
+import FlashMessage from '@/components/FlashMessage.vue'
 
 export default {
   name: 'CreatePlayer',
@@ -43,10 +45,10 @@ export default {
         lastName: '',
         email: '',
         phone: ''
-      },
-      responseMessage: ''
+      }
     }
   },
+  mixins: [flashMessageMixin],
   computed: {
     userStore() {
       return useUserStore()
@@ -64,7 +66,7 @@ export default {
       try {
         const response = await axios.post(endpoint, this.player)
         console.log('Hráč: ' + response.data.firstName + ' bol úspešne vytvorený.')
-        this.responseMessage = 'Hráč ' + response.data.firstName + ' bol úspešne vytvorený.'
+        this.showMessage('Hráč ' + response.data.firstName + ' bol úspešne vytvorený.','success')
 
         await this.userStore.fetchCurrentUser()
 
@@ -72,12 +74,12 @@ export default {
           this.$router.push('/participants')
         }, 2000)
       } catch (error) {
-        this.responseMessage = 'Chyba pri vytváraní hráča.'
+        this.showMessage('Chyba pri vytváraní hráča.','error')
         console.error(error)
       }
     }
   },
-  components: { AppHeader }
+  components: { AppHeader, FlashMessage }
 }
 </script>
 

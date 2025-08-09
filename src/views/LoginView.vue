@@ -1,22 +1,8 @@
-<!-- <template>
-  <div>
-    <h2>Prihlásenie</h2>
-    <form @submit.prevent="login">
-      <input v-model="username" placeholder="Username" required />
-      <input v-model="password" type="password" placeholder="Password" required />
-      
-      <AppButton
-        label="Login"
-        type="primary"      
-        htmlType="submit"  
-      />
-    </form>
-    <p v-if="error" style="color: red">{{ error }}</p>
-  </div>
-</template> -->
-
 <template>
   <AppHeader :title="isLogin ? 'Prihlásenie' : 'Registrácia'" />
+
+  <FlashMessage :message="message" :messageType="messageType" />
+
   <div>
     <form @submit.prevent="handleSubmit">
       <input v-model="username" placeholder="Užívatelské meno" required />
@@ -27,8 +13,6 @@
       <AppButton :label="isLogin ? 'Prihlásiť' : 'Registrovať'" htmlType="submit" type="primary" />
     </form>
 
-    <p v-if="error" style="color: red">{{ error }}</p>
-
     <p style="margin-top: 1rem;">
       <a href="#" @click.prevent="toggleMode">
         {{ isLogin ? "Ešte nemáš účet? Registruj sa" : "Už máš účet? Prihlás sa" }}
@@ -36,11 +20,15 @@
     </p>
   </div>
 </template>
+
 <script>
 import AppButton from '@/components/AppButton.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import axios from 'axios'
 import { useUserStore } from '@/user'
+import { flashMessageMixin } from '@/flashMessageMixin'
+import FlashMessage from '@/components/FlashMessage.vue'
+
 
 export default {
   data() {
@@ -48,28 +36,25 @@ export default {
       username: '',
       password: '',
       confirmPassword: '',
-      isLogin: true,
-      error: null
+      isLogin: true
     }
   },
   mounted() {
     if (this.$route.query.message === 'logout') {
-      this.error = 'Boli ste úspešne odhlásený.'
-      this.clearErrorAfterDelay()
+      this.showMessage('Boli ste úspešne odhlásený.', 'success')
     }
   },
+  mixins: [flashMessageMixin],
   methods: {
     toggleMode() {
       this.isLogin = !this.isLogin
-      this.error = null
       this.username = ''
       this.password = ''
       this.confirmPassword = ''
     },
     async handleSubmit() {
-      this.error = null
       if (!this.isLogin && this.password !== this.confirmPassword) {
-        this.error = 'Passwords do not match'
+        this.showMessage('Heslá sa nezhodujú', 'error')
         return
       }
       const userStore = useUserStore()
@@ -96,11 +81,10 @@ export default {
             password: this.password
           })
           this.toggleMode()
-          this.error = 'Účet bol vytvorený. Teraz sa môžete prihlásiť.'
-          this.clearErrorAfterDelay()
+          this.showMessage('Účet bol vytvorený. Teraz sa môžete prihlásiť.', 'success')
         }
       } catch (err) {
-        this.error = err.response?.data?.message || 'Unexpected error occurred'
+        this.showMessage(err.response?.data?.message || 'Nastala neočakávaná chyba.', 'error')
       }
 
       // try {
@@ -114,13 +98,8 @@ export default {
       // } catch (e) {
       //   this.error = 'Zlé prihlasovacie údaje'
       // }
-    },
-    clearErrorAfterDelay() {
-      setTimeout(() => {
-        this.error = null
-      }, 3000)
     }
   },
-  components: { AppButton, AppHeader }
+  components: { AppButton, AppHeader, FlashMessage }
 }
 </script>

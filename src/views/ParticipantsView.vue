@@ -1,5 +1,6 @@
 <template>
     <AppHeader title="Zoznam hráčov a tímov" />
+    <FlashMessage :message="message" :messageType="messageType" />
 
     <div class="container">
 
@@ -77,8 +78,8 @@
                         <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
                             @clicked="currentPageTeams--" :disabled="currentPageTeams === 1" />
                         <span>Strana {{ currentPageTeams }} z {{ totalPagesTeams }}</span>
-                        <AppButton label="Ďalšia" icon="→" type="default" htmlType="button" @clicked="currentPageTeams++"
-                        :disabled="currentPageTeams === totalPagesTeams" />
+                        <AppButton label="Ďalšia" icon="→" type="default" htmlType="button"
+                            @clicked="currentPageTeams++" :disabled="currentPageTeams === totalPagesTeams" />
                     </div>
                 </div>
             </div>
@@ -96,6 +97,8 @@ import AppButton from '@/components/AppButton.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import { useUserStore } from '@/user'
 import DeleteModal from '@/components/DeleteModal.vue'
+import { flashMessageMixin } from '@/flashMessageMixin'
+import FlashMessage from '@/components/FlashMessage.vue'
 
 export default {
     name: 'ParticipantsView',
@@ -122,6 +125,7 @@ export default {
         this.fetchPlayers();
         this.fetchTeams();
     },
+    mixins: [flashMessageMixin],
     methods: {
 
         fetchPlayers() {
@@ -152,7 +156,7 @@ export default {
         },
         goToDetail(type, id) {
             if (!this.isLoggedIn) {
-                alert("Musíte sa prihlásiť.");
+                this.showMessage('Musíte sa prihlásiť.','warning');
                 return;
             }
             this.$router.push(`/${type}/${id}`);
@@ -171,6 +175,8 @@ export default {
 
             try {
                 const res = await axios.post('/api/rest/teams/create', payload);
+
+                this.showMessage('Tim bol úspešne vytvoreny.','success')
                 console.log('Tim: ' + res.data.id + ' bol úspešne vytvoreny.')
 
                 // Resetovanie výberu hráčov
@@ -188,6 +194,8 @@ export default {
         async deleteParticipant() {
             try {
                 await axios.delete('/api/rest/' + this.participant.type + '/' + this.participant.id);
+                const type = this.participant.type === 'players' ? 'Hráč' : 'Tím';
+                this.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný`,'success');
                 console.log(`${this.participant.type.slice(0, -1)} bol vymazaný.`);
 
                 if (this.participant.type === 'teams') {
@@ -256,7 +264,7 @@ export default {
             return this.teams.slice(start, end);
         }
     },
-    components: { AppButton, ParticipantList, AppHeader, DeleteModal }
+    components: { AppButton, ParticipantList, AppHeader, DeleteModal, FlashMessage }
 }
 
 </script>

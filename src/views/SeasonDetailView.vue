@@ -4,8 +4,16 @@
 
     <div v-else>
         <AppHeader :title="season.year.toString()" />
+
+        <FlashMessage :message="message" :messageType="messageType" />
+
         <AppButton v-if="isAdmin" :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
             :type="showCreateLeagueForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
+
+        <AppButton v-if="season.status === 'CREATED'" label="Spustiť sezónu" type="default" htmlType="button" icon=""
+            @clicked="startSeason" />
+        <AppButton v-if="season.status === 'ACTIVE'" label="Ukončiť sezónu" type="default" htmlType="button" icon=""
+            @clicked="finishSeason" />
 
         <div v-if="showCreateLeagueForm">
             <input v-model="newLeague.name" placeholder="Názov ligy" />
@@ -17,7 +25,6 @@
             <AppButton label="Vytvoriť" type="create" htmlType="button" icon="➕" @clicked="createLeague" />
 
         </div>
-
         <table v-if="hasLeagues" class="league-table">
             <thead>
                 <tr>
@@ -31,8 +38,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="league in season.leagues" :key="league.id" @click="$router.push('/leagues/' + league.leagueId)"
-                    style="cursor: pointer;">
+                <tr v-for="league in season.leagues" :key="league.id"
+                    @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
                     <td>{{ league.leagueName }}</td>
                     <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
                     <td>{{ leagueStatusLabels[league.leagueStatus] }}</td>
@@ -74,6 +81,8 @@ import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
 import DeleteModal from '@/components/DeleteModal.vue';
+import { flashMessageMixin } from '@/flashMessageMixin';
+import FlashMessage from '@/components/FlashMessage.vue';
 
 
 export default {
@@ -96,7 +105,7 @@ export default {
         this.seasonId = this.$route.params.id;
         this.fetchSeason(this.seasonId);
     },
-
+    mixins: [flashMessageMixin],
     methods: {
         async fetchSeason(seasonId) {
             try {
@@ -119,10 +128,12 @@ export default {
             try {
                 const res = await axios.post('/api/rest/leagues/create', this.newLeague);
                 await this.addLeagueToSeason(res.data.id)
+                this.showMessage('✅ Liga ' + res.data.name + ' bola úspešne vytvorená a pridaná do sezóny','success');
                 console.log('Liga: ' + res.data.name + ' bola úspešne vytvorená.')
                 this.showCreateLeagueForm = false;
                 this.newLeague = { name: '', leagueType: 'SINGLES', seasonId: '' };
             } catch (err) {
+                this.showMessage(err.response.data.name,'error');
                 console.error('Chyba pri vytváraní ligy:', err);
             }
         },
@@ -159,6 +170,7 @@ export default {
             try {
                 await axios.delete('/api/rest/leagues/' + this.leagueToDelete.leagueId);
                 await this.fetchSeason(this.seasonId);
+                this.showMessage('Liga bola úspešne vymazaná','info')
                 console.log('Liga bola úspešne zmazaná.');
             } catch (err) {
                 console.error('Chyba pri mazaní ligy:', err);
@@ -186,6 +198,42 @@ export default {
                 if (count >= 2 && count <= 4) return `${count} tímy`;
                 return `${count} tímov`;
             }
+        },
+        async startSeason() {
+            this.loading = true;
+
+            try {
+                const response = await axios.patch(`/api/rest/seasons/${this.seasonId}/start`);
+                this.showMessage(response.data,'info');
+                await this.fetchSeason(this.seasonId);
+            } catch (err) {
+                if (err.response && err.response.status === 409) {
+                    this.showMessage(`⚠️ ${err.response.data.message}`,'warning');
+                } else {
+                    this.showMessage('❌ Nastala chyba pri štartovaní sezóny.','error');
+                    console.error('Chyba pri štartovaní sezóny:', err);
+                }
+            } finally {
+                this.loading = false;
+            }
+        },
+        async finishSeason() {
+            this.loading = true;
+
+            try {
+                const response = await axios.patch(`/api/rest/seasons/${this.seasonId}/finish`);
+                this.showMessage(response.data,'success');
+                await this.fetchSeason(this.seasonId);
+            } catch (err) {
+                if (err.response && err.response.status === 409) {
+                    this.showMessage(`⚠️ ${err.response.data.message}`,'warning');
+                } else {
+                    this.showMessage('❌ Nastala chyba pri ukončovaní sezóny.','error');
+                    console.error('Chyba pri ukončovaní sezóny:', err);
+                }
+            } finally {
+                this.loading = false;
+            }
         }
     },
     computed: {
@@ -212,7 +260,7 @@ export default {
             };
         }
     },
-    components: { AppButton, AppHeader, DeleteModal }
+    components: { AppButton, AppHeader, DeleteModal, FlashMessage }
 }
 
 </script>
