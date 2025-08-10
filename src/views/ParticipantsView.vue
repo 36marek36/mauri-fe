@@ -1,5 +1,6 @@
 <template>
-    <AppHeader title="Zoznam hráčov a tímov" />
+    <AppHeader class="app-header" title="Zoznam hráčov a tímov" />
+
     <FlashMessage :message="message" :messageType="messageType" />
 
     <div class="container">
@@ -26,7 +27,7 @@
                 <div v-if="totalPagesPlayers > 1" class="pagination">
                     <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
                         @clicked="currentPagePlayers--" :disabled="currentPagePlayers === 1" />
-                    <span>Strana {{ currentPagePlayers }} z {{ totalPagesPlayers }}</span>
+                    <span>{{ currentPagePlayers }} / {{ totalPagesPlayers }}</span>
                     <AppButton label="Ďalšia" icon="→" type="default" htmlType="button" @clicked="currentPagePlayers++"
                         :disabled="currentPagePlayers === totalPagesPlayers" />
                 </div>
@@ -156,7 +157,7 @@ export default {
         },
         goToDetail(type, id) {
             if (!this.isLoggedIn) {
-                this.showMessage('Musíte sa prihlásiť.','warning');
+                this.showMessage('Musíte sa prihlásiť.', 'warning');
                 return;
             }
             this.$router.push(`/${type}/${id}`);
@@ -176,7 +177,7 @@ export default {
             try {
                 const res = await axios.post('/api/rest/teams/create', payload);
 
-                this.showMessage('Tim bol úspešne vytvoreny.','success')
+                this.showMessage('Tim bol úspešne vytvoreny.', 'success')
                 console.log('Tim: ' + res.data.id + ' bol úspešne vytvoreny.')
 
                 // Resetovanie výberu hráčov
@@ -195,7 +196,7 @@ export default {
             try {
                 await axios.delete('/api/rest/' + this.participant.type + '/' + this.participant.id);
                 const type = this.participant.type === 'players' ? 'Hráč' : 'Tím';
-                this.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný`,'success');
+                this.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný`, 'success');
                 console.log(`${this.participant.type.slice(0, -1)} bol vymazaný.`);
 
                 if (this.participant.type === 'teams') {
@@ -284,7 +285,6 @@ export default {
     padding-right: 1rem;
 }
 
-/* Pravý stĺpec – tímy */
 .teams {
     flex: 1;
     padding-left: 1rem;
@@ -324,19 +324,37 @@ export default {
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
-        /* pod seba */
+        gap: 1rem;
+    }
+
+    :deep(ul) {
+        width: 100%;
     }
 
     .players {
         border-right: none;
         border-bottom: 1px solid #ccc;
         padding-right: 0;
+        width: 100%;
         padding-bottom: 1rem;
+        text-align: center;
     }
 
     .teams {
         padding-left: 0;
-        padding-top: 1rem;
+        /* padding-top: 1rem; */
+        width: 100%;
+        text-align: center;
+    }
+
+    .app-header :deep(.headings) {
+        display: none !important;
+    }
+
+    .pagination :deep(.app-button) {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+        gap: 0.3rem;
     }
 }
 </style>

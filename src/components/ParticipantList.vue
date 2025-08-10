@@ -71,7 +71,7 @@ li:not(:last-child) {
 
 @media (max-width: 768px) {
     .participant-content {
-        flex-direction: column;
+        flex-direction: row;
         align-items: flex-start;
         gap: 0.3em;
     }

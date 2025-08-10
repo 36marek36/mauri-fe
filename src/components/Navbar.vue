@@ -37,9 +37,9 @@
       </li>
     </ul>
 
-    <div v-if="userStore.error" class="error-message">
+    <!-- <div v-if="userStore.error" class="error-message">
       {{ userStore.error }}
-    </div>
+    </div> -->
 
   </nav>
 </template>
@@ -147,9 +147,24 @@ export default {
   margin: 0;
 }
 
-.error-message {
+/* .error-message {
   color: red;
   margin-bottom: 0.5rem;
   font-weight: bold;
+} */
+
+@media (max-width: 768px) {
+  .navbar ul {
+    width: 100%;
+  }
+
+  .navbar {
+    padding: 0.5rem;
+  }
+
+  .dropdown-menu {
+    right: 0;
+    left: auto;
+  }
 }
 </style>

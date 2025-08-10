@@ -39,8 +39,8 @@ export default {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  padding: 1rem;
-  gap: 1rem;
+  /* padding: 1rem; */
+  /* gap: 1rem; */
 }
 
 .left-side,
@@ -52,38 +52,48 @@ export default {
 .logo,
 .text,
 .spacer {
-    max-width: 150px;
-    width: 30vw;
-    aspect-ratio: 1 / 1;
-    background-size: contain;
-    background-repeat: no-repeat;
+  max-width: 150px;
+  width: 20vw;
+  aspect-ratio: 1 / 1;
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 .logo {
-    background-image: url('/images/logo.png');
+  background-image: url('/images/logo.png');
 }
 
 .text {
-    background-image: url('/images/text.png');
+  background-image: url('/images/text.png');
 }
+
 .spacer {
-  background-color: transparent; /* alebo napr. rgba(0,0,0,0.2) ak chceš niečo vidieť */
+  background-color: transparent;
+  /* alebo napr. rgba(0,0,0,0.2) ak chceš niečo vidieť */
 }
+
 .headings {
   flex-direction: column;
   justify-content: center;
-  flex-grow: 1; /* zaber zvyšný priestor */
-  min-width: 0; /* dôležité pre zalamovanie */
+  flex-grow: 1;
+  /* zaber zvyšný priestor */
+  min-width: 0;
+  /* dôležité pre zalamovanie */
 }
 
 @media (max-width: 768px) {
-    .header {
-        flex-direction: column;
-        align-items: center;
-    }
-.headings {
-    align-items: center; /* zarovná text na stred */
+  .header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .headings {
+    align-items: center;
     text-align: center;
+  }
+
+  .right-side {
+    display: none;
   }
 }
 </style>

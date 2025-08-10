@@ -20,10 +20,10 @@
                         <RouterLink v-if="user.player" :to="`/players/${user.player.id}`">
                             {{ user.player.firstName }} {{ user.player.lastName }}
                         </RouterLink>
-                        <span v-else>Užívateľ nemá svojho hráča</span>
+                        <span v-else>Bez hráča</span>
                     </td>
                     <td>
-                        <AppButton v-if="user.role === 'USER'" label="Vymazat" icon="🗑️" type="delete"
+                        <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete"
                             htmltype="button" @clicked="() => confirmDeleteUser(user)" />
                     </td>
                 </tr>

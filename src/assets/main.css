@@ -6,6 +6,7 @@
   min-height: 100vh;
   font-weight: normal;
 }
+
 /* 🌌 Hlavné pozadie celej stránky */
 html,
 body,
@@ -13,11 +14,15 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  background-image: url('/images/background.jpg'); /* uprav cestu podľa projektu */
-  background-size: cover;         /* prispôsobenie veľkosti */
-  background-position: center;    /* zarovnanie */
+  background-image: url('/images/background.jpg');
+  /* uprav cestu podľa projektu */
+  background-size: cover;
+  /* prispôsobenie veľkosti */
+  background-position: center;
+  /* zarovnanie */
   background-repeat: no-repeat;
-  background-attachment: fixed;   /* pozadie sa neposúva pri scrollovaní */
+  background-attachment: fixed;
+  /* pozadie sa neposúva pri scrollovaní */
   color: #FFD700;
   font-family: 'Segoe UI', sans-serif;
 }
@@ -41,15 +46,18 @@ h3 {
 /* 📦 Vizuálny štýl obsahových blokov */
 ul,
 table {
-background-color: rgba(255, 255, 255, 0.05); /* skoro neviditeľné pozadie */
-  backdrop-filter: blur(12px); /* silné rozmazanie za tabuľkou */
-  -webkit-backdrop-filter: blur(12px); /* pre Safari */
+  background-color: rgba(255, 255, 255, 0.05);
+  /* skoro neviditeľné pozadie */
+  backdrop-filter: blur(12px);
+  /* silné rozmazanie za tabuľkou */
+  -webkit-backdrop-filter: blur(12px);
+  /* pre Safari */
   border: none;
   color: #FFD700;
   border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  
+
 }
 
 a {
@@ -57,7 +65,12 @@ a {
   color: #FFD700;
   transition: 0.4s;
   padding: 3px
+}
 
+@media (max-width: 768px) {
+  h1,h2 {
+    font-size: 1.8rem;
+  }
 }
 
 @media (hover: hover) {

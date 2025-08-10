@@ -1,11 +1,11 @@
 <template>
+    <AppHeader :title="'Sezóna'" :subtitle="season.year.toString()" />
+
+    <FlashMessage :message="message" :messageType="messageType" />
 
     <div v-if="loading">... loading ...</div>
 
     <div v-else>
-        <AppHeader :title="season.year.toString()" />
-
-        <FlashMessage :message="message" :messageType="messageType" />
 
         <AppButton v-if="isAdmin" :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
             :type="showCreateLeagueForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
@@ -128,12 +128,12 @@ export default {
             try {
                 const res = await axios.post('/api/rest/leagues/create', this.newLeague);
                 await this.addLeagueToSeason(res.data.id)
-                this.showMessage('✅ Liga ' + res.data.name + ' bola úspešne vytvorená a pridaná do sezóny','success');
+                this.showMessage('✅ Liga ' + res.data.name + ' bola úspešne vytvorená a pridaná do sezóny', 'success');
                 console.log('Liga: ' + res.data.name + ' bola úspešne vytvorená.')
                 this.showCreateLeagueForm = false;
                 this.newLeague = { name: '', leagueType: 'SINGLES', seasonId: '' };
             } catch (err) {
-                this.showMessage(err.response.data.name,'error');
+                this.showMessage(err.response.data.name, 'error');
                 console.error('Chyba pri vytváraní ligy:', err);
             }
         },
@@ -170,7 +170,7 @@ export default {
             try {
                 await axios.delete('/api/rest/leagues/' + this.leagueToDelete.leagueId);
                 await this.fetchSeason(this.seasonId);
-                this.showMessage('Liga bola úspešne vymazaná','info')
+                this.showMessage('Liga bola úspešne vymazaná', 'info')
                 console.log('Liga bola úspešne zmazaná.');
             } catch (err) {
                 console.error('Chyba pri mazaní ligy:', err);
@@ -204,13 +204,13 @@ export default {
 
             try {
                 const response = await axios.patch(`/api/rest/seasons/${this.seasonId}/start`);
-                this.showMessage(response.data,'info');
+                this.showMessage(response.data, 'info');
                 await this.fetchSeason(this.seasonId);
             } catch (err) {
                 if (err.response && err.response.status === 409) {
-                    this.showMessage(`⚠️ ${err.response.data.message}`,'warning');
+                    this.showMessage('⚠️ ' + err.response.data.message, 'warning');
                 } else {
-                    this.showMessage('❌ Nastala chyba pri štartovaní sezóny.','error');
+                    this.showMessage('❌ Nastala chyba pri štartovaní sezóny.', 'error');
                     console.error('Chyba pri štartovaní sezóny:', err);
                 }
             } finally {
@@ -222,13 +222,13 @@ export default {
 
             try {
                 const response = await axios.patch(`/api/rest/seasons/${this.seasonId}/finish`);
-                this.showMessage(response.data,'success');
+                this.showMessage(response.data, 'success');
                 await this.fetchSeason(this.seasonId);
             } catch (err) {
                 if (err.response && err.response.status === 409) {
-                    this.showMessage(`⚠️ ${err.response.data.message}`,'warning');
+                    this.showMessage(`⚠️ ${err.response.data.message}`, 'warning');
                 } else {
-                    this.showMessage('❌ Nastala chyba pri ukončovaní sezóny.','error');
+                    this.showMessage('❌ Nastala chyba pri ukončovaní sezóny.', 'error');
                     console.error('Chyba pri ukončovaní sezóny:', err);
                 }
             } finally {

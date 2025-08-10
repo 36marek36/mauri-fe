@@ -1,6 +1,18 @@
 <template>
   <!-- <p v-if="message" class="flash-message">{{ message }}</p> -->
-  <p v-if="message" :class="['flash-message', messageType]">{{ message }}</p>
+
+  <!-- <p v-if="message" :class="['flash-message', messageType]">{{ message }}</p> -->
+
+  <!-- <div v-if="message" :class="['flash-message', messageType]">
+    {{ message }}
+  </div> -->
+
+  <transition name="flash">
+    <div v-if="message" :class="['flash-message', messageType]">
+      {{ message }}
+    </div>
+  </transition>
+
 </template>
 
 <script>
@@ -26,8 +38,6 @@ export default {
   width: fit-content;
   text-align: center;
   display: block;
-  opacity: 1;
-  transition: opacity 0.5s ease;
 }
 
 .flash-message.success {
@@ -54,15 +64,36 @@ export default {
   border-color: #38bdf8;
 }
 
-/* .flash-message {
-  background-color: #fef3c7;
-  color: #92400e; 
-  padding: 12px 16px;
-  margin: 1rem 0;
-  border: 1px solid #facc15;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  font-weight: 500;
-  transition: all 0.3s ease;
-} */
+/* === Animácie === */
+.flash-enter-active {
+  animation: slideInFromLeft 0.6s ease-out forwards;
+}
+
+.flash-leave-active {
+  animation: slideOutToRight 0.6s ease-in forwards;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100vw);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(100vw);
+    opacity: 0;
+  }
+}
 </style>

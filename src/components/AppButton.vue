@@ -11,8 +11,7 @@ export default {
   name: 'AppButton',
   props: {
     label: {
-      type: String,
-      required: true
+      type: String
     },
     icon: {
       type: String,
@@ -84,5 +83,17 @@ export default {
 .app-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .app-button {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.9rem;
+    gap: 0.4rem;
+  }
+
+  .app-button .icon {
+    font-size: 0.8rem;
+  }
 }
 </style>

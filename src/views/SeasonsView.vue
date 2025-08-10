@@ -25,11 +25,11 @@
             <table class="season-table">
                 <thead>
                     <tr>
-                        <th>Rok</th>
-                        <th>Počet líg</th>
-                        <th>Počet hráčov</th>
-                        <th>Počet tímov</th>
-                        <th>Status</th>
+                        <th>Sezóna</th>
+                        <th>Ligy</th>
+                        <th>Hráči</th>
+                        <th>Tími</th>
+                        <!-- <th>Status</th> -->
                         <th v-if="isAdmin">Akcie</th>
                     </tr>
                 </thead>
@@ -40,9 +40,9 @@
                         <td>{{ season.leagues.length }}</td>
                         <td>{{ season.totalPlayers }}</td>
                         <td>{{ season.totalTeams }}</td>
-                        <td>{{ season.status }}</td>
+                        <!-- <td>{{ season.status }}</td> -->
                         <td v-if="isAdmin">
-                            <AppButton label="Zmazať" icon="🗑️" type="delete" htmlType="button"
+                            <AppButton icon="🗑️" type="delete" htmlType="button"
                                 @clicked="() => confirmDeleteSeason(season)" />
                         </td>
                     </tr>
@@ -100,7 +100,7 @@ export default {
             try {
                 const res = await axios.post('/api/rest/seasons/create', this.newSeason);
                 console.log('Sezóna: ' + res.data.year + ' bola úspešne vytvorená.')
-                this.showMessage('Sezóna bola úspešne vytvorená','success');
+                this.showMessage('Sezóna bola úspešne vytvorená', 'success');
                 this.showCreateSeasonForm = false;
                 this.newSeason = { year: '' };
                 this.fetchSeasons();
@@ -110,20 +110,20 @@ export default {
 
                     // 👉 1. Validácia polí – napr. { "year": "Year is required" }
                     if (data.year) {
-                        this.showMessage(data.year,'warning');
+                        this.showMessage(data.year, 'warning');
 
                         // 👉 2. Iná chyba – napr. { "message": "Invalid value for field 'year'. Expected a number." }
                     } else if (data.message) {
-                        this.showMessage(data.message,'warning');
+                        this.showMessage(data.message, 'warning');
 
                         // 👉 3. Neznáma 400 chyba
                     } else {
-                        this.showMessage('Chyba: neplatné dáta.','warning');
+                        this.showMessage('Chyba: neplatné dáta.', 'warning');
                     }
 
                 } else {
                     // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
-                    this.showMessage('Neznáma chyba pri vytváraní sezóny.','error');
+                    this.showMessage('Neznáma chyba pri vytváraní sezóny.', 'error');
                     console.error('Chyba pri vytváraní sezóny:', err);
                 }
             }
@@ -132,7 +132,7 @@ export default {
             try {
                 await axios.delete('/api/rest/seasons/' + this.season?.id);
                 this.fetchSeasons();
-                this.showMessage('Sezóna bola úspešne zmazaná.','success')
+                this.showMessage('Sezóna bola úspešne zmazaná.', 'success')
                 console.log('Sezóna bola úspešne zmazaná.');
             } catch (err) {
                 console.error('Chyba pri mazaní sezóny:', err);
@@ -198,5 +198,23 @@ li:not(:last-child) {
 
 .season-table tbody tr:hover {
     background-color: #363537;
+}
+
+@media (max-width: 768px) {
+    .season-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .season-table th,
+    .season-table td {
+        /* font-size: 0.9rem; */
+        /* menšie písmo na mobiloch */
+        padding: 0.2rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+        /* 💡 umožní lámanie riadkov */
+    }
 }
 </style>
