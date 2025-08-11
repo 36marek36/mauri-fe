@@ -33,7 +33,7 @@
 
     <div v-else>Načítavam používateľov...</div>
 
-    <DeleteModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať používateľa: ${user?.username}?`"
+    <AppModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať používateľa: ${user?.username}?`"
         @confirm="deleteUser" @cancel="cancelDelete" />
 </template>
 
@@ -41,7 +41,7 @@
 import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
-import DeleteModal from '@/components/DeleteModal.vue';
+import AppModal from '@/components/AppModal.vue';
 import { flashMessageMixin } from '@/flashMessageMixin';
 import FlashMessage from '@/components/FlashMessage.vue';
 
@@ -93,7 +93,7 @@ export default {
             this.showDeleteModal = false;
         }
     },
-    components: { AppHeader, AppButton, DeleteModal,FlashMessage }
+    components: { AppHeader, AppButton, AppModal,FlashMessage }
 }
 
 </script>

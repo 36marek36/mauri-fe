@@ -54,7 +54,7 @@
             </table>
         </div>
     </div>
-    <DeleteModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať sezónu: ${season?.year}?`"
+    <AppModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať sezónu: ${season?.year}?`"
         @confirm="deleteSeason" @cancel="cancelDelete" />
 </template>
 
@@ -63,7 +63,7 @@ import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
-import DeleteModal from '@/components/DeleteModal.vue';
+import AppModal from '@/components/AppModal.vue';
 import { flashMessageMixin } from '@/flashMessageMixin';
 import FlashMessage from '@/components/FlashMessage.vue';
 
@@ -162,7 +162,7 @@ export default {
             return this.userStore.isAdmin
         }
     },
-    components: { AppButton, AppHeader, DeleteModal, FlashMessage }
+    components: { AppButton, AppHeader, AppModal, FlashMessage }
 }
 </script>
 

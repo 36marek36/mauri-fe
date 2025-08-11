@@ -6,9 +6,9 @@
     <div class="admin-buttons">
 
         <AppButton v-if="season.status === 'CREATED' && !showCreateLeagueForm" label="Spustiť sezónu" type="create"
-            htmlType="button" icon="" @clicked="startSeason" />
+            htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'start')" />
         <AppButton v-if="season.status === 'ACTIVE' && !showCreateLeagueForm" label="Ukončiť sezónu" type="delete"
-            htmlType="button" icon="" @clicked="finishSeason" />
+            htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'finish')" />
 
         <AppButton v-if="isAdmin" :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
             :type="showCreateLeagueForm ? 'delete' : 'default'" htmlType="button" @clicked="toggleCreateForm"
@@ -76,8 +76,12 @@
 
     </div>
 
-    <DeleteModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať ligu ${leagueToDelete?.leagueName}?`"
+    <AppModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať ligu ${leagueToDelete?.leagueName}?`"
         @confirm="deleteLeague" @cancel="cancelDelete" />
+    <AppModal :visible="showSeasonModal" :message="seasonModalType === 'start'
+        ? `Naozaj chceš spustiť sezónu ${seasonToAction?.year}?`
+        : `Naozaj chceš ukončiť sezónu ${seasonToAction?.year}?`" @confirm="performSeasonAction"
+        @cancel="cancelSeasonAction" />
 
 </template>
 
@@ -86,7 +90,7 @@ import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
-import DeleteModal from '@/components/DeleteModal.vue';
+import AppModal from '@/components/AppModal.vue';
 import { flashMessageMixin } from '@/flashMessageMixin';
 import FlashMessage from '@/components/FlashMessage.vue';
 
@@ -104,6 +108,9 @@ export default {
             },
             showDeleteModal: false,
             leagueToDelete: null,
+            showSeasonModal: false,
+            seasonToAction: null,
+            seasonModalType: null,
             loading: true
         }
     },
@@ -206,41 +213,45 @@ export default {
                 return `${count} tímov`;
             }
         },
-        async startSeason() {
+        async performSeasonAction() {
+            if (!this.seasonToAction || !this.seasonModalType) return;
+
             this.loading = true;
 
-            try {
-                const response = await axios.patch(`/api/rest/seasons/${this.seasonId}/start`);
-                this.showMessage(response.data, 'info');
-                await this.fetchSeason(this.seasonId);
-            } catch (err) {
-                if (err.response && err.response.status === 409) {
-                    this.showMessage('⚠️ ' + err.response.data.message, 'warning');
-                } else {
-                    this.showMessage('❌ Nastala chyba pri štartovaní sezóny.', 'error');
-                    console.error('Chyba pri štartovaní sezóny:', err);
-                }
-            } finally {
-                this.loading = false;
-            }
-        },
-        async finishSeason() {
-            this.loading = true;
+            const id = this.seasonToAction.id;
+            const action = this.seasonModalType; // 'start' alebo 'finish'
 
             try {
-                const response = await axios.patch(`/api/rest/seasons/${this.seasonId}/finish`);
+                const response = await axios.patch(`/api/rest/seasons/${id}/${action}`);
                 this.showMessage(response.data, 'success');
-                await this.fetchSeason(this.seasonId);
+
+                await this.fetchSeason(id);
             } catch (err) {
                 if (err.response && err.response.status === 409) {
                     this.showMessage(`⚠️ ${err.response.data.message}`, 'warning');
                 } else {
-                    this.showMessage('❌ Nastala chyba pri ukončovaní sezóny.', 'error');
-                    console.error('Chyba pri ukončovaní sezóny:', err);
+                    const errorText = action === 'start'
+                        ? '❌ Nastala chyba pri štartovaní sezóny.'
+                        : '❌ Nastala chyba pri ukončovaní sezóny.';
+
+                    this.showMessage(errorText, 'error');
+                    console.error('Chyba pri spracovaní sezóny:', err);
                 }
             } finally {
                 this.loading = false;
+                this.cancelSeasonAction();
             }
+        },
+        confirmSeasonAction(season, type) {
+            this.seasonToAction = season;
+            this.seasonModalType = type; // 'start' alebo 'finish'
+            this.showSeasonModal = true;
+        },
+
+        cancelSeasonAction() {
+            this.showSeasonModal = false;
+            this.seasonToAction = null;
+            this.seasonModalType = null;
         }
     },
     computed: {
@@ -267,7 +278,7 @@ export default {
             };
         },
     },
-    components: { AppButton, AppHeader, DeleteModal, FlashMessage }
+    components: { AppButton, AppHeader, AppModal, FlashMessage }
 }
 
 </script>

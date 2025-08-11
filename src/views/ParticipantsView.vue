@@ -86,7 +86,7 @@
             </div>
         </div>
     </div>
-    <DeleteModal :visible="showDeleteModal"
+    <AppModal :visible="showDeleteModal"
         :message="`Naozaj chcete zmazať ${participant?.type === 'players' ? 'hráča' : 'tím'}: ${participant?.name}?`"
         @confirm="deleteParticipant" @cancel="cancelDelete" />
 </template>
@@ -97,7 +97,7 @@ import ParticipantList from '@/components/ParticipantList.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import { useUserStore } from '@/user'
-import DeleteModal from '@/components/DeleteModal.vue'
+import AppModal from '@/components/AppModal.vue'
 import { flashMessageMixin } from '@/flashMessageMixin'
 import FlashMessage from '@/components/FlashMessage.vue'
 
@@ -265,7 +265,7 @@ export default {
             return this.teams.slice(start, end);
         }
     },
-    components: { AppButton, ParticipantList, AppHeader, DeleteModal, FlashMessage }
+    components: { AppButton, ParticipantList, AppHeader, AppModal, FlashMessage }
 }
 
 </script>

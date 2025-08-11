@@ -147,7 +147,7 @@
             </aside>
         </main>
     </div>
-    <DeleteModal :visible="showDeleteModal"
+    <AppModal :visible="showDeleteModal"
         :message="`Naozaj chcete odstrániť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy?`"
         @confirm="() => removeParticipantFromLeague(participant?.id)" @cancel="cancelDelete" />
 </template>
@@ -161,7 +161,7 @@ import ParticipantList from '@/components/ParticipantList.vue';
 import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/user';
-import DeleteModal from '@/components/DeleteModal.vue';
+import AppModal from '@/components/AppModal.vue';
 import { flashMessageMixin } from '@/flashMessageMixin';
 import FlashMessage from '@/components/FlashMessage.vue';
 
@@ -495,7 +495,7 @@ export default {
             return this.userStore.isLoggedIn
         }
     },
-    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader, DeleteModal, FlashMessage }
+    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader, AppModal, FlashMessage }
 }
 
 </script>
