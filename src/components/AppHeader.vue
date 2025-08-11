@@ -27,7 +27,7 @@ export default {
       required: true
     },
     subtitle: {
-      type: String,
+      type: [String, Number],
       default: ''
     }
   }

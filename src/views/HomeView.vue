@@ -1,5 +1,5 @@
 <template>
-  <AppHeader title="Home Page" subtitle="Vitajte doma!" />
+  <AppHeader title="Handlovská" subtitle="Tenisová Liga" />
 </template>
 
 <script>

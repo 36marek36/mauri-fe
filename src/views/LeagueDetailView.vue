@@ -3,18 +3,26 @@
 
     <FlashMessage :message="message" :messageType="messageType" />
 
-    <div class="league-detail-container">
+    <div class="admin-buttons">
         <!-- 🟢 Štart ligy -->
-        <div class="start-finishLeague-button">
-            <AppButton v-if="isAdmin && hasParticipants && leagueStatus === 'CREATED'" label="Odštartovať ligu"
-                icon="🏁" type="create" htmlType="button" @clicked="generateMatches" />
-        </div>
+        <AppButton v-if="isAdmin && hasParticipants && leagueStatus === 'CREATED'" label="Odštartovať ligu" icon="🏁"
+            type="create" htmlType="button" @clicked="generateMatches" />
 
         <!-- 🔴 Ukončenie ligy -->
-        <div class="start-finishLeague-button">
-            <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Ukončiť ligu" icon="🛑" type="delete"
-                htmlType="button" @clicked="finishLeague" />
-        </div>
+        <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Ukončiť ligu" icon="🛑" type="delete"
+            htmlType="button" @clicked="finishLeague" />
+
+        <!--    Pridávanie účastníkov -->
+        <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
+            :label="showAddParticipants ? 'Skryť formulár' : isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
+            icon="➕" type="create" htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
+        <AddParticipantsForm v-if="isAdmin" :show="showAddParticipants" :items="isSingles ? freePlayers : freeTeams"
+            :formatName="isSingles ? fullName : formatTeamName"
+            :title="isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
+            :submitLabel="isSingles ? 'Pridať hráčov' : 'Pridať tímy'" @submit="handleAddParticipants" />
+    </div>
+
+    <div class="league-detail-container">
 
         <div v-if="loading">Načítavam...</div>
 
@@ -28,21 +36,12 @@
                     :formatName="isSingles ? fullName : formatTeamName"
                     :remove="isAdmin ? (id => confirmDeleteParticipant(isSingles ? 'players' : 'teams', id)) : null"
                     @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
-                <h3 v-else>{{ noParticipantsMessage }}</h3>
-
-                <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
-                    :label="showAddParticipants ? 'Skryť formulár' : 'Pridať účastníkov do ligy'" icon="➕" type="create"
-                    htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
-
-                <AddParticipantsForm v-if="isAdmin" :show="showAddParticipants"
-                    :items="isSingles ? freePlayers : freeTeams" :formatName="isSingles ? fullName : formatTeamName"
-                    :title="isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
-                    :submitLabel="isSingles ? 'Pridať hráčov' : 'Pridať tímy'" @submit="handleAddParticipants" />
+                <!-- <h3 v-else>{{ noParticipantsMessage }}</h3> -->
             </aside>
 
             <!-- 🏓 Zápasy -->
             <section class="matches">
-                <h3>Zápasy ligy</h3>
+                <h3 v-if="hasMatches">Zápasy ligy</h3>
 
                 <div v-if="hasMatches">
                     <AppButton :label="areAnyRoundsOpened ? 'Skryť všetky kolá' : 'Zobraziť všetky kolá'"
@@ -110,15 +109,15 @@
                     </div>
                 </div>
 
-                <p v-else>Žiadne zápasy pre túto ligu.</p>
+                <h3 v-else>Žiadne zápasy pre túto ligu.</h3>
             </section>
 
             <!-- 📊 Tabuľka -->
             <aside class="standings">
-                <h3>Tabuľka</h3>
+                <h3 v-if="hasParticipants">Tabuľka</h3>
 
                 <div class="table-scroll">
-                    <table class="standings-table" v-if="isSingles || isDoubles">
+                    <table class="standings-table" v-if="hasParticipants">
                         <thead>
                             <tr>
                                 <th>Poradie</th>
@@ -143,7 +142,7 @@
                         </tbody>
                     </table>
 
-                    <p v-else>Nie je určený typ zápasu.</p>
+                    <h3 v-else>{{ noParticipantsMessage }}</h3>
                 </div>
             </aside>
         </main>
@@ -240,10 +239,10 @@ export default {
             try {
                 await axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload);
                 await this.loadInitialData();
-                this.showMessage('✅ Účastníci boli úspešne pridaní do ligy!','success');
+                this.showMessage('✅ Účastníci boli úspešne pridaní do ligy!', 'success');
                 this.selectedParticipants = [];
             } catch (err) {
-                this.showMessage('Chyba pri hromadnom pridávaní','error');
+                this.showMessage('Chyba pri hromadnom pridávaní', 'error');
                 console.error('Chyba pri hromadnom pridávaní:', err);
             }
         },
@@ -258,30 +257,30 @@ export default {
                 }
 
                 if (!participant) {
-                    this.showMessage('Účastník nebol nájdený.','warning');
+                    this.showMessage('Účastník nebol nájdený.', 'warning');
                     return;
                 }
 
                 await axios.delete(`/api/rest/leagues/${this.league.id}/participants/${id}`);
 
                 if (this.league.leagueType === 'SINGLES') {
-                    this.showMessage('Hráč ' + this.fullName(participant) + ' bol úspešne odstránený z ligy.','info');
+                    this.showMessage('Hráč ' + this.fullName(participant) + ' bol úspešne odstránený z ligy.', 'info');
                 } else if (this.league.leagueType === 'DOUBLES') {
-                    this.showMessage('Tím ' + this.formatTeamName(participant) + ' bol úspešne odstránený z ligy.','info');
+                    this.showMessage('Tím ' + this.formatTeamName(participant) + ' bol úspešne odstránený z ligy.', 'info');
                 }
 
                 await this.loadInitialData();  // aby sa aktualizovali dáta ligy
 
             } catch (err) {
                 console.error('Chyba pri mazaní participanta z ligy:', err);
-                this.showMessage('Nepodarilo sa odstrániť účastníka z ligy.','error');
+                this.showMessage('Nepodarilo sa odstrániť účastníka z ligy.', 'error');
             } finally {
                 this.cancelDelete();
             }
         },
         goToDetail(type, id) {
             if (!this.isLoggedIn) {
-                this.showMessage('Musíte sa prihlásiť','warning');
+                this.showMessage('Musíte sa prihlásiť', 'warning');
                 return;
             }
             this.$router.push(`/${type}/${id}`);
@@ -304,15 +303,15 @@ export default {
 
                 // Vygenerovanie zápasov
                 await axios.patch(`/api/rest/matches/${leagueId}/generate-matches`);
-                this.showMessage('✅ Zápasy boli úspešne vygenerované','info');
+                this.showMessage('✅ Zápasy boli úspešne vygenerované', 'info');
 
                 await this.loadInitialData();
 
             } catch (err) {
                 if (err.response && err.response.status === 409) {
-                    this.showMessage(`⚠️ ${err.response.data}`,'warning');
+                    this.showMessage(`⚠️ ${err.response.data}`, 'warning');
                 } else {
-                    this.showMessage('❌ Nastala chyba pri generovaní zápasov.','error');
+                    this.showMessage('❌ Nastala chyba pri generovaní zápasov.', 'error');
                     console.error('Chyba pri generovaní zápasov:', err);
                 }
             } finally {
@@ -381,7 +380,7 @@ export default {
             await this.fetchMatches();
             await this.fetchStats()
             this.activeMatchId = null;
-            this.showMessage('✅ Výsledok bol úspešne uložený!','success');
+            this.showMessage('✅ Výsledok bol úspešne uložený!', 'success');
         },
         async fetchStats() {
             const leagueId = this.leagueId
@@ -405,17 +404,17 @@ export default {
 
                 // Ukončenie ligy
                 await axios.patch(`/api/rest/leagues/${leagueId}/finish`);
-                this.showMessage('✅ Liga bola úspešne ukončená','info');
+                this.showMessage('✅ Liga bola úspešne ukončená', 'info');
 
                 await this.loadInitialData();
 
             } catch (err) {
                 if (err.response && err.response.status === 409) {
                     // Konflikt
-                    this.showMessage(`⚠️ ${err.response.data}`,'warning');
+                    this.showMessage(`⚠️ ${err.response.data}`, 'warning');
                 } else {
                     // Neznáma chyba
-                    this.showMessage('❌ Nastala chyba pri ukončovaní ligy.','error');
+                    this.showMessage('❌ Nastala chyba pri ukončovaní ligy.', 'error');
                     console.error('Chyba pri ukončení ligy:', err);
                 }
             } finally {
@@ -444,11 +443,11 @@ export default {
             this.loading = true;
             try {
                 await axios.patch(`/api/rest/matches/${matchId}/cancel-result`);
-                this.showMessage('✅ Výsledok zápasu bol zrušený','warning');
+                this.showMessage('✅ Výsledok zápasu bol zrušený', 'warning');
                 await this.loadInitialData();
             } catch (error) {
                 console.error('Chyba pri rušení výsledku:', error);
-                this.showMessage('❌ Nepodarilo sa zrušiť výsledok.','error');
+                this.showMessage('❌ Nepodarilo sa zrušiť výsledok.', 'error');
             } finally {
                 this.loading = false;
             }
@@ -566,10 +565,17 @@ export default {
     color: whitesmoke;
 }
 
-.start-finishLeague-button {
+.admin-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* .start-finishLeague-button {
     display: flex;
     justify-content: center;
-}
+} */
 
 /* 📱 Mobilné zobrazenie */
 @media (max-width: 768px) {
@@ -577,7 +583,7 @@ export default {
         flex-direction: column;
     }
 
-    .players,
+    .participants,
     .matches,
     .standings {
         width: 100%;
@@ -585,16 +591,28 @@ export default {
     }
 
     /* Voliteľne uprav poradie */
-    .players {
+    .standings {
         order: 1;
     }
 
     .matches {
+        flex: 1 1 auto;
         order: 2;
     }
 
-    .standings {
+    .participants {
         order: 3;
+    }
+
+    .standings-table th,
+    .standings-table td {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* Minimalna sirka tabuľky na mobil aby nebola natiahnuta */
+    .standings-table {
+        min-width: 100%;
     }
 }
 </style>

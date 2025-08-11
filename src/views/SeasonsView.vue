@@ -3,15 +3,18 @@
 
     <FlashMessage :message="message" :messageType="messageType" />
 
-    <AppButton v-if="isAdmin" :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
-        :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
+    <div class="create-button-wrapper">
+        <AppButton v-if="isAdmin"
+            :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
+            :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
+    </div>
 
-    <div v-if="showCreateSeasonForm">
-        <input v-model="newSeason.year" placeholder="Rok sezóny:" />
+    <div v-if="showCreateSeasonForm" class="create-form">
+        <input v-model="newSeason.year" placeholder="Rok sezóny:" class="season-input" />
 
         <AppButton label="Vytvoriť" type="create" icon="➕" htmlType="button" @clicked="createSeason" />
-
     </div>
+
     <div v-if="loading">
         ... loading ...
     </div>
@@ -29,18 +32,19 @@
                         <th>Ligy</th>
                         <th>Hráči</th>
                         <th>Tími</th>
-                        <!-- <th>Status</th> -->
                         <th v-if="isAdmin">Akcie</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="season in seasons" :key="season.id" @click="$router.push('/seasons/' + season.id)"
                         style="cursor: pointer;">
-                        <td>{{ season.year }}</td>
+                        <td class="season-name">
+                            <span class="status-dot" :class="season.status.toLowerCase()"></span>
+                            {{ season.year }}
+                        </td>
                         <td>{{ season.leagues.length }}</td>
                         <td>{{ season.totalPlayers }}</td>
                         <td>{{ season.totalTeams }}</td>
-                        <!-- <td>{{ season.status }}</td> -->
                         <td v-if="isAdmin">
                             <AppButton icon="🗑️" type="delete" htmlType="button"
                                 @clicked="() => confirmDeleteSeason(season)" />
@@ -198,6 +202,50 @@ li:not(:last-child) {
 
 .season-table tbody tr:hover {
     background-color: #363537;
+}
+
+.create-button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.create-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.season-input {
+    padding: 0.5rem;
+    font-size: 1rem;
+    width: 250px;
+    max-width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+.status-dot.created {
+    background-color: #FFC107;
+}
+
+.status-dot.active {
+    background-color: #4CAF50;
+}
+
+.status-dot.finished {
+    background-color: #f44336;
 }
 
 @media (max-width: 768px) {

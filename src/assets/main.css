@@ -27,6 +27,18 @@ body,
   font-family: 'Segoe UI', sans-serif;
 }
 
+h3,
+h4,
+h5,
+h6,
+th {
+  text-shadow:
+    -0.5px -0.5px 0 #ff0000,
+    0.5px -0.5px 0 #ff0000,
+    -0.5px 0.5px 0 #ff0000,
+    0.5px 0.5px 0 #ff0000;
+}
+
 h1,
 h2 {
   font-family: 'Merriweather', serif;
@@ -68,7 +80,9 @@ a {
 }
 
 @media (max-width: 768px) {
-  h1,h2 {
+
+  h1,
+  h2 {
     font-size: 1.8rem;
   }
 }

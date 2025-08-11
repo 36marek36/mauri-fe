@@ -1,23 +1,22 @@
 <template>
-    <AppHeader :title="'Sezóna'" :subtitle="season.year.toString()" />
+    <AppHeader :title="'Sezóna'" :subtitle="season.year" />
 
     <FlashMessage :message="message" :messageType="messageType" />
 
-    <div v-if="loading">... loading ...</div>
+    <div class="admin-buttons">
 
-    <div v-else>
+        <AppButton v-if="season.status === 'CREATED' && !showCreateLeagueForm" label="Spustiť sezónu" type="create"
+            htmlType="button" icon="" @clicked="startSeason" />
+        <AppButton v-if="season.status === 'ACTIVE' && !showCreateLeagueForm" label="Ukončiť sezónu" type="delete"
+            htmlType="button" icon="" @clicked="finishSeason" />
 
         <AppButton v-if="isAdmin" :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
-            :type="showCreateLeagueForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
+            :type="showCreateLeagueForm ? 'delete' : 'default'" htmlType="button" @clicked="toggleCreateForm"
+            icon="➕" />
 
-        <AppButton v-if="season.status === 'CREATED'" label="Spustiť sezónu" type="default" htmlType="button" icon=""
-            @clicked="startSeason" />
-        <AppButton v-if="season.status === 'ACTIVE'" label="Ukončiť sezónu" type="default" htmlType="button" icon=""
-            @clicked="finishSeason" />
-
-        <div v-if="showCreateLeagueForm">
-            <input v-model="newLeague.name" placeholder="Názov ligy" />
-            <select v-model="newLeague.leagueType">
+        <div v-if="showCreateLeagueForm" class="create-form">
+            <input v-model="newLeague.name" placeholder="Názov ligy" class="form-control" />
+            <select v-model="newLeague.leagueType" class="form-control">
                 <option value="SINGLES">DVOJHRA</option>
                 <option value="DOUBLES">ŠTVORHRA</option>
             </select>
@@ -25,15 +24,21 @@
             <AppButton label="Vytvoriť" type="create" htmlType="button" icon="➕" @clicked="createLeague" />
 
         </div>
+    </div>
+
+    <div v-if="loading">... loading ...</div>
+
+    <div v-else>
+
         <table v-if="hasLeagues" class="league-table">
             <thead>
                 <tr>
-                    <th>Názov ligy</th>
-                    <th>Typ ligy</th>
-                    <th>Status</th>
-                    <th>Progres</th>
+                    <th>Liga</th>
+                    <th>Typ</th>
+                    <!-- <th>Status</th> -->
+                    <th v-if="season.status === 'ACTIVE'">Progres</th>
                     <th>Účasť</th>
-                    <th>Víťaz</th>
+                    <th v-if="season.status === 'FINISHED'">Víťaz</th>
                     <th v-if="isAdmin">Akcie</th>
                 </tr>
             </thead>
@@ -42,8 +47,8 @@
                     @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
                     <td>{{ league.leagueName }}</td>
                     <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
-                    <td>{{ leagueStatusLabels[league.leagueStatus] }}</td>
-                    <td>
+                    <!-- <td>{{ leagueStatusLabels[league.leagueStatus] }}</td> -->
+                    <td v-if="season.status === 'ACTIVE'">
                         <span>{{ league.progress }}%</span>
                         <div class="league-progress-bar">
                             <div class="league-progress-fill" :style="{ width: league.progress + '%' }"></div>
@@ -53,13 +58,14 @@
                         {{ inflection(league) }}
                     </td>
 
-                    <td>
+                    <td v-if="season.status === 'FINISHED'">
                         <span v-if="league.leagueStatus === 'FINISHED' && league.winner">
                             🏆 {{ league.winner }}
                         </span>
                     </td>
+
                     <td v-if="isAdmin">
-                        <AppButton v-if="isAdmin" label="Zmazať" icon="🗑️" type="delete" htmlType="button"
+                        <AppButton v-if="isAdmin" icon="🗑️" type="delete" htmlType="button"
                             @clicked="() => confirmDeleteLeague(league)" />
                     </td>
                 </tr>
@@ -106,6 +112,7 @@ export default {
         this.fetchSeason(this.seasonId);
     },
     mixins: [flashMessageMixin],
+
     methods: {
         async fetchSeason(seasonId) {
             try {
@@ -258,7 +265,7 @@ export default {
                 ACTIVE: 'PRIEBEHA',
                 FINISHED: 'UKONČENÁ'
             };
-        }
+        },
     },
     components: { AppButton, AppHeader, DeleteModal, FlashMessage }
 }
@@ -285,13 +292,17 @@ export default {
     color: whitesmoke;
 }
 
+.league-table td:nth-child(2) {
+    white-space: nowrap;
+}
+
 .league-table tbody tr:hover {
     background-color: #363537;
 }
 
 .league-progress-bar {
     height: 8px;
-    width: 200px;
+    width: 100%;
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
     overflow: hidden;
@@ -301,5 +312,48 @@ export default {
     height: 100%;
     background-color: #FFCC00;
     transition: width 0.3sease-in-out;
+}
+
+.admin-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.create-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.form-control {
+    padding: 0.5rem;
+    font-size: 1rem;
+    width: 250px;
+    max-width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .league-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .league-table th,
+    .league-table td {
+        font-size: 0.9rem;
+        /* menšie písmo na mobiloch */
+        padding: 0.2rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+        /* 💡 umožní lámanie riadkov */
+    }
 }
 </style>
