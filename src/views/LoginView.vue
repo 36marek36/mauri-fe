@@ -1,7 +1,7 @@
 <template>
   <AppHeader :title="isLogin ? 'Prihlásenie' : 'Registrácia'" />
 
-  <FlashMessage :message="message" :messageType="messageType" />
+  <FlashMessage />
 
   <div>
     <form @submit.prevent="handleSubmit">
@@ -24,9 +24,9 @@
 <script>
 import AppButton from '@/components/AppButton.vue'
 import AppHeader from '@/components/AppHeader.vue'
-import axios from 'axios'
-import { useUserStore } from '@/user'
-import { flashMessageMixin } from '@/flashMessageMixin'
+import axios from '@/axios-interceptor'
+import { useUserStore } from '@/stores/user'
+import { useFlashMessageStore } from '@/stores/flashMessage';
 import FlashMessage from '@/components/FlashMessage.vue'
 
 
@@ -41,10 +41,9 @@ export default {
   },
   mounted() {
     if (this.$route.query.message === 'logout') {
-      this.showMessage('Boli ste úspešne odhlásený.', 'success')
+      this.flash.showMessage('Boli ste úspešne odhlásený.', 'success')
     }
   },
-  mixins: [flashMessageMixin],
   methods: {
     toggleMode() {
       this.isLogin = !this.isLogin
@@ -54,7 +53,7 @@ export default {
     },
     async handleSubmit() {
       if (!this.isLogin && this.password !== this.confirmPassword) {
-        this.showMessage('Heslá sa nezhodujú', 'error')
+        this.flash.showMessage('Heslá sa nezhodujú', 'error')
         return
       }
       const userStore = useUserStore()
@@ -68,7 +67,7 @@ export default {
           const token = res.data.token
           // ulož token, presmeruj atď.
           localStorage.setItem('jwt', token)
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+          // axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
           await userStore.fetchCurrentUser()
 
           // Vypíš do konzoly
@@ -81,23 +80,16 @@ export default {
             password: this.password
           })
           this.toggleMode()
-          this.showMessage('Účet bol vytvorený. Teraz sa môžete prihlásiť.', 'success')
+          this.flash.showMessage('Účet bol vytvorený. Teraz sa môžete prihlásiť.', 'success')
         }
       } catch (err) {
-        this.showMessage(err.response?.data?.message || 'Nastala neočakávaná chyba.', 'error')
+        this.flash.showMessage(err.response?.data?.message || 'Nastala neočakávaná chyba.', 'error')
       }
-
-      // try {
-      //   const response = await axios.post('/api/rest/auth/login', {
-      //     username: this.username,
-      //     password: this.password
-      //   })
-      //   const token = response.data.token
-      //   localStorage.setItem('jwt', token)
-      //   this.$router.push('/')
-      // } catch (e) {
-      //   this.error = 'Zlé prihlasovacie údaje'
-      // }
+    }
+  },
+  computed: {
+    flash() {
+      return useFlashMessageStore();
     }
   },
   components: { AppButton, AppHeader, FlashMessage }

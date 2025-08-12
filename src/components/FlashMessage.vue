@@ -1,27 +1,19 @@
 <template>
-  <!-- <p v-if="message" class="flash-message">{{ message }}</p> -->
-
-  <!-- <p v-if="message" :class="['flash-message', messageType]">{{ message }}</p> -->
-
-  <!-- <div v-if="message" :class="['flash-message', messageType]">
-    {{ message }}
-  </div> -->
-
   <transition name="flash">
-    <div v-if="message" :class="['flash-message', messageType]">
-      {{ message }}
+    <div v-if="flash.message" :class="['flash-message', flash.messageType]">
+      {{ flash.message }}
     </div>
   </transition>
-
 </template>
 
 <script>
+import { useFlashMessageStore } from '@/stores/flashMessage';
+
 export default {
-  props: {
-    message: String,
-    messageType: {
-      type: String,
-      default: 'info'
+  name: 'FlashMessage',
+  computed: {
+    flash() {
+      return useFlashMessageStore();
     }
   }
 };

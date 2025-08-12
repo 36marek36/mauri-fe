@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { useUserStore } from '@/user'
+import { useUserStore } from '@/stores/user'
 import AppButton from './AppButton.vue'
 
 export default {

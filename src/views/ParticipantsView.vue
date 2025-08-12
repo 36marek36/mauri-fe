@@ -1,7 +1,7 @@
 <template>
     <AppHeader class="app-header" title="Zoznam hráčov a tímov" />
 
-    <FlashMessage :message="message" :messageType="messageType" />
+    <FlashMessage />
 
     <div class="container">
 
@@ -96,9 +96,9 @@ import axios from 'axios'
 import ParticipantList from '@/components/ParticipantList.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppHeader from '@/components/AppHeader.vue'
-import { useUserStore } from '@/user'
+import { useUserStore } from '@/stores/user'
 import AppModal from '@/components/AppModal.vue'
-import { flashMessageMixin } from '@/flashMessageMixin'
+import { useFlashMessageStore } from '@/stores/flashMessage';
 import FlashMessage from '@/components/FlashMessage.vue'
 
 export default {
@@ -126,7 +126,6 @@ export default {
         this.fetchPlayers();
         this.fetchTeams();
     },
-    mixins: [flashMessageMixin],
     methods: {
 
         fetchPlayers() {
@@ -157,7 +156,7 @@ export default {
         },
         goToDetail(type, id) {
             if (!this.isLoggedIn) {
-                this.showMessage('Musíte sa prihlásiť.', 'warning');
+                this.flash.showMessage('Musíte sa prihlásiť.', 'warning');
                 return;
             }
             this.$router.push(`/${type}/${id}`);
@@ -177,7 +176,7 @@ export default {
             try {
                 const res = await axios.post('/api/rest/teams/create', payload);
 
-                this.showMessage('Tim bol úspešne vytvoreny.', 'success')
+                this.flash.showMessage('Tim bol úspešne vytvoreny.', 'success')
                 console.log('Tim: ' + res.data.id + ' bol úspešne vytvoreny.')
 
                 // Resetovanie výberu hráčov
@@ -196,7 +195,7 @@ export default {
             try {
                 await axios.delete('/api/rest/' + this.participant.type + '/' + this.participant.id);
                 const type = this.participant.type === 'players' ? 'Hráč' : 'Tím';
-                this.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný`, 'success');
+                this.flash.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný`, 'success');
                 console.log(`${this.participant.type.slice(0, -1)} bol vymazaný.`);
 
                 if (this.participant.type === 'teams') {
@@ -241,6 +240,9 @@ export default {
     computed: {
         userStore() {
             return useUserStore()
+        },
+        flash() {
+            return useFlashMessageStore();
         },
         isAdmin() {
             return this.userStore.isAdmin

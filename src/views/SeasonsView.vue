@@ -1,11 +1,10 @@
 <template>
     <AppHeader title="Sezóny" />
 
-    <FlashMessage :message="message" :messageType="messageType" />
+    <FlashMessage />
 
     <div class="create-button-wrapper">
-        <AppButton v-if="isAdmin"
-            :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
+        <AppButton v-if="isAdmin" :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
             :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
     </div>
 
@@ -62,10 +61,10 @@
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppHeader from '@/components/AppHeader.vue';
-import { useUserStore } from '@/user';
+import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
-import { flashMessageMixin } from '@/flashMessageMixin';
 import FlashMessage from '@/components/FlashMessage.vue';
+import { useFlashMessageStore } from '@/stores/flashMessage';
 
 export default {
     name: 'SeasonsView',
@@ -82,9 +81,8 @@ export default {
         }
     },
     created() {
-        this.fetchSeasons()
+        this.fetchSeasons();
     },
-    mixins: [flashMessageMixin],
     methods: {
         fetchSeasons() {
             axios.get('/api/rest/seasons/')
@@ -104,7 +102,7 @@ export default {
             try {
                 const res = await axios.post('/api/rest/seasons/create', this.newSeason);
                 console.log('Sezóna: ' + res.data.year + ' bola úspešne vytvorená.')
-                this.showMessage('Sezóna bola úspešne vytvorená', 'success');
+                this.flash.showMessage('Sezóna bola úspešne vytvorená', 'success');
                 this.showCreateSeasonForm = false;
                 this.newSeason = { year: '' };
                 this.fetchSeasons();
@@ -114,20 +112,20 @@ export default {
 
                     // 👉 1. Validácia polí – napr. { "year": "Year is required" }
                     if (data.year) {
-                        this.showMessage(data.year, 'warning');
+                        this.flash.showMessage(data.year, 'warning');
 
                         // 👉 2. Iná chyba – napr. { "message": "Invalid value for field 'year'. Expected a number." }
                     } else if (data.message) {
-                        this.showMessage(data.message, 'warning');
+                        this.flash.showMessage(data.message, 'warning');
 
                         // 👉 3. Neznáma 400 chyba
                     } else {
-                        this.showMessage('Chyba: neplatné dáta.', 'warning');
+                        this.flash.showMessage('Chyba: neplatné dáta.', 'warning');
                     }
 
                 } else {
                     // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
-                    this.showMessage('Neznáma chyba pri vytváraní sezóny.', 'error');
+                    this.flash.showMessage('Neznáma chyba pri vytváraní sezóny.', 'error');
                     console.error('Chyba pri vytváraní sezóny:', err);
                 }
             }
@@ -136,7 +134,7 @@ export default {
             try {
                 await axios.delete('/api/rest/seasons/' + this.season?.id);
                 this.fetchSeasons();
-                this.showMessage('Sezóna bola úspešne zmazaná.', 'success')
+                this.flash.showMessage('Sezóna bola úspešne zmazaná.', 'success')
                 console.log('Sezóna bola úspešne zmazaná.');
             } catch (err) {
                 console.error('Chyba pri mazaní sezóny:', err);
@@ -157,6 +155,9 @@ export default {
     computed: {
         userStore() {
             return useUserStore()
+        },
+        flash() {
+            return useFlashMessageStore();
         },
         isAdmin() {
             return this.userStore.isAdmin

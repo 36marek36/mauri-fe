@@ -1,7 +1,7 @@
 <template>
     <AppHeader :title="league.name" :subtitle="league.leagueType" />
 
-    <FlashMessage :message="message" :messageType="messageType" />
+    <FlashMessage />
 
     <div class="admin-buttons">
         <!-- 🟢 Štart ligy -->
@@ -160,9 +160,9 @@ import axios from 'axios';
 import ParticipantList from '@/components/ParticipantList.vue';
 import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
 import AppHeader from '@/components/AppHeader.vue';
-import { useUserStore } from '@/user';
+import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
-import { flashMessageMixin } from '@/flashMessageMixin';
+import { useFlashMessageStore } from '@/stores/flashMessage';
 import FlashMessage from '@/components/FlashMessage.vue';
 
 
@@ -188,8 +188,6 @@ export default {
     created() {
         this.loadInitialData()
     },
-    mixins: [flashMessageMixin],
-
     methods: {
         async loadInitialData() {
             this.loading = true;
@@ -239,10 +237,10 @@ export default {
             try {
                 await axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload);
                 await this.loadInitialData();
-                this.showMessage('✅ Účastníci boli úspešne pridaní do ligy!', 'success');
+                this.flash.showMessage('✅ Účastníci boli úspešne pridaní do ligy!', 'success');
                 this.selectedParticipants = [];
             } catch (err) {
-                this.showMessage('Chyba pri hromadnom pridávaní', 'error');
+                this.flash.showMessage('Chyba pri hromadnom pridávaní', 'error');
                 console.error('Chyba pri hromadnom pridávaní:', err);
             }
         },
@@ -257,30 +255,30 @@ export default {
                 }
 
                 if (!participant) {
-                    this.showMessage('Účastník nebol nájdený.', 'warning');
+                    this.flash.showMessage('Účastník nebol nájdený.', 'warning');
                     return;
                 }
 
                 await axios.delete(`/api/rest/leagues/${this.league.id}/participants/${id}`);
 
                 if (this.league.leagueType === 'SINGLES') {
-                    this.showMessage('Hráč ' + this.fullName(participant) + ' bol úspešne odstránený z ligy.', 'info');
+                    this.flash.showMessage('Hráč ' + this.fullName(participant) + ' bol úspešne odstránený z ligy.', 'info');
                 } else if (this.league.leagueType === 'DOUBLES') {
-                    this.showMessage('Tím ' + this.formatTeamName(participant) + ' bol úspešne odstránený z ligy.', 'info');
+                    this.flash.showMessage('Tím ' + this.formatTeamName(participant) + ' bol úspešne odstránený z ligy.', 'info');
                 }
 
                 await this.loadInitialData();  // aby sa aktualizovali dáta ligy
 
             } catch (err) {
                 console.error('Chyba pri mazaní participanta z ligy:', err);
-                this.showMessage('Nepodarilo sa odstrániť účastníka z ligy.', 'error');
+                this.flash.showMessage('Nepodarilo sa odstrániť účastníka z ligy.', 'error');
             } finally {
                 this.cancelDelete();
             }
         },
         goToDetail(type, id) {
             if (!this.isLoggedIn) {
-                this.showMessage('Musíte sa prihlásiť', 'warning');
+                this.flash.showMessage('Musíte sa prihlásiť', 'warning');
                 return;
             }
             this.$router.push(`/${type}/${id}`);
@@ -303,15 +301,15 @@ export default {
 
                 // Vygenerovanie zápasov
                 await axios.patch(`/api/rest/matches/${leagueId}/generate-matches`);
-                this.showMessage('✅ Zápasy boli úspešne vygenerované', 'info');
+                this.flash.showMessage('✅ Zápasy boli úspešne vygenerované', 'info');
 
                 await this.loadInitialData();
 
             } catch (err) {
                 if (err.response && err.response.status === 409) {
-                    this.showMessage(`⚠️ ${err.response.data}`, 'warning');
+                    this.flash.showMessage(`⚠️ ${err.response.data}`, 'warning');
                 } else {
-                    this.showMessage('❌ Nastala chyba pri generovaní zápasov.', 'error');
+                    this.flash.showMessage('❌ Nastala chyba pri generovaní zápasov.', 'error');
                     console.error('Chyba pri generovaní zápasov:', err);
                 }
             } finally {
@@ -380,7 +378,7 @@ export default {
             await this.fetchMatches();
             await this.fetchStats()
             this.activeMatchId = null;
-            this.showMessage('✅ Výsledok bol úspešne uložený!', 'success');
+            this.flash.showMessage('✅ Výsledok bol úspešne uložený!', 'success');
         },
         async fetchStats() {
             const leagueId = this.leagueId
@@ -404,17 +402,17 @@ export default {
 
                 // Ukončenie ligy
                 await axios.patch(`/api/rest/leagues/${leagueId}/finish`);
-                this.showMessage('✅ Liga bola úspešne ukončená', 'info');
+                this.flash.showMessage('✅ Liga bola úspešne ukončená', 'info');
 
                 await this.loadInitialData();
 
             } catch (err) {
                 if (err.response && err.response.status === 409) {
                     // Konflikt
-                    this.showMessage(`⚠️ ${err.response.data}`, 'warning');
+                    this.flash.showMessage(`⚠️ ${err.response.data}`, 'warning');
                 } else {
                     // Neznáma chyba
-                    this.showMessage('❌ Nastala chyba pri ukončovaní ligy.', 'error');
+                    this.flash.showMessage('❌ Nastala chyba pri ukončovaní ligy.', 'error');
                     console.error('Chyba pri ukončení ligy:', err);
                 }
             } finally {
@@ -443,11 +441,11 @@ export default {
             this.loading = true;
             try {
                 await axios.patch(`/api/rest/matches/${matchId}/cancel-result`);
-                this.showMessage('✅ Výsledok zápasu bol zrušený', 'warning');
+                this.flash.showMessage('✅ Výsledok zápasu bol zrušený', 'warning');
                 await this.loadInitialData();
             } catch (error) {
                 console.error('Chyba pri rušení výsledku:', error);
-                this.showMessage('❌ Nepodarilo sa zrušiť výsledok.', 'error');
+                this.flash.showMessage('❌ Nepodarilo sa zrušiť výsledok.', 'error');
             } finally {
                 this.loading = false;
             }
@@ -487,6 +485,9 @@ export default {
         },
         userStore() {
             return useUserStore();
+        },
+        flash() {
+            return useFlashMessageStore();
         },
         isAdmin() {
             return this.userStore.isAdmin;

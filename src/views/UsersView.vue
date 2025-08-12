@@ -1,7 +1,7 @@
 <template>
     <AppHeader title="Zoznam používateľov:" />
 
-    <FlashMessage :message="message" :messageType="messageType" />
+    <FlashMessage />
 
     <div v-if="!loading">
         <table class="users-table">
@@ -23,8 +23,8 @@
                         <span v-else>Bez hráča</span>
                     </td>
                     <td>
-                        <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete"
-                            htmltype="button" @clicked="() => confirmDeleteUser(user)" />
+                        <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete" htmltype="button"
+                            @clicked="() => confirmDeleteUser(user)" />
                     </td>
                 </tr>
             </tbody>
@@ -42,7 +42,7 @@ import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppModal from '@/components/AppModal.vue';
-import { flashMessageMixin } from '@/flashMessageMixin';
+import { useFlashMessageStore } from '@/stores/flashMessage';
 import FlashMessage from '@/components/FlashMessage.vue';
 
 export default {
@@ -58,7 +58,6 @@ export default {
     created() {
         this.fetchUsers()
     },
-    mixins:[flashMessageMixin],
     methods: {
 
         fetchUsers() {
@@ -76,7 +75,7 @@ export default {
             try {
                 await axios.delete('/api/rest/users/' + this.user?.id);
                 this.fetchUsers();
-                this.showMessage('Užívatel ' + this.user?.username +' úspešne vymazaný','success')
+                this.flash.showMessage('Užívatel ' + this.user?.username + ' úspešne vymazaný', 'success')
                 console.log('Používatel vymazaný.');
             } catch (err) {
                 console.error('Chyba pri mazaní používateľa:', err);
@@ -92,8 +91,12 @@ export default {
             this.user = null;
             this.showDeleteModal = false;
         }
+    }, computed: {
+        flash() {
+            return useFlashMessageStore();
+        }
     },
-    components: { AppHeader, AppButton, AppModal,FlashMessage }
+    components: { AppHeader, AppButton, AppModal, FlashMessage }
 }
 
 </script>

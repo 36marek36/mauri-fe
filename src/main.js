@@ -4,8 +4,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import { useUserStore } from './user'
-import axios from 'axios'
+import { useUserStore } from './stores/user'
 import './axios-interceptor'
 
 const app = createApp(App)
@@ -19,7 +18,6 @@ async function initApp() {
   const token = localStorage.getItem('jwt')
 
   if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
     await userStore.fetchCurrentUser()
   }
 
