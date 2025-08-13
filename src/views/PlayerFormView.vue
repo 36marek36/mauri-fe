@@ -1,7 +1,5 @@
 <template>
 
-  <AppHeader title="Vytvorenie nového hráča" />
-
   <FlashMessage />
 
   <div class="create-player">
@@ -30,11 +28,11 @@
 </template>
 
 <script>
-import AppHeader from '@/components/AppHeader.vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import FlashMessage from '@/components/FlashMessage.vue'
+import { useHeaderStore } from '@/stores/header';
 
 export default {
   name: 'CreatePlayer',
@@ -47,6 +45,10 @@ export default {
         phone: ''
       }
     }
+  },
+  created() {
+    const header = useHeaderStore();
+    header.setTitle('Vytvorenie nového hráča', '');
   },
   computed: {
     userStore() {
@@ -81,7 +83,7 @@ export default {
       }
     }
   },
-  components: { AppHeader, FlashMessage }
+  components: { FlashMessage }
 }
 </script>
 

@@ -1,7 +1,7 @@
 <template>
     <div class="app-layout">
         <Navbar />
-
+        <AppHeader />
         <main class="main-content">
             <RouterView />
         </main>
@@ -11,6 +11,7 @@
 
 <script setup>
 import Navbar from '@/components/Navbar.vue'
+import AppHeader from './components/AppHeader.vue';
 </script>
 
 <style scoped>
@@ -23,7 +24,7 @@ import Navbar from '@/components/Navbar.vue'
 
 .main-content {
     flex-grow: 1;
-    padding: 0 20px; /* 0 hore/dole, 20px vľavo/vpravo */
+    padding: 0 20px;
+    /* 0 hore/dole, 20px vľavo/vpravo */
 }
-
 </style>

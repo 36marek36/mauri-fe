@@ -1,5 +1,4 @@
 <template>
-    <AppHeader :title="'Sezóna'" :subtitle="season.year" />
 
     <FlashMessage />
 
@@ -88,11 +87,11 @@
 <script>
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
-import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import FlashMessage from '@/components/FlashMessage.vue';
+import { useHeaderStore } from '@/stores/header';
 
 
 export default {
@@ -118,6 +117,7 @@ export default {
         this.seasonId = this.$route.params.id;
         this.fetchSeason(this.seasonId);
     },
+
     methods: {
         async fetchSeason(seasonId) {
             try {
@@ -129,6 +129,9 @@ export default {
                 }
 
                 this.season = season;
+                const header = useHeaderStore()
+                header.setTitle('Sezóna', season.year)
+                
                 this.loading = false;
             } catch (err) {
                 console.error('Chyba pri načítavaní sezóny:', err);
@@ -279,7 +282,7 @@ export default {
             };
         },
     },
-    components: { AppButton, AppHeader, AppModal, FlashMessage }
+    components: { AppButton, AppModal, FlashMessage }
 }
 
 </script>

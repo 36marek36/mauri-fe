@@ -1,5 +1,4 @@
 <template>
-    <AppHeader title="Sezóny" />
 
     <FlashMessage />
 
@@ -60,11 +59,11 @@
 <script>
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
-import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
+import { useHeaderStore } from '@/stores/header';
 
 export default {
     name: 'SeasonsView',
@@ -88,6 +87,8 @@ export default {
             axios.get('/api/rest/seasons/')
                 .then((res) => {
                     this.seasons = res.data
+                    const header = useHeaderStore()
+                    header.setTitle('Sezóny', '')
                     this.loading = false
                 })
                 .catch((error) => {
@@ -163,7 +164,7 @@ export default {
             return this.userStore.isAdmin
         }
     },
-    components: { AppButton, AppHeader, AppModal, FlashMessage }
+    components: { AppButton, AppModal, FlashMessage }
 }
 </script>
 

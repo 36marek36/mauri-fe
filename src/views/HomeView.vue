@@ -1,13 +1,14 @@
 <template>
-  <AppHeader title="Handlovská" subtitle="Tenisová Liga" />
+
 </template>
 
 <script>
-import AppHeader from '@/components/AppHeader.vue';
+import { useHeaderStore } from '@/stores/header';
 
 export default {
-  components:{
-    AppHeader
-  }
+  created() {
+    const header = useHeaderStore();
+    header.setTitle('Handlovská', 'Tenisová Liga');
+  },
 }
 </script>

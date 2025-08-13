@@ -18,20 +18,19 @@
 </template>
 
 <script>
+import { useHeaderStore } from '@/stores/header'
+
 export default {
   name: 'AppHeader',
-  props: {
-    title: {
-      type: String,
-      default: '',
-      required: true
+  computed: {
+    title() {
+      return useHeaderStore().title
     },
-    subtitle: {
-      type: [String, Number],
-      default: ''
+    subtitle() {
+      return useHeaderStore().subtitle
     }
   }
-};
+}
 </script>
 
 <style scoped>

@@ -1,12 +1,8 @@
 <template>
 
-    <AppHeader title="Detail tímu" />
-
     <div v-if="loading">... loading ...</div>
 
     <ul v-else>
-        <h2>{{ team.player1.firstName + ' ' + team.player1.lastName }}</h2>
-        <h2>{{ team.player2.firstName + ' ' + team.player2.lastName }}</h2>
         <div>
             <h3>Všetky zápasy aktuálnej sezóny</h3>
             <div class="table-wrapper">
@@ -42,7 +38,7 @@
                                 }">
                                     {{ match.status === 'FINISHED' ? 'Odohratý' : (match.status === 'CANCELLED' ?
                                         'Zrušený'
-                                    : 'Neodohratý') }}
+                                        : 'Neodohratý') }}
                                 </span>
                             </td>
                         </tr>
@@ -58,8 +54,8 @@
 
 <script>
 
-import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
+import { useHeaderStore } from '@/stores/header';
 
 export default {
     name: 'TeamDetailView.vue',
@@ -87,6 +83,10 @@ export default {
             try {
                 const response = await axios.get('/api/rest/teams/' + this.teamId);
                 this.team = response.data;
+                const header = useHeaderStore();
+                const player1Name = this.team.player1.firstName + ' ' + this.team.player1.lastName;
+                const player2Name = this.team.player2.firstName + ' ' + this.team.player2.lastName;
+                header.setTitle('Detail tímu', player1Name +' a ' + player2Name);
                 this.loading = false
             } catch (error) {
                 console.error('Chyba pri načítavaní tímu:', error);
@@ -114,17 +114,16 @@ export default {
         allMatches() {
             return [...this.createdMatches, ...this.finishedMatches, ...this.cancelledMatches];
         }
-    },
-    components: { AppHeader }
+    }
 }
 
 </script>
 
 <style scoped>
 .table-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
 }
 
 table {

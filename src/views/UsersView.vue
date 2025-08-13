@@ -1,5 +1,4 @@
 <template>
-    <AppHeader title="Zoznam používateľov:" />
 
     <FlashMessage />
 
@@ -38,12 +37,12 @@
 </template>
 
 <script>
-import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import FlashMessage from '@/components/FlashMessage.vue';
+import { useHeaderStore } from '@/stores/header';
 
 export default {
     name: 'UsersView',
@@ -60,16 +59,18 @@ export default {
     },
     methods: {
 
-        fetchUsers() {
-            axios.get('/api/rest/users/')
-                .then((response) => {
-                    this.users = response.data
-                    this.loading = false
-                })
-                .catch((error) => {
-                    console.error('Chyba pri načítaní používatelov:', error)
-                    this.loading = false
-                })
+        async fetchUsers() {
+            this.loading = true;
+            const header = useHeaderStore();
+            try {
+                const response = await axios.get('/api/rest/users/');
+                this.users = response.data;
+                header.setTitle('Zoznam používateľov', '');
+            } catch (error) {
+                console.error('Chyba pri načítaní používateľov:', error);
+            } finally {
+                this.loading = false;
+            }
         },
         async deleteUser() {
             try {
@@ -96,7 +97,7 @@ export default {
             return useFlashMessageStore();
         }
     },
-    components: { AppHeader, AppButton, AppModal, FlashMessage }
+    components: { AppButton, AppModal, FlashMessage }
 }
 
 </script>

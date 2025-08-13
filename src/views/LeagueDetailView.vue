@@ -1,5 +1,4 @@
 <template>
-    <AppHeader :title="league.name" :subtitle="league.leagueType" />
 
     <FlashMessage />
 
@@ -159,11 +158,11 @@ import AddMatchResult from '@/components/AddMatchResult.vue';
 import axios from 'axios';
 import ParticipantList from '@/components/ParticipantList.vue';
 import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
-import AppHeader from '@/components/AppHeader.vue';
 import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import FlashMessage from '@/components/FlashMessage.vue';
+import { useHeaderStore } from '@/stores/header';
 
 
 export default {
@@ -205,6 +204,8 @@ export default {
         async fetchLeague() {
             const res = await axios.get('/api/rest/leagues/' + this.leagueId);
             this.league = res.data;
+                const header = useHeaderStore()
+                header.setTitle(this.league.name, this.league.leagueType)
         },
         async fetchFreeParticipants() {
             if (!this.isAdmin) {
@@ -496,7 +497,7 @@ export default {
             return this.userStore.isLoggedIn
         }
     },
-    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppHeader, AppModal, FlashMessage }
+    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppModal, FlashMessage }
 }
 
 </script>

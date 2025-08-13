@@ -1,5 +1,4 @@
 <template>
-    <AppHeader title="Detail hráča" />
 
     <div v-if="loading">... loading ...</div>
 
@@ -71,7 +70,7 @@
                                         ? 'Odohratý'
                                         : match.status === 'CANCELLED'
                                             ? 'Zrušený'
-                                : 'Neodohratý'
+                                            : 'Neodohratý'
                                 }}
                             </span>
                         </td>
@@ -84,8 +83,8 @@
 
 <script>
 
-import AppHeader from '@/components/AppHeader.vue';
 import axios from 'axios';
+import { useHeaderStore } from '@/stores/header';
 
 export default {
     name: 'PlayerDetailView.vue',
@@ -118,12 +117,16 @@ export default {
             });
         },
         async fetchPlayer() {
+            this.loading = true;
             try {
                 const response = await axios.get('/api/rest/players/' + this.playerId);
                 this.player = response.data;
-                this.loading = false
+                const header = useHeaderStore();
+                header.setTitle('Detail hráča', this.player.firstName + ' ' + this.player.lastName);
             } catch (error) {
                 console.error('Chyba pri načítavaní hráča:', error);
+            } finally {
+                this.loading = false;
             }
         },
         async loadPlayerLeagues() {
@@ -156,8 +159,7 @@ export default {
         allMatches() {
             return [...this.createdMatches, ...this.finishedMatches, ...this.cancelledMatches];
         }
-    },
-    components: { AppHeader }
+    }
 }
 
 </script>
@@ -217,9 +219,10 @@ li span:nth-child(2) {
     text-align: center;
     white-space: nowrap;
 }
+
 .matches-title {
-  text-align: left;
-   margin-bottom: 1rem;
+    text-align: left;
+    margin-bottom: 1rem;
 }
 
 .badge-finished {

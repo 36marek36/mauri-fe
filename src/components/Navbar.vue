@@ -36,16 +36,12 @@
         <RouterLink to="/login">Prihlásenie</RouterLink>
       </li>
     </ul>
-
-    <!-- <div v-if="userStore.error" class="error-message">
-      {{ userStore.error }}
-    </div> -->
-
   </nav>
 </template>
 
 <script>
 import { useUserStore } from '@/stores/user'
+import { useHeaderStore } from '@/stores/header'
 import AppButton from './AppButton.vue'
 
 export default {

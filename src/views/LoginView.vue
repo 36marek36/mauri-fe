@@ -1,5 +1,4 @@
 <template>
-  <AppHeader :title="isLogin ? 'Prihlásenie' : 'Registrácia'" />
 
   <FlashMessage />
 
@@ -23,10 +22,10 @@
 
 <script>
 import AppButton from '@/components/AppButton.vue'
-import AppHeader from '@/components/AppHeader.vue'
 import axios from '@/axios-interceptor'
 import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage';
+import { useHeaderStore } from '@/stores/header';
 import FlashMessage from '@/components/FlashMessage.vue'
 
 
@@ -36,10 +35,13 @@ export default {
       username: '',
       password: '',
       confirmPassword: '',
-      isLogin: true
+      isLogin: true,
     }
   },
-  mounted() {
+  created() {
+    const header = useHeaderStore()
+    header.setTitle(this.isLogin ? 'Prihlásenie' : 'Registrácia', '')
+
     if (this.$route.query.message === 'logout') {
       this.flash.showMessage('Boli ste úspešne odhlásený.', 'success')
     }
@@ -50,6 +52,8 @@ export default {
       this.username = ''
       this.password = ''
       this.confirmPassword = ''
+      const header = useHeaderStore()
+      header.setTitle(this.isLogin ? 'Prihlásenie' : 'Registrácia', '')
     },
     async handleSubmit() {
       if (!this.isLogin && this.password !== this.confirmPassword) {
@@ -57,6 +61,7 @@ export default {
         return
       }
       const userStore = useUserStore()
+      const header = useHeaderStore();
       try {
         if (this.isLogin) {
           // Login API call
@@ -92,6 +97,6 @@ export default {
       return useFlashMessageStore();
     }
   },
-  components: { AppButton, AppHeader, FlashMessage }
+  components: { AppButton, FlashMessage }
 }
 </script>

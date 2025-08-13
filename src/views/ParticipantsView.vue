@@ -1,5 +1,4 @@
 <template>
-    <AppHeader class="app-header" title="Zoznam hráčov a tímov" />
 
     <FlashMessage />
 
@@ -95,11 +94,11 @@
 import axios from 'axios'
 import ParticipantList from '@/components/ParticipantList.vue'
 import AppButton from '@/components/AppButton.vue'
-import AppHeader from '@/components/AppHeader.vue'
 import { useUserStore } from '@/stores/user'
 import AppModal from '@/components/AppModal.vue'
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import FlashMessage from '@/components/FlashMessage.vue'
+import { useHeaderStore } from '@/stores/header'
 
 export default {
     name: 'ParticipantsView',
@@ -123,36 +122,35 @@ export default {
 
     },
     created() {
+        const header = useHeaderStore()
+        header.setTitle('Zoznam hráčov a tímov', '')
         this.fetchPlayers();
         this.fetchTeams();
     },
     methods: {
 
-        fetchPlayers() {
+        async fetchPlayers() {
             this.loadingPlayers = true;
-            axios.get('/api/rest/players/')
-                .then((response) => {
-                    this.players = response.data;
-                })
-                .catch((error) => {
-                    console.error('Chyba pri načítaní hráčov:', error);
-                })
-                .finally(() => {
-                    this.loadingPlayers = false;
-                });
+            try {
+                const response = await axios.get('/api/rest/players/')
+                this.players = response.data
+            } catch (error) {
+                console.error('Chyba pri načítaní hráčov:', error)
+            } finally {
+                this.loadingPlayers = false
+            }
         },
-        fetchTeams() {
+        async fetchTeams() {
             this.loadingTeams = true;
-            axios.get('/api/rest/teams/')
-                .then((response) => {
-                    this.teams = response.data;
-                })
-                .catch((error) => {
-                    console.error('Chyba pri načítaní tímov:', error);
-                })
-                .finally(() => {
-                    this.loadingTeams = false;
-                });
+            try {
+                const response = await axios.get('/api/rest/teams/')
+                this.teams = response.data
+            }
+            catch (error) {
+                console.error('Chyba pri načítaní tímov:', error);
+            } finally {
+                this.loadingTeams = false;
+            }
         },
         goToDetail(type, id) {
             if (!this.isLoggedIn) {
@@ -267,7 +265,7 @@ export default {
             return this.teams.slice(start, end);
         }
     },
-    components: { AppButton, ParticipantList, AppHeader, AppModal, FlashMessage }
+    components: { AppButton, ParticipantList, AppModal, FlashMessage }
 }
 
 </script>
