@@ -1,6 +1,7 @@
 <template>
+    <FlashMessage />
+
     <div class="change-password-form">
-        <h2>Zmena hesla</h2>
         <form @submit.prevent="handleChangePassword">
             <div>
                 <label>Staré heslo:</label>
@@ -24,8 +25,6 @@
                     Heslá sa nezhodujú
                 </small>
             </div>
-            <div v-if="message" class="success-message">{{ message }}</div>
-            <div v-if="error" class="error-message">{{ error }}</div>
         </form>
     </div>
 </template>
@@ -33,6 +32,9 @@
 <script>
 import AppButton from '@/components/AppButton.vue'
 import axios from 'axios'
+import { useHeaderStore } from '@/stores/header'
+import { useFlashMessageStore } from '@/stores/flashMessage';
+import FlashMessage from '@/components/FlashMessage.vue';
 
 export default {
     name: 'ChangePassword',
@@ -40,10 +42,12 @@ export default {
         return {
             oldPassword: '',
             newPassword: '',
-            confirmPassword: '',
-            message: '',
-            error: ''
+            confirmPassword: ''
         }
+    },
+    created() {
+        const header = useHeaderStore();
+        header.setTitle('Zmena hesla', '');
     },
     computed: {
         passwordsMatch() {
@@ -55,15 +59,15 @@ export default {
                 this.confirmPassword.length > 0 &&
                 !this.passwordsMatch
             )
+        },
+        flash() {
+            return useFlashMessageStore();
         }
     },
     methods: {
         async handleChangePassword() {
-            this.message = ''
-            this.error = ''
-
             if (!this.passwordsMatch) {
-                this.error = 'Nové heslá sa nezhodujú.'
+                this.flash.showMessage('Nové heslá sa nezhodujú.', 'error')
                 return
             }
 
@@ -73,17 +77,19 @@ export default {
                     newPassword: this.newPassword
                 })
 
-                this.message = 'Heslo bolo úspešne zmenené.'
+                this.flash.showMessage('Heslo bolo úspešne zmenené.', 'success')
                 this.oldPassword = ''
                 this.newPassword = ''
                 this.confirmPassword = ''
+                setTimeout(() => {
+                    this.$router.push('/')
+                }, 3500)
             } catch (err) {
-                this.error =
-                    err.response?.data?.message || 'Nepodarilo sa zmeniť heslo.'
+                this.flash.showMessage(err.response?.data?.message || 'Nepodarilo sa zmeniť heslo.', 'error')
             }
         }
     },
-    components: { AppButton }
+    components: { AppButton, FlashMessage }
 }
 </script>
 
@@ -133,27 +139,6 @@ input:focus {
     border-color: red;
 }
 
-.field-error {
-    color: red;
-    font-size: 0.85rem;
-    margin-left: 130px;
-
-}
-
-.success-message {
-    color: green;
-    font-weight: bold;
-    text-align: center;
-    margin-top: 1rem;
-}
-
-.error-message {
-    color: red;
-    font-weight: bold;
-    text-align: center;
-    margin-top: 1rem;
-}
-
 .submit-row {
     display: flex;
     align-items: center;
@@ -163,7 +148,7 @@ input:focus {
 
 .field-error-inline {
     color: red;
-    font-size: 0.85rem;
+    font-size: 1rem;
     white-space: nowrap;
 }
 </style>

@@ -83,18 +83,19 @@ export default {
         this.fetchSeasons();
     },
     methods: {
-        fetchSeasons() {
-            axios.get('/api/rest/seasons/')
-                .then((res) => {
-                    this.seasons = res.data
-                    const header = useHeaderStore()
-                    header.setTitle('Sezóny', '')
-                    this.loading = false
-                })
-                .catch((error) => {
-                    console.error('Chyba pri nacitavani sezon:', error)
-                    this.loading = false
-                })
+        async fetchSeasons() {
+            this.loading = true
+            try {
+                const res = await axios.get('/api/rest/seasons/')
+                this.seasons = res.data
+
+                const header = useHeaderStore()
+                header.setTitle('Sezóny', '')
+            } catch (error) {
+                console.error('Chyba pri načítavaní sezón:', error)
+            } finally {
+                this.loading = false
+            }
         },
         toggleCreateForm() {
             this.showCreateSeasonForm = !this.showCreateSeasonForm
