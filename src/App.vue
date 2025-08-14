@@ -2,6 +2,7 @@
     <div class="app-layout">
         <Navbar />
         <AppHeader />
+        <FlashMessage/>
         <main class="main-content">
             <RouterView />
         </main>
@@ -12,6 +13,7 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue'
 import AppHeader from './components/AppHeader.vue';
+import FlashMessage from './components/FlashMessage.vue';
 </script>
 
 <style scoped>

@@ -1,7 +1,5 @@
 <template>
 
-    <FlashMessage />
-
     <div class="create-button-wrapper">
         <AppButton v-if="isAdmin" :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
             :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
@@ -61,7 +59,6 @@ import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
-import FlashMessage from '@/components/FlashMessage.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
 
@@ -165,7 +162,7 @@ export default {
             return this.userStore.isAdmin
         }
     },
-    components: { AppButton, AppModal, FlashMessage }
+    components: { AppButton, AppModal }
 }
 </script>
 

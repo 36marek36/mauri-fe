@@ -1,7 +1,5 @@
 <template>
 
-    <FlashMessage />
-
     <div class="admin-buttons">
 
         <AppButton v-if="season.status === 'CREATED' && !showCreateLeagueForm" label="Spustiť sezónu" type="create"
@@ -90,7 +88,6 @@ import AppButton from '@/components/AppButton.vue';
 import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
-import FlashMessage from '@/components/FlashMessage.vue';
 import { useHeaderStore } from '@/stores/header';
 
 
@@ -282,7 +279,7 @@ export default {
             };
         },
     },
-    components: { AppButton, AppModal, FlashMessage }
+    components: { AppButton, AppModal }
 }
 
 </script>

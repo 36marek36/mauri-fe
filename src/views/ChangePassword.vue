@@ -1,5 +1,4 @@
 <template>
-    <FlashMessage />
 
     <div class="change-password-form">
         <form @submit.prevent="handleChangePassword">
@@ -34,7 +33,6 @@ import AppButton from '@/components/AppButton.vue'
 import axios from 'axios'
 import { useHeaderStore } from '@/stores/header'
 import { useFlashMessageStore } from '@/stores/flashMessage';
-import FlashMessage from '@/components/FlashMessage.vue';
 
 export default {
     name: 'ChangePassword',
@@ -89,7 +87,7 @@ export default {
             }
         }
     },
-    components: { AppButton, FlashMessage }
+    components: { AppButton }
 }
 </script>
 

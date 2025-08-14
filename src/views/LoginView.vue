@@ -1,7 +1,5 @@
 <template>
 
-  <FlashMessage />
-
   <div>
     <form @submit.prevent="handleSubmit">
       <input v-model="username" placeholder="Užívatelské meno" required />
@@ -26,8 +24,6 @@ import axios from '@/axios-interceptor'
 import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
-import FlashMessage from '@/components/FlashMessage.vue'
-
 
 export default {
   data() {
@@ -61,7 +57,6 @@ export default {
         return
       }
       const userStore = useUserStore()
-      const header = useHeaderStore();
       try {
         if (this.isLogin) {
           // Login API call
@@ -97,6 +92,6 @@ export default {
       return useFlashMessageStore();
     }
   },
-  components: { AppButton, FlashMessage }
+  components: { AppButton }
 }
 </script>

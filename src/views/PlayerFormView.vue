@@ -1,7 +1,5 @@
 <template>
 
-  <FlashMessage />
-
   <div class="create-player">
 
     <form @submit.prevent="submitForm">
@@ -31,7 +29,6 @@
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage';
-import FlashMessage from '@/components/FlashMessage.vue'
 import { useHeaderStore } from '@/stores/header';
 
 export default {
@@ -82,8 +79,7 @@ export default {
         console.error(error)
       }
     }
-  },
-  components: { FlashMessage }
+  }
 }
 </script>
 

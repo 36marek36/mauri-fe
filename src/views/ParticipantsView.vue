@@ -1,7 +1,5 @@
 <template>
 
-    <FlashMessage />
-
     <div class="container">
 
         <!-- Ľavý stĺpec: Hráči -->
@@ -97,7 +95,6 @@ import AppButton from '@/components/AppButton.vue'
 import { useUserStore } from '@/stores/user'
 import AppModal from '@/components/AppModal.vue'
 import { useFlashMessageStore } from '@/stores/flashMessage';
-import FlashMessage from '@/components/FlashMessage.vue'
 import { useHeaderStore } from '@/stores/header'
 
 export default {
@@ -265,7 +262,7 @@ export default {
             return this.teams.slice(start, end);
         }
     },
-    components: { AppButton, ParticipantList, AppModal, FlashMessage }
+    components: { AppButton, ParticipantList, AppModal }
 }
 
 </script>

@@ -1,7 +1,5 @@
 <template>
 
-    <FlashMessage />
-
     <div class="admin-buttons">
         <!-- 🟢 Štart ligy -->
         <AppButton v-if="isAdmin && hasParticipants && leagueStatus === 'CREATED'" label="Odštartovať ligu" icon="🏁"
@@ -161,7 +159,6 @@ import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
 import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
-import FlashMessage from '@/components/FlashMessage.vue';
 import { useHeaderStore } from '@/stores/header';
 
 
@@ -497,7 +494,7 @@ export default {
             return this.userStore.isLoggedIn
         }
     },
-    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppModal, FlashMessage }
+    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppModal }
 }
 
 </script>

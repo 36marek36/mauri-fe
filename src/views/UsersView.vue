@@ -1,7 +1,5 @@
 <template>
 
-    <FlashMessage />
-
     <div v-if="!loading">
         <table class="users-table">
             <thead>
@@ -41,7 +39,6 @@ import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
-import FlashMessage from '@/components/FlashMessage.vue';
 import { useHeaderStore } from '@/stores/header';
 
 export default {
@@ -97,7 +94,7 @@ export default {
             return useFlashMessageStore();
         }
     },
-    components: { AppButton, AppModal, FlashMessage }
+    components: { AppButton, AppModal }
 }
 
 </script>
