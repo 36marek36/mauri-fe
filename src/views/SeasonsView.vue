@@ -1,5 +1,4 @@
 <template>
-
     <div class="create-button-wrapper">
         <AppButton v-if="isAdmin" :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
             :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
@@ -7,7 +6,6 @@
 
     <div v-if="showCreateSeasonForm" class="create-form">
         <input v-model="newSeason.year" placeholder="Rok sezóny:" class="season-input" />
-
         <AppButton label="Vytvoriť" type="create" icon="➕" htmlType="button" @clicked="createSeason" />
     </div>
 
@@ -20,36 +18,25 @@
             <p>Žiadne sezóny nie sú k dispozícii.</p>
         </div>
 
-        <div v-else>
-            <table class="season-table">
-                <thead>
-                    <tr>
-                        <th>Sezóna</th>
-                        <th>Ligy</th>
-                        <th>Hráči</th>
-                        <th>Tími</th>
-                        <th v-if="isAdmin">Akcie</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="season in seasons" :key="season.id" @click="$router.push('/seasons/' + season.id)"
-                        style="cursor: pointer;">
-                        <td class="season-name">
-                            <span class="status-dot" :class="season.status.toLowerCase()"></span>
-                            {{ season.year }}
-                        </td>
-                        <td>{{ season.leagues.length }}</td>
-                        <td>{{ season.totalPlayers }}</td>
-                        <td>{{ season.totalTeams }}</td>
-                        <td v-if="isAdmin">
-                            <AppButton icon="🗑️" type="delete" htmlType="button"
-                                @clicked="() => confirmDeleteSeason(season)" />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div v-else class="seasons-grid">
+            <div v-for="season in seasons" :key="season.id" class="season-card"
+                @click="$router.push('/seasons/' + season.id)" role="button" tabindex="0">
+                <h3 class="season-year">{{ season.year }}</h3>
+
+                <div class="season-info">
+                    <p><strong>Ligy:</strong> {{ season.leagues.length }}</p>
+                    <p><strong>Hráči:</strong> {{ season.totalPlayers }}</p>
+                    <p><strong>Tímy:</strong> {{ season.totalTeams }}</p>
+                </div>
+
+                <div v-if="isAdmin" class="season-actions">
+                    <AppButton icon="🗑️" type="delete" htmlType="button" @clicked="confirmDeleteSeason(season)"
+                        title="Vymazať sezónu" />
+                </div>
+            </div>
         </div>
     </div>
+
     <AppModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať sezónu: ${season?.year}?`"
         @confirm="deleteSeason" @cancel="cancelDelete" />
 </template>
@@ -167,41 +154,54 @@ export default {
 </script>
 
 <style scoped>
-ul {
-    list-style-type: none;
-    border: 1px solid #cdcdcd;
+.seasons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
 }
 
-li {
-    padding: .3em .6em;
+.season-card {
+    /* background-color: white; */
+    border: 1px solid #ddd;
+    border-radius: 8px;
     cursor: pointer;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-li:not(:last-child) {
-    border-bottom: 1px solid #cdcdcd;
-}
-
-.season-table {
-    width: 50%;
-    border-collapse: collapse;
-}
-
-.season-table th,
-.season-table td {
-    border-bottom: 1px solid #eee;
-    padding: 0.5rem;
-    text-align: left;
-
-}
-
-.season-table th {
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    color: whitesmoke;
-}
-
-.season-table tbody tr:hover {
+.season-card:hover,
+.season-card:focus {
     background-color: #363537;
+    outline: 2px solid #FFD700;
+}
+
+.season-year {
+    margin: 0 0 12px 0;
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.season-info p {
+    /* display: flex;
+    justify-content: center; */
+    margin: 6px 0;
+}
+
+.season-actions {
+    margin-top: 12px;
+    align-self: flex-end;
+}
+
+.season-input {
+    padding: 0.5rem;
+    font-size: 1rem;
+    width: 250px;
+    max-width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .create-button-wrapper {
@@ -218,51 +218,15 @@ li:not(:last-child) {
     margin-bottom: 2rem;
 }
 
-.season-input {
-    padding: 0.5rem;
-    font-size: 1rem;
-    width: 250px;
-    max-width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.status-dot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 0.5rem;
-    vertical-align: middle;
-}
-
-.status-dot.created {
-    background-color: #FFC107;
-}
-
-.status-dot.active {
-    background-color: #4CAF50;
-}
-
-.status-dot.finished {
-    background-color: #f44336;
-}
-
 @media (max-width: 768px) {
-    .season-table {
-        width: 100%;
-        table-layout: fixed;
+    .seasons-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .season-table th,
-    .season-table td {
-        /* font-size: 0.9rem; */
-        /* menšie písmo na mobiloch */
-        padding: 0.2rem;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        white-space: normal;
-        /* 💡 umožní lámanie riadkov */
+    .season-card {
+        width: 90%;
     }
 }
 </style>

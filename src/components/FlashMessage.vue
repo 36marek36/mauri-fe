@@ -58,33 +58,31 @@ export default {
 
 /* === Animácie === */
 .flash-enter-active {
-  animation: slideInFromLeft 0.6s ease-out forwards;
+  animation: fadeInSlideUp 0.8s ease-out forwards;
 }
 
 .flash-leave-active {
-  animation: slideOutToRight 0.6s ease-in forwards;
+  animation: fadeOutSlideDown 0.8s ease-in forwards;
 }
 
-@keyframes slideInFromLeft {
+@keyframes fadeInSlideUp {
   from {
-    transform: translateX(-100vw);
+    transform: translateY(20px);
     opacity: 0;
   }
-
   to {
-    transform: translateX(0);
+    transform: translateY(0);
     opacity: 1;
   }
 }
 
-@keyframes slideOutToRight {
+@keyframes fadeOutSlideDown {
   from {
-    transform: translateX(0);
+    transform: translateY(0);
     opacity: 1;
   }
-
   to {
-    transform: translateX(100vw);
+    transform: translateY(20px);
     opacity: 0;
   }
 }

@@ -33,7 +33,7 @@
                     :formatName="isSingles ? fullName : formatTeamName"
                     :remove="isAdmin ? (id => confirmDeleteParticipant(isSingles ? 'players' : 'teams', id)) : null"
                     @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
-                <!-- <h3 v-else>{{ noParticipantsMessage }}</h3> -->
+                <h3 v-else>{{ noParticipantsMessage }}</h3>
             </aside>
 
             <!-- 🏓 Zápasy -->
@@ -139,7 +139,7 @@
                         </tbody>
                     </table>
 
-                    <h3 v-else>{{ noParticipantsMessage }}</h3>
+                    <!-- <h3 v-else>{{ noParticipantsMessage }}</h3> -->
                 </div>
             </aside>
         </main>

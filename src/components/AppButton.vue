@@ -1,6 +1,5 @@
 <template>
-  <button class="app-button" :class="buttonClass" @click.stop="handleClick" :disabled="disabled"
-    :type="htmlType">
+  <button class="app-button" :class="buttonClass" @click.stop="handleClick" :disabled="disabled" :type="htmlType">
     <span v-if="icon" class="icon">{{ icon }}</span>
     <span>{{ label }}</span>
   </button>
@@ -68,6 +67,10 @@ export default {
 .app-button--delete {
   background-color: #f44336;
   color: white;
+}
+
+.app-button--delete:hover {
+  background-color: #ffe5e5;
 }
 
 .app-button--edit {

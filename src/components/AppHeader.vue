@@ -11,14 +11,14 @@
     </div>
 
     <div class="right-side">
-      <div class="spacer"></div>
-      <div class="spacer"></div>
+      <FlashMessage />
     </div>
   </div>
 </template>
 
 <script>
 import { useHeaderStore } from '@/stores/header'
+import FlashMessage from './FlashMessage.vue';
 
 export default {
   name: 'AppHeader',
@@ -29,7 +29,8 @@ export default {
     subtitle() {
       return useHeaderStore().subtitle
     }
-  }
+  },
+  components: { FlashMessage }
 }
 </script>
 
@@ -38,19 +39,36 @@ export default {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  /* padding: 1rem; */
-  /* gap: 1rem; */
+  padding: 0 2rem;
 }
 
 .left-side,
+.headings,
 .right-side {
   display: flex;
+  align-items: center;
+}
+
+.left-side {
+  width: 25%;
   gap: 0.5rem;
 }
 
+.headings {
+  width: 50%;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  min-width: 200px;
+}
+
+.right-side {
+  width: 25%;
+  justify-content: flex-end;
+}
+
 .logo,
-.text,
-.spacer {
+.text {
   max-width: 150px;
   width: 20vw;
   aspect-ratio: 1 / 1;
@@ -64,20 +82,6 @@ export default {
 
 .text {
   background-image: url('/images/text.png');
-}
-
-.spacer {
-  background-color: transparent;
-  /* alebo napr. rgba(0,0,0,0.2) ak chceš niečo vidieť */
-}
-
-.headings {
-  flex-direction: column;
-  justify-content: center;
-  flex-grow: 1;
-  /* zaber zvyšný priestor */
-  min-width: 0;
-  /* dôležité pre zalamovanie */
 }
 
 @media (max-width: 768px) {
