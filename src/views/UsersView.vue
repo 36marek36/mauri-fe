@@ -17,7 +17,16 @@
                         <RouterLink v-if="user.player" :to="`/players/${user.player.id}`">
                             {{ user.player.firstName }} {{ user.player.lastName }}
                         </RouterLink>
-                        <span v-else>Bez hráča</span>
+                        <div v-else-if="user.role === 'USER'">
+                            <select v-model="selectedPlayers[user.id]">
+                                <option disabled value="">-- Vyber hráča --</option>
+                                <option v-for="player in unassignedPlayers" :key="player.id" :value="player.id">
+                                    {{ player.firstName }} {{ player.lastName }}
+                                </option>
+                            </select>
+                            <AppButton type="submit" label="Priradiť" @clicked="() => assignPlayerToUser(user)" />
+                        </div>
+                        <span v-else>Bez možnosti priradiť hráča</span>
                     </td>
                     <td>
                         <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete" htmltype="button"
@@ -26,6 +35,17 @@
                 </tr>
             </tbody>
         </table>
+        <div class="ip-wrapper">
+            <div class="inactive-participants">
+                <ParticipantList :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
+                    :formatName="formatPlayerName" @view-detail="(id) => goToDetail('players', id)" />
+            </div>
+            <div class="inactive-participants">
+                <ParticipantList :title="'Neaktívne (vymazané) tími'" :participants="inactiveTeams"
+                    :formatName="formatTeamName" @view-detail="(id) => goToDetail('teams', id)" />
+            </div>
+        </div>
+
     </div>
 
     <div v-else>Načítavam používateľov...</div>
@@ -40,19 +60,27 @@ import AppButton from '@/components/AppButton.vue';
 import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
+import ParticipantList from '@/components/ParticipantList.vue';
 
 export default {
     name: 'UsersView',
     data() {
         return {
             users: [],
+            unassignedPlayers: [],
+            selectedPlayers: {},
+            inactivePlayers: [],
+            inactiveTeams: [],
             showDeleteModal: false,
             user: null,
             loading: true
         }
     },
     created() {
-        this.fetchUsers()
+        this.fetchUsers();
+        this.fetchUnassignedPlayers();
+        this.fetchInactivePlayers();
+        this.fetchInactiveTeams();
     },
     methods: {
 
@@ -67,6 +95,61 @@ export default {
                 console.error('Chyba pri načítaní používateľov:', error);
             } finally {
                 this.loading = false;
+            }
+        },
+        async fetchUnassignedPlayers() {
+            this.loading = true;
+            try {
+                const response = await axios.get('/api/rest/players/without-user')
+                this.unassignedPlayers = response.data
+            } catch (error) {
+                console.error('Chyba pri načítaní hráčov:', error)
+            } finally {
+                this.loading = false;
+            }
+        },
+        async fetchInactivePlayers() {
+            this.loading = true;
+            try {
+                const response = await axios.get('/api/rest/players/inactive')
+                this.inactivePlayers = response.data
+            } catch (error) {
+                console.error('Chyba pri načítaní hráčov:', error)
+            } finally {
+                this.loading = false
+            }
+        },
+        async fetchInactiveTeams() {
+            this.loading = true;
+            try {
+                const response = await axios.get('/api/rest/teams/inactive')
+                this.inactiveTeams = response.data
+            } catch (error) {
+                console.error('Chyba pri načítaní hráčov:', error)
+            } finally {
+                this.loading = false
+            }
+        },
+        async assignPlayerToUser(user) {
+            const playerId = this.selectedPlayers[user.id]
+
+            if (!playerId) {
+                this.flash.showMessage('Najprv vyber hráča!', 'error')
+                return
+            }
+
+            try {
+                await axios.patch(`/api/rest/players/assignToUser/${user.id}`, {
+                    playerId: playerId
+                })
+                this.flash.showMessage('Hráč bol úspešne priradený.', 'success')
+
+                // Obnov zoznamy
+                await this.fetchUsers()
+                await this.fetchUnassignedPlayers()
+            } catch (error) {
+                console.error('Chyba pri priraďovaní hráča:', error)
+                alert('Nepodarilo sa priradiť hráča.')
             }
         },
         async deleteUser() {
@@ -88,13 +171,23 @@ export default {
         cancelDelete() {
             this.user = null;
             this.showDeleteModal = false;
+        },
+        goToDetail(type, id) {
+            this.$router.push(`/${type}/${id}`);
+        },
+        formatPlayerName(player) {
+            return player.firstName + ' ' + player.lastName
+        },
+        formatTeamName(team) {
+            if (!team || !team.player1 || !team.player2) return '';
+            return `${this.formatPlayerName(team.player1)} a ${this.formatPlayerName(team.player2)}`;
         }
     }, computed: {
         flash() {
             return useFlashMessageStore();
         }
     },
-    components: { AppButton, AppModal }
+    components: { AppButton, AppModal, ParticipantList }
 }
 
 </script>
@@ -110,5 +203,32 @@ export default {
 .users-table td {
     padding: 8px;
     text-align: left;
+}
+
+.ip-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.inactive-participants {
+    width: 400px;
+    height: auto;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+@media (max-width: 768px) {
+    .ip-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .inactive-participants {
+        width: 90%;
+        max-height: 200px;
+    }
 }
 </style>

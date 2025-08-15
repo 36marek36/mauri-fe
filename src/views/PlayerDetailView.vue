@@ -25,6 +25,10 @@
                 <span>Dátum registrácie: </span>
                 <span>{{ formatDate(player.registrationDate) }}</span>
             </li>
+            <li v-if="player.deletedDate">
+                <span>Dátum zmazania: </span>
+                <span>{{ formatDate(player.deletedDate) }}</span>
+            </li>
             <li>
                 <span>Zoznam líg:</span>
                 <span class="league-names">
@@ -36,7 +40,7 @@
         </ul>
 
         <!-- Pravý stĺpec – tabuľka zápasov -->
-        <div class="matches-table">
+        <div v-if="player.active" class="matches-table">
             <h3 class="matches-title">Všetky zápasy aktuálnej sezóny</h3>
             <table>
                 <thead>
