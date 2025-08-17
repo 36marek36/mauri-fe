@@ -128,7 +128,7 @@ export default {
                 this.season = season;
                 const header = useHeaderStore()
                 header.setTitle('Sezóna', season.year)
-                
+
                 this.loading = false;
             } catch (err) {
                 console.error('Chyba pri načítavaní sezóny:', err);
@@ -144,10 +144,34 @@ export default {
                 console.log('Liga: ' + res.data.name + ' bola úspešne vytvorená.')
                 this.showCreateLeagueForm = false;
                 this.newLeague = { name: '', leagueType: 'SINGLES', seasonId: '' };
-            } catch (err) {
-                this.flash.showMessage(err.response.data.name, 'error');
-                console.error('Chyba pri vytváraní ligy:', err);
+
+            }catch (err) {
+                if (err.response && err.response.status === 400) {
+                    const data = err.response.data;
+                   if (data.message) {
+                        this.flash.showMessage(data.message, 'warning');
+                    } else {
+                        this.flash.showMessage('Chyba: neplatné dáta.', 'warning');
+                    }
+                } else {
+                    // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
+                    this.flash.showMessage('Neznáma chyba pri vytváraní ligy.', 'error');
+                    console.error('Chyba pri vytváraní ligy:', err);
+                }
             }
+
+
+
+
+            // } catch (err) {
+            //     if (err.response && err.response.status === 400) {
+            //         const data = err.response.data;
+            //         this.flash.showMessage(data.message, 'error');
+            //     } else {
+            //         console.error('Chyba pri vytváraní ligy:', err);
+            //     }
+
+            // }
         },
         toggleCreateForm() {
             this.showCreateLeagueForm = !this.showCreateLeagueForm

@@ -110,7 +110,7 @@
             </section>
 
             <!-- 📊 Tabuľka -->
-            <aside class="standings">
+            <aside class="standings" v-if="standings.length > 0">
                 <h3 v-if="hasParticipants">Tabuľka</h3>
 
                 <div class="table-scroll">
@@ -571,12 +571,6 @@ export default {
     gap: 0.5rem;
 }
 
-/* .start-finishLeague-button {
-    display: flex;
-    justify-content: center;
-} */
-
-/* 📱 Mobilné zobrazenie */
 @media (max-width: 768px) {
     .main-flex-layout {
         flex-direction: column;

@@ -71,6 +71,7 @@ export default {
 
 .app-button--delete:hover {
   background-color: #ffe5e5;
+  color: black;
 }
 
 .app-button--edit {

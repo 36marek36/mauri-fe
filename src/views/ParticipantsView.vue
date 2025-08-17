@@ -182,87 +182,98 @@ export default {
 
                 // ⬇️ Zatvorenie formulára
                 this.toggleCreateForm();
-            } catch (error) {
-                console.error('Chyba pri vytváraní tímu:', error);
-            }
-        },
-        async deleteParticipant() {
-            try {
-                await axios.delete('/api/rest/' + this.participant.type + '/' + this.participant.id);
-                const type = this.participant.type === 'players' ? 'Hráč' : 'Tím';
-                this.flash.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný`, 'success');
-                console.log(`${this.participant.type.slice(0, -1)} bol vymazaný.`);
-
-                if (this.participant.type === 'teams') {
-                    this.currentPageTeams = 1;
-                    this.fetchTeams();
-                } else if (this.participant.type === 'players') {
-                    this.currentPagePlayers = 1;
-                    this.fetchPlayers();
-                }
             } catch (err) {
-                console.error(`Chyba pri mazaní ${this.participant.type.slice(0, -1)}a:`, err);
-            } finally {
-                this.cancelDelete();
+                if (err.response && err.response.status === 400) {
+                    const data = err.response.data;
+                    if (data.message) {
+                        this.flash.showMessage(data.message, 'warning');
+                    } else {
+                        this.flash.showMessage('Chyba: neplatné dáta.', 'warning');
+                    }
+                } else {
+                    // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
+                    this.flash.showMessage('Neznáma chyba pri vytváraní tímu.', 'error');
+                    console.error('Chyba pri vytváraní tímu:', err);
+                }
             }
-        },
-        confirmDeleteParticipant(type, id) {
-            let name = '';
+    },
+    async deleteParticipant() {
+        try {
+            await axios.delete('/api/rest/' + this.participant.type + '/' + this.participant.id);
+            const type = this.participant.type === 'players' ? 'Hráč' : 'Tím';
+            this.flash.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný`, 'success');
+            console.log(`${this.participant.type.slice(0, -1)} bol vymazaný.`);
 
-            if (type === 'players') {
-                const player = this.players.find(p => p.id === id);
-                name = player ? this.formatPlayerName(player) : '';
-            } else if (type === 'teams') {
-                const team = this.teams.find(t => t.id === id);
-                name = team ? this.formatTeamName(team) : '';
+            if (this.participant.type === 'teams') {
+                this.currentPageTeams = 1;
+                this.fetchTeams();
+            } else if (this.participant.type === 'players') {
+                this.currentPagePlayers = 1;
+                this.fetchPlayers();
             }
-
-            this.participant = { id, type, name };
-            this.showDeleteModal = true;
-        },
-        cancelDelete() {
-            this.participant = null;
-            this.showDeleteModal = false;
-        },
-        formatPlayerName(player) {
-            return player.firstName + ' ' + player.lastName
-        },
-        formatTeamName(team) {
-            if (!team || !team.player1 || !team.player2) return '';
-            return `${this.formatPlayerName(team.player1)} a ${this.formatPlayerName(team.player2)}`;
+        } catch (err) {
+            console.error(`Chyba pri mazaní ${this.participant.type.slice(0, -1)}a:`, err);
+        } finally {
+            this.cancelDelete();
         }
     },
-    computed: {
-        userStore() {
-            return useUserStore()
-        },
-        flash() {
-            return useFlashMessageStore();
-        },
-        isAdmin() {
-            return this.userStore.isAdmin
-        },
-        isLoggedIn() {
-            return this.userStore.isLoggedIn
-        },
-        totalPagesPlayers() {
-            return Math.ceil(this.players.length / this.participantsPerPage);
-        },
-        paginatedPlayers() {
-            const start = (this.currentPagePlayers - 1) * this.participantsPerPage;
-            const end = start + this.participantsPerPage;
-            return this.players.slice(start, end);
-        },
-        totalPagesTeams() {
-            return Math.ceil(this.teams.length / this.participantsPerPage);
-        },
-        paginatedTeams() {
-            const start = (this.currentPageTeams - 1) * this.participantsPerPage;
-            const end = start + this.participantsPerPage;
-            return this.teams.slice(start, end);
+    confirmDeleteParticipant(type, id) {
+        let name = '';
+
+        if (type === 'players') {
+            const player = this.players.find(p => p.id === id);
+            name = player ? this.formatPlayerName(player) : '';
+        } else if (type === 'teams') {
+            const team = this.teams.find(t => t.id === id);
+            name = team ? this.formatTeamName(team) : '';
         }
+
+        this.participant = { id, type, name };
+        this.showDeleteModal = true;
     },
-    components: { AppButton, ParticipantList, AppModal }
+    cancelDelete() {
+        this.participant = null;
+        this.showDeleteModal = false;
+    },
+    formatPlayerName(player) {
+        return player.firstName + ' ' + player.lastName
+    },
+    formatTeamName(team) {
+        if (!team || !team.player1 || !team.player2) return '';
+        return `${this.formatPlayerName(team.player1)} a ${this.formatPlayerName(team.player2)}`;
+    }
+},
+computed: {
+    userStore() {
+        return useUserStore()
+    },
+    flash() {
+        return useFlashMessageStore();
+    },
+    isAdmin() {
+        return this.userStore.isAdmin
+    },
+    isLoggedIn() {
+        return this.userStore.isLoggedIn
+    },
+    totalPagesPlayers() {
+        return Math.ceil(this.players.length / this.participantsPerPage);
+    },
+    paginatedPlayers() {
+        const start = (this.currentPagePlayers - 1) * this.participantsPerPage;
+        const end = start + this.participantsPerPage;
+        return this.players.slice(start, end);
+    },
+    totalPagesTeams() {
+        return Math.ceil(this.teams.length / this.participantsPerPage);
+    },
+    paginatedTeams() {
+        const start = (this.currentPageTeams - 1) * this.participantsPerPage;
+        const end = start + this.participantsPerPage;
+        return this.teams.slice(start, end);
+    }
+},
+components: { AppButton, ParticipantList, AppModal }
 }
 
 </script>

@@ -90,13 +90,16 @@ export default {
     align-items: center;
   }
 
-  .headings {
-    align-items: center;
+  .left-side,
+  .headings,
+  .right-side {
+    width: 100%;
+    justify-content: center;
     text-align: center;
   }
 
-  .right-side {
-    display: none;
+  .headings {
+    margin-bottom: 0.5rem;
   }
 }
 </style>

@@ -7,6 +7,7 @@
                     <th>Meno používateľa</th>
                     <th>Rola</th>
                     <th>Hráč</th>
+                    <th>Posledne prihlasenie</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,6 +28,10 @@
                             <AppButton type="submit" label="Priradiť" @clicked="() => assignPlayerToUser(user)" />
                         </div>
                         <span v-else>Bez možnosti priradiť hráča</span>
+                    </td>
+                    <td>
+                        <span v-if="user.lastLogin"> {{ formatDate(user.lastLogin) }} </span>
+                        <span v-else>Zatial žiadne prihlásenie</span>
                     </td>
                     <td>
                         <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete" htmltype="button"
@@ -223,6 +228,10 @@ export default {
         formatTeamName(team) {
             if (!team || !team.player1 || !team.player2) return '';
             return `${this.formatPlayerName(team.player1)} a ${this.formatPlayerName(team.player2)}`;
+        },
+        formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString();
         }
     }, computed: {
         flash() {

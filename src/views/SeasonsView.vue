@@ -95,20 +95,11 @@ export default {
             } catch (err) {
                 if (err.response && err.response.status === 400) {
                     const data = err.response.data;
-
-                    // 👉 1. Validácia polí – napr. { "year": "Year is required" }
-                    if (data.year) {
-                        this.flash.showMessage(data.year, 'warning');
-
-                        // 👉 2. Iná chyba – napr. { "message": "Invalid value for field 'year'. Expected a number." }
-                    } else if (data.message) {
+                   if (data.message) {
                         this.flash.showMessage(data.message, 'warning');
-
-                        // 👉 3. Neznáma 400 chyba
                     } else {
                         this.flash.showMessage('Chyba: neplatné dáta.', 'warning');
                     }
-
                 } else {
                     // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
                     this.flash.showMessage('Neznáma chyba pri vytváraní sezóny.', 'error');
@@ -161,7 +152,7 @@ export default {
 }
 
 .season-card {
-    /* background-color: white; */
+    backdrop-filter: blur(5px);
     border: 1px solid #ddd;
     border-radius: 8px;
     cursor: pointer;
