@@ -91,16 +91,16 @@ import axios from 'axios';
 import { useHeaderStore } from '@/stores/header';
 
 export default {
-    name: 'PlayerDetailView.vue',
+    name: 'PlayerDetailView',
     data() {
         return {
             player: null,
-            playerId: this.$route.params.id,
             playerLeagues: [],
             createdMatches: [],
             finishedMatches: [],
             cancelledMatches: [],
-            loading: true
+            loading: true,
+            header: useHeaderStore()
         }
     },
     created() {
@@ -125,8 +125,7 @@ export default {
             try {
                 const response = await axios.get('/api/rest/players/' + this.playerId);
                 this.player = response.data;
-                const header = useHeaderStore();
-                header.setTitle('Detail hráča', this.player.firstName + ' ' + this.player.lastName);
+                this.header.setTitle('Detail hráča', this.player.name);
             } catch (error) {
                 console.error('Chyba pri načítavaní hráča:', error);
             } finally {
@@ -134,13 +133,12 @@ export default {
             }
         },
         async loadPlayerLeagues() {
-            axios.get(`/api/rest/players/${this.player.id}/leagues`)
-                .then(response => {
-                    this.playerLeagues = response.data;
-                })
-                .catch(err => {
-                    console.error('Chyba pri načítaní líg hráča:', err);
-                });
+            try {
+                const response = await axios.get('/api/rest/players/'+ this.playerId +'/leagues');
+                this.playerLeagues = response.data;
+            } catch (err) {
+                console.error('Chyba pri načítaní líg hráča:', err);
+            }
         },
         async fetchPlayerMatches() {
             try {
@@ -162,6 +160,9 @@ export default {
     computed: {
         allMatches() {
             return [...this.createdMatches, ...this.finishedMatches, ...this.cancelledMatches];
+        },
+        playerId(){
+            return this.$route.params.id
         }
     }
 }

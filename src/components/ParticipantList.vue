@@ -4,7 +4,7 @@
         <ul>
             <li v-for="participant in participants" :key="participant.id">
                 <div class="participant-content">
-                    <span @click="openDetail(participant.id)">{{ formatName(participant) }}</span>
+                    <span @click="openDetail(participant.id)">{{ participant.name }}</span>
                     <AppButton v-if="remove" label="" icon="🗑️" type="delete" htmlType="button" @clicked="() => remove(participant.id)" />
                 </div>
 
@@ -24,10 +24,6 @@ export default {
         },
         participants: {
             type: Array,
-            required: true
-        },
-        formatName: {
-            type: Function,
             required: true
         },
         remove: {

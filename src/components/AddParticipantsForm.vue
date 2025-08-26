@@ -9,7 +9,7 @@
                     :value="item.id"
                     v-model="selected"
                     />
-                    <span>{{ formatName(item) }}</span>
+                    <span>{{ item.name }}</span>
                 </label>
             </li>
         </ul>
@@ -37,13 +37,8 @@ export default {
             type:Array,
             required:true
         },
-        formatName:{
-            type:Function,
-            required:true
-        },
         title:{
             type:String,
-
             required:true
         },
         submitLabel:{

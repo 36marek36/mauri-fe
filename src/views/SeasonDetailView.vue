@@ -96,7 +96,6 @@ export default {
     data() {
         return {
             season: {},
-            seasonId: null,
             showCreateLeagueForm: false,
             newLeague: {
                 name: '',
@@ -107,12 +106,13 @@ export default {
             showSeasonModal: false,
             seasonToAction: null,
             seasonModalType: null,
-            loading: true
+            loading: true,
+            header: useHeaderStore()
         }
     },
     created() {
-        this.seasonId = this.$route.params.id;
-        this.fetchSeason(this.seasonId);
+        const seasonId = this.$route.params.id;
+        this.fetchSeason(seasonId);
     },
 
     methods: {
@@ -126,8 +126,8 @@ export default {
                 }
 
                 this.season = season;
-                const header = useHeaderStore()
-                header.setTitle('Sezóna', season.year)
+
+                this.header.setTitle('Sezóna', season.year)
 
                 this.loading = false;
             } catch (err) {
@@ -135,57 +135,45 @@ export default {
                 this.loading = false;
             }
         },
-
         async createLeague() {
             try {
-                const res = await axios.post('/api/rest/leagues/create', this.newLeague);
-                await this.addLeagueToSeason(res.data.id)
-                this.flash.showMessage('✅ Liga ' + res.data.name + ' bola úspešne vytvorená a pridaná do sezóny', 'success');
-                console.log('Liga: ' + res.data.name + ' bola úspešne vytvorená.')
-                this.showCreateLeagueForm = false;
-                this.newLeague = { name: '', leagueType: 'SINGLES', seasonId: '' };
+                const seasonId = this.$route.params.id; // id sezóny z URL
 
-            }catch (err) {
-                if (err.response && err.response.status === 400) {
-                    const data = err.response.data;
-                   if (data.message) {
-                        this.flash.showMessage(data.message, 'warning');
-                    } else {
-                        this.flash.showMessage('Chyba: neplatné dáta.', 'warning');
-                    }
+                // ...this.newLeague skopíruje všetky vlastnosti objektu newLeague
+                // Potom tam ešte pridáš alebo prepíšeš seasonId
+                //  Výsledkom je nový objekt s kombinovanými údajmi
+                const payload = {
+                    ...this.newLeague,
+                    seasonId // pridáme do payloadu
+                };
+
+                const res = await axios.post('/api/rest/leagues/create', payload);
+                const { leagueName } = res.data;
+
+                this.flash.showMessage(`✅ Liga ${leagueName} bola úspešne vytvorená a pridaná do sezóny`, 'success');
+                console.log(`Liga ${leagueName} bola úspešne vytvorená.`);
+
+                this.showCreateLeagueForm = false;
+
+                // Obnovíme sezónu, aby sa nová liga zobrazila v tabuľke
+                await this.fetchSeason(seasonId);
+
+                // Reset formulára
+                this.newLeague = { name: '', leagueType: 'SINGLES' };
+
+            } catch (err) {
+                if (err.response?.status === 400) {
+                    const msg = err.response.data?.message || 'Chyba: neplatné dáta.';
+                    this.flash.showMessage(msg, 'warning');
                 } else {
-                    // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
-                    this.flash.showMessage('Neznáma chyba pri vytváraní ligy.', 'error');
+                    this.flash.showMessage('❌ Neznáma chyba pri vytváraní ligy.', 'error');
                     console.error('Chyba pri vytváraní ligy:', err);
                 }
             }
-
-
-
-
-            // } catch (err) {
-            //     if (err.response && err.response.status === 400) {
-            //         const data = err.response.data;
-            //         this.flash.showMessage(data.message, 'error');
-            //     } else {
-            //         console.error('Chyba pri vytváraní ligy:', err);
-            //     }
-
-            // }
         },
+
         toggleCreateForm() {
             this.showCreateLeagueForm = !this.showCreateLeagueForm
-        },
-        async addLeagueToSeason(leagueId) {
-            try {
-                await axios.patch('/api/rest/seasons/' + this.seasonId + '/addLeague', {
-                    leagueId: leagueId
-                });
-                console.log('Liga bola pridaná do sezóny.');
-                await this.fetchSeason(this.seasonId);
-            } catch (err) {
-                console.error('Chyba pri priraďovaní ligy:', err);
-            }
         },
 
         async fetchLeagueProgress(leagueId) {
@@ -197,7 +185,7 @@ export default {
                 return 0;
             }
         },
-        // vyvoláš modál, keď chceš zmazať ligu
+
         confirmDeleteLeague(league) {
             this.leagueToDelete = league;
             this.showDeleteModal = true;
@@ -205,7 +193,7 @@ export default {
         async deleteLeague() {
             try {
                 await axios.delete('/api/rest/leagues/' + this.leagueToDelete.leagueId);
-                await this.fetchSeason(this.seasonId);
+                await this.fetchSeason(this.season.id);
                 this.flash.showMessage('Liga bola úspešne vymazaná', 'info')
                 console.log('Liga bola úspešne zmazaná.');
             } catch (err) {
@@ -222,8 +210,8 @@ export default {
 
         inflection(league) {
             const count = league.leagueType === 'SINGLES'
-                ? league.totalPlayers
-                : league.totalTeams;
+                ? league.players?.length
+                : league.teams?.length
 
             if (league.leagueType === 'SINGLES') {
                 if (count === 1) return '1 hráč';

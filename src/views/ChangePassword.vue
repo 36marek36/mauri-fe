@@ -40,12 +40,12 @@ export default {
         return {
             oldPassword: '',
             newPassword: '',
-            confirmPassword: ''
+            confirmPassword: '',
+            header: useHeaderStore()
         }
     },
     created() {
-        const header = useHeaderStore();
-        header.setTitle('Zmena hesla', '');
+        this.header.setTitle('Zmena hesla', '');
     },
     computed: {
         passwordsMatch() {

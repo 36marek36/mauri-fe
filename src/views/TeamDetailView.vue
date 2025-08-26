@@ -62,11 +62,11 @@ export default {
     data() {
         return {
             team: null,
-            teamId: this.$route.params.id,
             createdMatches: [],
             finishedMatches: [],
             cancelledMatches: [],
-            loading: true
+            loading: true,
+            header: useHeaderStore()
         }
     },
     created() {
@@ -83,10 +83,7 @@ export default {
             try {
                 const response = await axios.get('/api/rest/teams/' + this.teamId);
                 this.team = response.data;
-                const header = useHeaderStore();
-                const player1Name = this.team.player1.firstName + ' ' + this.team.player1.lastName;
-                const player2Name = this.team.player2.firstName + ' ' + this.team.player2.lastName;
-                header.setTitle('Detail tímu', player1Name +' a ' + player2Name);
+                this.header.setTitle('Detail tímu', this.team.name);
                 this.loading = false
             } catch (error) {
                 console.error('Chyba pri načítavaní tímu:', error);
@@ -113,6 +110,9 @@ export default {
     computed: {
         allMatches() {
             return [...this.createdMatches, ...this.finishedMatches, ...this.cancelledMatches];
+        },
+        teamId(){
+            return this.$route.params.id
         }
     }
 }

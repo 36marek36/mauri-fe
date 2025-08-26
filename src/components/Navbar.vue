@@ -16,20 +16,12 @@
 
       <li v-if="isLoggedIn" class="user-dropdown">
         <span class="username" @click="toggleDropdown">{{ userStore.user.username }}</span>
-        <ul v-if="showDropdown" class="dropdown-menu">
-          <li v-if="playerId">
-            <AppButton label="Detail hráča" type="create" @clicked="goToPlayerDetail" />
-          </li>
-          <li v-else>
-            <AppButton label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" />
-          </li>
-          <li>
-            <AppButton label="Zmeniť heslo" type="default" @clicked="goToChangePassword" />
-          </li>
-          <li>
-            <AppButton label="Odhlásiť sa" type="delete" @clicked="logout" />
-          </li>
-        </ul>
+        <div v-if="showDropdown" class="dropdown-menu">
+          <AppButton v-if="playerId" label="Detail hráča" type="create" @clicked="goToPlayerDetail" />
+          <AppButton v-else label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" />
+          <AppButton label="Zmeniť heslo" type="default" @clicked="goToChangePassword" />
+          <AppButton label="Odhlásiť sa" type="delete" @clicked="logout" />
+        </div>
       </li>
 
       <li v-else>
@@ -41,7 +33,6 @@
 
 <script>
 import { useUserStore } from '@/stores/user'
-import { useHeaderStore } from '@/stores/header'
 import AppButton from './AppButton.vue'
 
 export default {
@@ -128,7 +119,7 @@ export default {
 
 .dropdown-menu {
   position: absolute;
-  background-color: white;
+  backdrop-filter: blur(12px);
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 8px;
@@ -136,18 +127,9 @@ export default {
   flex-direction: column;
   gap: 8px;
   min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.dropdown-menu li {
-  list-style: none;
-  margin: 0;
-}
-
-/* .error-message {
-  color: red;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-} */
 
 @media (max-width: 768px) {
   .navbar ul {

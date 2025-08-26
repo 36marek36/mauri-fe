@@ -12,9 +12,8 @@
         <!--    Pridávanie účastníkov -->
         <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
             :label="showAddParticipants ? 'Skryť formulár' : isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
-            icon="➕" type="create" htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
+            icon="➕" type="default" htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
         <AddParticipantsForm v-if="isAdmin" :show="showAddParticipants" :items="isSingles ? freePlayers : freeTeams"
-            :formatName="isSingles ? fullName : formatTeamName"
             :title="isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
             :submitLabel="isSingles ? 'Pridať hráčov' : 'Pridať tímy'" @submit="handleAddParticipants" />
     </div>
@@ -30,7 +29,6 @@
             <aside class="participants">
                 <ParticipantList v-if="hasParticipants" :title="isSingles ? 'Hráči v lige' : 'Tímy v lige'"
                     :participants="isSingles ? league.players : league.teams"
-                    :formatName="isSingles ? fullName : formatTeamName"
                     :remove="isAdmin ? (id => confirmDeleteParticipant(isSingles ? 'players' : 'teams', id)) : null"
                     @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
                 <h3 v-else>{{ noParticipantsMessage }}</h3>
@@ -178,6 +176,7 @@ export default {
             showAddParticipants: false,
             showDeleteModal: false,
             participant: null,
+            header: useHeaderStore()
 
         }
     },
@@ -201,8 +200,7 @@ export default {
         async fetchLeague() {
             const res = await axios.get('/api/rest/leagues/' + this.leagueId);
             this.league = res.data;
-                const header = useHeaderStore()
-                header.setTitle(this.league.name, this.league.leagueType)
+            this.header.setTitle(this.league.name, this.league.leagueType)
         },
         async fetchFreeParticipants() {
             if (!this.isAdmin) {
@@ -233,9 +231,9 @@ export default {
             };
 
             try {
-                await axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload);
+                const res = await axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload);
                 await this.loadInitialData();
-                this.flash.showMessage('✅ Účastníci boli úspešne pridaní do ligy!', 'success');
+                this.flash.showMessage(res.data, 'success');
                 this.selectedParticipants = [];
             } catch (err) {
                 this.flash.showMessage('Chyba pri hromadnom pridávaní', 'error');
@@ -257,12 +255,12 @@ export default {
                     return;
                 }
 
-                await axios.delete(`/api/rest/leagues/${this.league.id}/participants/${id}`);
+                await axios.delete(`/api/rest/leagues/${this.league.leagueId}/participants/${id}`);
 
                 if (this.league.leagueType === 'SINGLES') {
-                    this.flash.showMessage('Hráč ' + this.fullName(participant) + ' bol úspešne odstránený z ligy.', 'info');
+                    this.flash.showMessage('Hráč ' + participant.name + ' bol úspešne odstránený z ligy.', 'info');
                 } else if (this.league.leagueType === 'DOUBLES') {
-                    this.flash.showMessage('Tím ' + this.formatTeamName(participant) + ' bol úspešne odstránený z ligy.', 'info');
+                    this.flash.showMessage('Tím ' + participant.name + ' bol úspešne odstránený z ligy.', 'info');
                 }
 
                 await this.loadInitialData();  // aby sa aktualizovali dáta ligy
@@ -319,10 +317,10 @@ export default {
 
             if (type === 'players') {
                 const player = this.league.players.find(p => p.id === id);
-                name = player ? this.fullName(player) : '';
+                name = player?.name || '';
             } else if (type === 'teams') {
                 const team = this.league.teams.find(t => t.id === id);
-                name = team ? this.formatTeamName(team) : '';
+                name = team?.name || '';
             }
 
             this.participant = { id, type, name };
@@ -464,8 +462,8 @@ export default {
         },
         hasParticipants() {
             return this.isSingles
-                ? this.league.players?.length > 0
-                : this.league.teams?.length > 0;
+                ? this.league.players?.length
+                : this.league.teams?.length
         },
         noParticipantsMessage() {
             return this.isSingles
@@ -479,7 +477,7 @@ export default {
             return this.openedRounds.length > 0;
         },
         leagueStatus() {
-            return this.league.status;
+            return this.league.leagueStatus;
         },
         userStore() {
             return useUserStore();

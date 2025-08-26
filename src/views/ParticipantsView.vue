@@ -18,7 +18,7 @@
             </div>
 
             <div v-else>
-                <ParticipantList :participants="paginatedPlayers" :formatName="formatPlayerName"
+                <ParticipantList :participants="paginatedPlayers"
                     :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
                     @view-detail="(id) => goToDetail('players', id)" />
                 <div v-if="totalPagesPlayers > 1" class="pagination">
@@ -69,7 +69,7 @@
                 </div>
 
                 <div v-else>
-                    <ParticipantList :participants="paginatedTeams" :formatName="formatTeamName"
+                    <ParticipantList :participants="paginatedTeams"
                         :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
                         @view-detail="(id) => goToDetail('teams', id)" />
                     <div v-if="totalPagesTeams > 1" class="pagination">
@@ -114,13 +114,13 @@ export default {
             participant: null,
             participantsPerPage: 5,
             currentPagePlayers: 1,
-            currentPageTeams: 1
+            currentPageTeams: 1,
+            header: useHeaderStore()
         }
 
     },
     created() {
-        const header = useHeaderStore()
-        header.setTitle('Zoznam hráčov a tímov', '')
+        this.header.setTitle('Zoznam hráčov a tímov', '')
         this.fetchPlayers();
         this.fetchTeams();
     },
@@ -222,10 +222,10 @@ export default {
 
         if (type === 'players') {
             const player = this.players.find(p => p.id === id);
-            name = player ? this.formatPlayerName(player) : '';
+            name = player?.name || '';
         } else if (type === 'teams') {
             const team = this.teams.find(t => t.id === id);
-            name = team ? this.formatTeamName(team) : '';
+            name =team.name || '';
         }
 
         this.participant = { id, type, name };
@@ -234,13 +234,6 @@ export default {
     cancelDelete() {
         this.participant = null;
         this.showDeleteModal = false;
-    },
-    formatPlayerName(player) {
-        return player.firstName + ' ' + player.lastName
-    },
-    formatTeamName(team) {
-        if (!team || !team.player1 || !team.player2) return '';
-        return `${this.formatPlayerName(team.player1)} a ${this.formatPlayerName(team.player2)}`;
     }
 },
 computed: {
