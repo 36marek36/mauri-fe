@@ -1,14 +1,22 @@
 <template>
-
+  <div class="logo-wrapper">
+    <img src="/images/logo.png" alt="Logo" class="logo" />
+  </div>
 </template>
 
 <script>
-import { useHeaderStore } from '@/stores/header';
-
-export default {
-  created() {
-    const header = useHeaderStore();
-    header.setTitle('Handlovská', 'Tenisová Liga');
-  },
-}
 </script>
+
+<style scoped>
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; 
+  height: 100%;  
+}
+@media (max-width: 768px) {
+  .logo {
+    width: 80vw;
+  }
+}
+</style>

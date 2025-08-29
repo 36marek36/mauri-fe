@@ -44,11 +44,10 @@
                     @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
                     <td>{{ league.leagueName }}</td>
                     <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
-                    <!-- <td>{{ leagueStatusLabels[league.leagueStatus] }}</td> -->
                     <td v-if="season.status === 'ACTIVE'">
-                        <span>{{ league.progress }}%</span>
+                        <span>{{ league.leagueProgress }}%</span>
                         <div class="league-progress-bar">
-                            <div class="league-progress-fill" :style="{ width: league.progress + '%' }"></div>
+                            <div class="league-progress-fill" :style="{ width: league.leagueProgress + '%' }"></div>
                         </div>
                     </td>
                     <td>
@@ -121,10 +120,6 @@ export default {
                 const response = await axios.get('/api/rest/seasons/' + seasonId + '/stats');
                 const season = response.data;
 
-                for (const league of season.leagues) {
-                    league.progress = await this.fetchLeagueProgress(league.leagueId)
-                }
-
                 this.season = season;
 
                 this.header.setTitle('Sezóna', season.year)
@@ -174,16 +169,6 @@ export default {
 
         toggleCreateForm() {
             this.showCreateLeagueForm = !this.showCreateLeagueForm
-        },
-
-        async fetchLeagueProgress(leagueId) {
-            try {
-                const response = await axios.get(`/api/rest/leagues/${leagueId}/progress`);
-                return response.data;
-            } catch (error) {
-                console.error('Chyba pri načítaní progressu:', error);
-                return 0;
-            }
         },
 
         confirmDeleteLeague(league) {
@@ -281,13 +266,6 @@ export default {
             return {
                 SINGLES: 'DVOJHRA',
                 DOUBLES: 'ŠTVORHRA',
-            };
-        },
-        leagueStatusLabels() {
-            return {
-                CREATED: 'VYTVORENÁ',
-                ACTIVE: 'PRIEBEHA',
-                FINISHED: 'UKONČENÁ'
             };
         },
     },

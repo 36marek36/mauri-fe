@@ -55,8 +55,8 @@
                                 <div>
                                     <span>
                                         {{ isSingles
-                                            ? `${fullName(match.homePlayer)} vs ${fullName(match.awayPlayer)}`
-                                            : `${formatTeamName(match.homeTeam)} vs ${formatTeamName(match.awayTeam)}` }}
+                                            ? `${match.homePlayer?.name} vs ${match.awayPlayer?.name}`
+                                        : `${match.homeTeam?.name} vs ${match.awayTeam?.name}` }}
                                     </span>
 
                                     <!-- Pridanie výsledku (admin alebo hráč) -->
@@ -200,7 +200,7 @@ export default {
         async fetchLeague() {
             const res = await axios.get('/api/rest/leagues/' + this.leagueId);
             this.league = res.data;
-            this.header.setTitle(this.league.name, this.league.leagueType)
+            this.header.setTitle(this.league.leagueName, this.league.leagueType)
         },
         async fetchFreeParticipants() {
             if (!this.isAdmin) {
@@ -255,13 +255,15 @@ export default {
                     return;
                 }
 
-                await axios.delete(`/api/rest/leagues/${this.league.leagueId}/participants/${id}`);
+                const response = await axios.delete(`/api/rest/leagues/${this.league.leagueId}/participants/${id}`);
 
-                if (this.league.leagueType === 'SINGLES') {
-                    this.flash.showMessage('Hráč ' + participant.name + ' bol úspešne odstránený z ligy.', 'info');
-                } else if (this.league.leagueType === 'DOUBLES') {
-                    this.flash.showMessage('Tím ' + participant.name + ' bol úspešne odstránený z ligy.', 'info');
-                }
+                this.flash.showMessage(response.data,'info')
+
+                // if (this.league.leagueType === 'SINGLES') {
+                //     this.flash.showMessage('Hráč ' + participant.name + ' bol úspešne odstránený z ligy.', 'info');
+                // } else if (this.league.leagueType === 'DOUBLES') {
+                //     this.flash.showMessage('Tím ' + participant.name + ' bol úspešne odstránený z ligy.', 'info');
+                // }
 
                 await this.loadInitialData();  // aby sa aktualizovali dáta ligy
 
@@ -329,14 +331,6 @@ export default {
         cancelDelete() {
             this.participant = null;
             this.showDeleteModal = false;
-        },
-        fullName(player) {
-            if (!player) return 'Neznámy';
-            return `${player.firstName || ''} ${player.lastName || ''}`.trim();
-        },
-        formatTeamName(team) {
-            if (!team || !team.player1 || !team.player2) return '';
-            return `${this.fullName(team.player1)} a ${this.fullName(team.player2)}`;
         },
         async handleAddParticipants(selectedIds) {
             this.loading = true;

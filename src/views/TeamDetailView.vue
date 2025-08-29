@@ -18,8 +18,8 @@
                     </thead>
                     <tbody>
                         <tr v-for="match in allMatches" :key="match.id">
-                            <td>{{ match.homeTeam.player1.lastName + '/' + match.homeTeam.player2.lastName }}</td>
-                            <td>{{ match.awayTeam.player1.lastName + '/' + match.awayTeam.player2.lastName }}</td>
+                            <td>{{ match.homeTeam.name }}</td>
+                            <td>{{ match.awayTeam.name }}</td>
 
                             <td>
                                 <span v-if="match.status === 'FINISHED' && match.result">

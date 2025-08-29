@@ -8,19 +8,19 @@
 
                 <template v-if="leagueType === 'SINGLES'">
                     <option :value="match.homePlayer?.id">
-                        {{ fullName(match.homePlayer) }}
+                        {{ match.homePlayer?.name }}
                     </option>
                     <option :value="match.awayPlayer?.id">
-                        {{ fullName(match.awayPlayer) }}
+                        {{ match.awayPlayer?.name }}
                     </option>
                 </template>
 
                 <template v-else>
                     <option :value="match.homeTeam?.id">
-                        {{ teamName(match.homeTeam) }} (domáci tím)
+                        {{ match.homeTeam?.name }} (domáci tím)
                     </option>
                     <option :value="match.awayTeam?.id">
-                        {{ teamName(match.awayTeam) }} (hosťujúci tím)
+                        {{ match.awayTeam?.name }} (hosťujúci tím)
                     </option>
                 </template>
             </select>
@@ -82,19 +82,13 @@ export default {
         }
     },
     methods: {
-        fullName(player) {
-            return `${player?.firstName ?? ''} ${player?.lastName ?? ''}`.trim();
-        },
-        teamName(team) {
-            return `${team?.player1?.lastName ?? ''} / ${team?.player2?.lastName ?? ''}`;
-        },
         participantName(side) {
             if (this.leagueType === 'SINGLES') {
-                const player = side === 'home' ? this.match.homePlayer : this.match.awayPlayer;
-                return this.fullName(player);
+                const player = side === 'home' ? this.match.homePlayer?.name : this.match.awayPlayer?.name;
+                return player;
             } else {
-                const team = side === 'home' ? this.match.homeTeam : this.match.awayTeam;
-                return this.teamName(team);
+                const team = side === 'home' ? this.match.homeTeam?.name : this.match.awayTeam?.name;
+                return team;
             }
         },
         addSet() {

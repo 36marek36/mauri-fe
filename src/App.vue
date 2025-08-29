@@ -1,7 +1,7 @@
 <template>
     <div class="app-layout">
         <Navbar />
-        <AppHeader />
+        <AppHeader v-if="!$route.meta?.hideHeader" />
         <main class="main-content">
             <RouterView />
         </main>

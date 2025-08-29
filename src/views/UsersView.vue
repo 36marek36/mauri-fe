@@ -43,12 +43,12 @@
         <div class="ip-wrapper">
             <div class="inactive-participants">
                 <ParticipantList :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
-                    :formatName="formatPlayerName" @view-detail="(id) => goToDetail('players', id)"
+                     @view-detail="(id) => goToDetail('players', id)"
                     :remove="(id) => confirmDeleteParticipant('players', id)" />
             </div>
             <div class="inactive-participants">
                 <ParticipantList :title="'Neaktívne (vymazané) tími'" :participants="inactiveTeams"
-                    :formatName="formatTeamName" @view-detail="(id) => goToDetail('teams', id)"
+                    @view-detail="(id) => goToDetail('teams', id)"
                     :remove="(id) => confirmDeleteParticipant('teams', id)" />
             </div>
         </div>
@@ -205,10 +205,10 @@ export default {
 
             if (type === 'players') {
                 const player = this.inactivePlayers.find(p => p.id === id);
-                name = player ? this.formatPlayerName(player) : '';
+                name = player ? player.name : '';
             } else if (type === 'teams') {
                 const team = this.inactiveTeams.find(t => t.id === id);
-                name = team ? this.formatTeamName(team) : '';
+                name = team ? team.name : '';
             }
 
             this.participant = { id, type, name };
@@ -222,13 +222,13 @@ export default {
         goToDetail(type, id) {
             this.$router.push(`/${type}/${id}`);
         },
-        formatPlayerName(player) {
-            return player.firstName + ' ' + player.lastName
-        },
-        formatTeamName(team) {
-            if (!team || !team.player1 || !team.player2) return '';
-            return `${this.formatPlayerName(team.player1)} a ${this.formatPlayerName(team.player2)}`;
-        },
+        // formatPlayerName(player) {
+        //     return player.firstName + ' ' + player.lastName
+        // },
+        // formatTeamName(team) {
+        //     if (!team || !team.player1 || !team.player2) return '';
+        //     return `${this.formatPlayerName(team.player1)} a ${this.formatPlayerName(team.player2)}`;
+        // },
         formatDate(dateStr) {
             const date = new Date(dateStr);
             return date.toLocaleString();
