@@ -20,11 +20,12 @@
       </label>
 
       <AppButton :label="isEdit ? 'Upraviť' : 'Vytvoriť'" :type="isEdit ? 'edit' : 'create'" htmlType="submit" />
-      <AppButton label="Vymazat" type="delete" @clicked="deletePlayer" />
+      <AppButton v-if="isEdit" label="Vymazat" type="delete" @clicked="confirmDeletePlayer" />
 
     </form>
 
   </div>
+  <AppModal :visible="showDeleteModal" :message="'Naozaj si chceš vymazať hráča?'" @confirm="deletePlayer" @cancel="cancelDelete" />
 </template>
 
 <script>
@@ -33,6 +34,7 @@ import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
 import AppButton from '@/components/AppButton.vue';
+import AppModal from '@/components/AppModal.vue';
 
 export default {
   name: 'CreatePlayer',
@@ -45,7 +47,8 @@ export default {
         phone: ''
       },
       isEdit: false,
-      playerId: null
+      playerId: null,
+      showDeleteModal: false
     }
   },
   created() {
@@ -91,12 +94,20 @@ export default {
     async deletePlayer() {
       try {
         await axios.delete('/api/rest/players/' + this.playerId)
-        this.flash.showMessage('Hráč bol úspešne vymazaný')
+        this.flash.showMessage(`Hráč ${this.player.firstName} ${this.player.lastName} bol úspešne vymazaný.`,'success')
         await this.userStore.fetchCurrentUser();
         this.$router.push('/participants')
       } catch (err) {
         console.error('Chyba', err)
+      } finally {
+        this.cancelDelete()
       }
+    },
+    confirmDeletePlayer() {
+      this.showDeleteModal = true
+    },
+    cancelDelete(){
+      this.showDeleteModal = false
     },
     async submitForm() {
       try {
@@ -160,7 +171,7 @@ export default {
     //   }
     // }
   },
-  components: { AppButton }
+  components: { AppButton, AppModal }
 }
 </script>
 
