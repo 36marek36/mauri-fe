@@ -32,7 +32,6 @@
                 <tr>
                     <th>Liga</th>
                     <th>Typ</th>
-                    <!-- <th>Status</th> -->
                     <th v-if="season.status === 'ACTIVE'">Progres</th>
                     <th>Účasť</th>
                     <th v-if="season.status === 'FINISHED'">Víťaz</th>
@@ -61,7 +60,7 @@
                     </td>
 
                     <td v-if="isAdmin">
-                        <AppButton v-if="isAdmin" icon="🗑️" type="delete" htmlType="button"
+                        <AppButton v-if="isAdmin" icon="🗑️" type="delete" htmlType="button" :preventPropagation="true"
                             @clicked="() => confirmDeleteLeague(league)" />
                     </td>
                 </tr>

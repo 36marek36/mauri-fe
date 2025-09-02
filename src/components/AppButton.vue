@@ -1,5 +1,5 @@
 <template>
-  <button class="app-button" :class="buttonClass" @click.stop="handleClick" :disabled="disabled" :type="htmlType">
+  <button class="app-button" :class="buttonClass" @click="handleClick" :disabled="disabled" :type="htmlType">
     <span v-if="icon" class="icon">{{ icon }}</span>
     <span>{{ label }}</span>
   </button>
@@ -27,6 +27,10 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    preventPropagation: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -36,6 +40,7 @@ export default {
   },
   methods: {
     handleClick(event) {
+      if (this.preventPropagation) event.stopPropagation();
       this.$emit('clicked', event);
     }
   }

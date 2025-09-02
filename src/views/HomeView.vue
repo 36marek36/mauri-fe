@@ -11,9 +11,10 @@
 .logo-wrapper {
   display: flex;
   justify-content: center;
-  align-items: flex-start; 
-  height: 100%;  
+  align-items: flex-start;
+  height: 100%;
 }
+
 @media (max-width: 768px) {
   .logo {
     width: 80vw;

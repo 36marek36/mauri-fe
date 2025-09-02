@@ -35,6 +35,11 @@ const router = createRouter({
       name: 'newPlayer',
       component: () => import('../views/PlayerFormView.vue'),
     },
+     {
+      path: '/players/edit/:id',
+      name: 'editPlayer',
+      component: () => import('../views/PlayerFormView.vue'),
+    },
     {
       path: '/seasons',
       name: 'seasons',

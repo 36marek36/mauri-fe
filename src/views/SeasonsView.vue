@@ -1,7 +1,7 @@
 <template>
     <div class="create-button-wrapper">
         <AppButton v-if="isAdmin" :label="showCreateSeasonForm ? 'Zavrieť formulár' : 'Vytvoriť novú sezónu'"
-            :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button" @clicked="toggleCreateForm" icon="➕" />
+            :type="showCreateSeasonForm ? 'delete' : 'create'" htmlType="button"  @clicked="toggleCreateForm" icon="➕" />
     </div>
 
     <div v-if="showCreateSeasonForm" class="create-form">
@@ -30,7 +30,7 @@
                 </div>
 
                 <div v-if="isAdmin" class="season-actions">
-                    <AppButton icon="🗑️" type="delete" htmlType="button" @clicked="confirmDeleteSeason(season)"
+                    <AppButton icon="🗑️" type="delete" htmlType="button" :preventPropagation="true" @clicked="confirmDeleteSeason(season)"
                         title="Vymazať sezónu" />
                 </div>
             </div>
@@ -164,7 +164,7 @@ export default {
 
 .season-card:hover,
 .season-card:focus {
-    background-color: #363537;
+    background-color: #002E2C;
     outline: 2px solid #FFD700;
 }
 

@@ -15,14 +15,14 @@
                     <td>{{ user.username }}</td>
                     <td>{{ user.role }}</td>
                     <td>
-                        <RouterLink v-if="user.player" :to="`/players/${user.player.id}`">
-                            {{ user.player.firstName }} {{ user.player.lastName }}
+                        <RouterLink v-if="user.playerId" :to="`/players/${user.playerId}`">
+                            {{ user.playerName }}
                         </RouterLink>
                         <div v-else-if="user.role === 'USER'">
                             <select v-model="selectedPlayers[user.id]">
                                 <option disabled value="">-- Vyber hráča --</option>
                                 <option v-for="player in unassignedPlayers" :key="player.id" :value="player.id">
-                                    {{ player.firstName }} {{ player.lastName }}
+                                    {{ player.name }}
                                 </option>
                             </select>
                             <AppButton type="submit" label="Priradiť" @clicked="() => assignPlayerToUser(user)" />
@@ -43,7 +43,7 @@
         <div class="ip-wrapper">
             <div class="inactive-participants">
                 <ParticipantList :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
-                     @view-detail="(id) => goToDetail('players', id)"
+                    @view-detail="(id) => goToDetail('players', id)"
                     :remove="(id) => confirmDeleteParticipant('players', id)" />
             </div>
             <div class="inactive-participants">
@@ -85,11 +85,21 @@ export default {
         }
     },
     created() {
-        this.fetchUsers();
-        this.fetchUnassignedPlayers();
-        this.fetchAllInactiveParticipants();
+        this.loadInitialData()
     },
     methods: {
+        async loadInitialData() {
+            this.loading = true;
+            try {
+                await this.fetchUsers();
+                await this.fetchUnassignedPlayers();
+                await this.fetchAllInactiveParticipants();
+            } catch (error) {
+                console.error('Chyba pri načítaní údajov:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
 
         async fetchUsers() {
             this.loading = true;
@@ -139,10 +149,10 @@ export default {
             }
 
             try {
-                await axios.patch(`/api/rest/players/assignToUser/${user.id}`, {
+                const res = await axios.patch(`/api/rest/players/assignToUser/${user.id}`, {
                     playerId: playerId
                 })
-                this.flash.showMessage('Hráč bol úspešne priradený.', 'success')
+                this.flash.showMessage(res.data, 'success')
 
                 // Obnov zoznamy
                 await this.fetchUsers()
@@ -155,7 +165,7 @@ export default {
         async deleteUser() {
             try {
                 await axios.delete('/api/rest/users/' + this.user?.id);
-                this.fetchUsers();
+                this.loadInitialData()
                 this.flash.showMessage('Užívatel ' + this.user?.username + ' úspešne vymazaný', 'success')
                 console.log('Používatel vymazaný.');
             } catch (err) {

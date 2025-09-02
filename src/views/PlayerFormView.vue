@@ -19,7 +19,9 @@
         <input v-model="player.phone" type="text" />
       </label>
 
-      <button type="submit">Vytvoriť</button>
+      <AppButton :label="isEdit ? 'Upraviť' : 'Vytvoriť'" :type="isEdit ? 'edit' : 'create'" htmlType="submit" />
+      <AppButton label="Vymazat" type="delete" @clicked="deletePlayer" />
+
     </form>
 
   </div>
@@ -30,6 +32,7 @@ import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
+import AppButton from '@/components/AppButton.vue';
 
 export default {
   name: 'CreatePlayer',
@@ -40,12 +43,23 @@ export default {
         lastName: '',
         email: '',
         phone: ''
-      }
+      },
+      isEdit: false,
+      playerId: null
     }
   },
   created() {
     const header = useHeaderStore();
-    header.setTitle('Vytvorenie nového hráča', '');
+
+    this.playerId = this.$route.params.id;
+    this.isEdit = !!this.playerId;
+
+    if (this.isEdit) {
+      header.setTitle('Úprava profilu hráča', '');
+      this.loadPlayer();
+    } else {
+      header.setTitle('Vytvorenie nového hráča', '');
+    }
   },
   computed: {
     userStore() {
@@ -59,21 +73,48 @@ export default {
     }
   },
   methods: {
-    async submitForm() {
-      const endpoint = this.isAdmin
-        ? '/api/rest/players/admin/createPlayer'
-        : '/api/rest/players/user/createPlayer'
-
+    async loadPlayer() {
       try {
-        const response = await axios.post(endpoint, this.player)
-        console.log('Hráč: ' + response.data.firstName + ' bol úspešne vytvorený.')
-        this.flash.showMessage('Hráč ' + response.data.firstName + ' bol úspešne vytvorený.', 'success')
+        const response = await axios.get(`/api/rest/players/${this.playerId}`);
+        this.player = {
+          firstName: response.data.firstName,
+          lastName: response.data.lastName,
+          email: response.data.email,
+          phone: response.data.phone
+        };
+      } catch (error) {
+        console.error('Chyba pri načítaní hráča:', error);
+        this.flash.showMessage('Nepodarilo sa načítať hráča.', 'error');
+        // prípadne presmerovať alebo inak riešiť
+      }
+    },
+    async deletePlayer() {
+      try {
+        await axios.delete('/api/rest/players/' + this.playerId)
+        this.flash.showMessage('Hráč bol úspešne vymazaný')
+        await this.userStore.fetchCurrentUser();
+        this.$router.push('/participants')
+      } catch (err) {
+        console.error('Chyba', err)
+      }
+    },
+    async submitForm() {
+      try {
+        if (this.isEdit) {
+          // PATCH request na úpravu hráča
+          await axios.patch(`/api/rest/players/${this.playerId}`, this.player);
+          this.flash.showMessage('Hráč bol úspešne upravený.', 'success');
+        } else {
+          // POST request na vytvorenie hráča
+          const endpoint = this.isAdmin
+            ? '/api/rest/players/admin/createPlayer'
+            : '/api/rest/players/user/createPlayer'
 
-        await this.userStore.fetchCurrentUser()
-
-        setTimeout(() => {
-          this.$router.push('/participants')
-        }, 2000)
+          const response = await axios.post(endpoint, this.player);
+          this.flash.showMessage(`Hráč ${response.data.firstName} bol úspešne vytvorený.`, 'success');
+          await this.userStore.fetchCurrentUser();
+          this.$router.push('/participants');
+        }
       } catch (err) {
         if (err.response && err.response.status === 400) {
           const data = err.response.data;
@@ -83,17 +124,43 @@ export default {
             this.flash.showMessage('Chyba: neplatné dáta.', 'warning');
           }
         } else {
-          // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
-          this.flash.showMessage('Neznáma chyba pri vytváraní hráča.', 'error');
-          console.error('Chyba pri vytváraní hráča:', err);
+          this.flash.showMessage('Neznáma chyba pri ukladaní hráča.', 'error');
+          console.error('Chyba pri ukladaní hráča:', err);
         }
       }
-      // } catch (error) {
-      //   this.flash.showMessage('Chyba pri vytváraní hráča.', 'error')
-      //   console.error(error)
-      // }
-    }
-  }
+    },
+    // async submitForm() {
+    //   const endpoint = this.isAdmin
+    //     ? '/api/rest/players/admin/createPlayer'
+    //     : '/api/rest/players/user/createPlayer'
+
+    //   try {
+    //     const response = await axios.post(endpoint, this.player)
+    //     console.log('Hráč: ' + response.data.firstName + ' bol úspešne vytvorený.')
+    //     this.flash.showMessage('Hráč ' + response.data.firstName + ' bol úspešne vytvorený.', 'success')
+
+    //     await this.userStore.fetchCurrentUser()
+
+    //     setTimeout(() => {
+    //       this.$router.push('/participants')
+    //     }, 2000)
+    //   } catch (err) {
+    //     if (err.response && err.response.status === 400) {
+    //       const data = err.response.data;
+    //       if (data.message) {
+    //         this.flash.showMessage(data.message, 'warning');
+    //       } else {
+    //         this.flash.showMessage('Chyba: neplatné dáta.', 'warning');
+    //       }
+    //     } else {
+    //       // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
+    //       this.flash.showMessage('Neznáma chyba pri vytváraní hráča.', 'error');
+    //       console.error('Chyba pri vytváraní hráča:', err);
+    //     }
+    //   }
+    // }
+  },
+  components: { AppButton }
 }
 </script>
 

@@ -17,9 +17,10 @@
       <li v-if="isLoggedIn" class="user-dropdown">
         <span class="username" @click="toggleDropdown">{{ userStore.user.username }}</span>
         <div v-if="showDropdown" class="dropdown-menu">
-          <AppButton v-if="playerId" label="Detail hráča" type="create" @clicked="goToPlayerDetail" />
+          <AppButton v-if="playerId" label="Detail hráča" type="create" @clicked="goToPlayerDetail" htmlType="button" />
           <AppButton v-else label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" />
-          <AppButton label="Zmeniť heslo" type="default" @clicked="goToChangePassword" />
+          <AppButton v-if="playerId" label="Upraviť profil hráča" type="edit" @clicked="goToEditPlayer" />
+          <AppButton label="Zmeniť heslo" type="edit" @clicked="goToChangePassword" />
           <AppButton label="Odhlásiť sa" type="delete" @clicked="logout" />
         </div>
       </li>
@@ -67,6 +68,10 @@ export default {
     goToCreatePlayer() {
       this.closeDropdown()
       this.$router.push('/players/create')
+    },
+    goToEditPlayer() {
+      this.closeDropdown()
+      this.$router.push(`/players/edit/${this.playerId}`);
     },
     goToPlayerDetail() {
       this.closeDropdown()
