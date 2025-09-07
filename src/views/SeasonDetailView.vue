@@ -28,7 +28,7 @@
     <div v-else>
 
         <table v-if="hasLeagues" class="league-table">
-            <thead>
+            <!-- <thead>
                 <tr>
                     <th>Liga</th>
                     <th>Typ</th>
@@ -37,17 +37,14 @@
                     <th v-if="season.status === 'FINISHED'">Víťaz</th>
                     <th v-if="isAdmin">Akcie</th>
                 </tr>
-            </thead>
+            </thead> -->
             <tbody>
                 <tr v-for="league in season.leagues" :key="league.id"
                     @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
                     <td>{{ league.leagueName }}</td>
                     <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
                     <td v-if="season.status === 'ACTIVE'">
-                        <span>{{ league.leagueProgress }}%</span>
-                        <div class="league-progress-bar">
-                            <div class="league-progress-fill" :style="{ width: league.leagueProgress + '%' }"></div>
-                        </div>
+                        <CircularProgress :progress="league.leagueProgress" />
                     </td>
                     <td>
                         {{ inflection(league) }}
@@ -87,6 +84,7 @@ import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
+import CircularProgress from '@/components/CircularProgress.vue';
 
 
 export default {
@@ -129,6 +127,7 @@ export default {
                 this.loading = false;
             }
         },
+
         async createLeague() {
             try {
                 const seasonId = this.$route.params.id; // id sezóny z URL
@@ -263,12 +262,12 @@ export default {
         },
         leagueTypeLabels() {
             return {
-                SINGLES: 'DVOJHRA',
-                DOUBLES: 'ŠTVORHRA',
+                SINGLES: '2-HRA',
+                DOUBLES: '4-HRA',
             };
         },
     },
-    components: { AppButton, AppModal }
+    components: { AppButton, AppModal, CircularProgress }
 }
 
 </script>
@@ -277,42 +276,23 @@ export default {
 .league-table {
     width: 50%;
     border-collapse: collapse;
+
 }
 
-.league-table th,
 .league-table td {
     border-bottom: 1px solid #eee;
     padding: 0.5rem;
     text-align: left;
-
-}
-
-.league-table th {
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    color: whitesmoke;
-}
-
-.league-table td:nth-child(2) {
     white-space: nowrap;
+
 }
+
+/* .league-table td:nth-child(2) {
+    white-space: nowrap;
+} */
 
 .league-table tbody tr:hover {
     background-color: #363537;
-}
-
-.league-progress-bar {
-    height: 8px;
-    width: 100%;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.league-progress-fill {
-    height: 100%;
-    background-color: #FFCC00;
-    transition: width 0.3sease-in-out;
 }
 
 .admin-buttons {
@@ -346,7 +326,6 @@ export default {
         table-layout: fixed;
     }
 
-    .league-table th,
     .league-table td {
         font-size: 0.9rem;
         /* menšie písmo na mobiloch */

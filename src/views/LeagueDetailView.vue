@@ -154,7 +154,7 @@
         :message="`Naozaj chcete odstrániť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy?`"
         @confirm="() => removeParticipantFromLeague(participant?.id)" @cancel="cancelDelete" />
     <AppModal :visible="showDropModal" :message="`Naozaj chcete odhlásiť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy? 
-        Všetky zapasy budú kontumačne prehraté 0:6, 0:6. Táto akcia sa nebude dať vrátiť.`"
+        Všetky jeho zapasy budú kontumačne prehraté 0:6, 0:6. Táto akcia sa nebude dať vrátiť.`"
         @confirm="() => dropParticipantFromLeague(participant?.id)" @cancel="cancelDrop" />
 </template>
 

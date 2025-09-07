@@ -5,12 +5,13 @@
             <li v-for="participant in participants" :key="participant.id" :class="{ inactive: !participant.active }">
                 <div class="participant-content">
                     <span @click="openDetail(participant.id)">{{ participant.name }}</span>
-                    <AppButton v-if="remove" label="" icon="🗑️" type="delete" htmlType="button"
-                        @clicked="() => remove(participant.id)" />
-                    <AppButton v-if="drop" label="odhlásiť" type="edit" htmlType="button"
-                        @clicked="()=> drop(participant.id)"/>
+                    <div class="actions">
+                        <AppButton v-if="drop" label="odhlásiť" type="edit" htmlType="button"
+                            @clicked="() => drop(participant.id)" />
+                        <AppButton v-if="remove" label="" icon="🗑️" type="delete" htmlType="button"
+                            @clicked="() => remove(participant.id)" />
+                    </div>
                 </div>
-
             </li>
         </ul>
     </div>
@@ -33,9 +34,9 @@ export default {
             type: Function,
             default: null
         },
-        drop:{
+        drop: {
             type: Function,
-            default:null
+            default: null
         }
     },
     methods: {
@@ -70,6 +71,11 @@ li:not(:last-child) {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5em;
 }
 
 .inactive {
