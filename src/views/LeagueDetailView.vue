@@ -27,11 +27,19 @@
 
             <!-- 🎽 Účastníci -->
             <aside class="participants">
-                <ParticipantList v-if="hasParticipants" :title="isSingles ? 'Hráči v lige' : 'Tímy v lige'"
-                    :participants="isSingles ? league.players : league.teams"
+                <!-- Aktívni hráči/tímy -->
+                <ParticipantList v-if="activeParticipants.length" :title="isSingles ? 'Hráči v lige' : 'Tímy v lige'"
+                    :participants="activeParticipants"
+                    :remove="isAdmin ? (id => confirmDeleteParticipant(isSingles ? 'players' : 'teams', id)) : null"
+                    :drop="isAdmin && league.leagueStatus === 'ACTIVE' ? (id => confirmDropParticipant(isSingles ? 'players' : 'teams', id)) : null"
+                    @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
+                <!-- Neaktívni hráči/tímy -->
+                <ParticipantList v-if="inactiveParticipants.length"
+                    :title="isSingles ? 'Neaktívni hráči v lige' : 'Neaktívne tímy v lige'"
+                    :participants="inactiveParticipants"
                     :remove="isAdmin ? (id => confirmDeleteParticipant(isSingles ? 'players' : 'teams', id)) : null"
                     @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
-                <h3 v-else>{{ noParticipantsMessage }}</h3>
+                <h3 v-if="!hasParticipants">{{ noParticipantsMessage }}</h3>
             </aside>
 
             <!-- 🏓 Zápasy -->
@@ -56,7 +64,7 @@
                                     <span>
                                         {{ isSingles
                                             ? `${match.homePlayer?.name} vs ${match.awayPlayer?.name}`
-                                        : `${match.homeTeam?.name} vs ${match.awayTeam?.name}` }}
+                                            : `${match.homeTeam?.name} vs ${match.awayTeam?.name}` }}
                                     </span>
 
                                     <!-- Pridanie výsledku (admin alebo hráč) -->
@@ -145,6 +153,9 @@
     <AppModal :visible="showDeleteModal"
         :message="`Naozaj chcete odstrániť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy?`"
         @confirm="() => removeParticipantFromLeague(participant?.id)" @cancel="cancelDelete" />
+    <AppModal :visible="showDropModal" :message="`Naozaj chcete odhlásiť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy? 
+        Všetky zapasy budú kontumačne prehraté 0:6, 0:6. Táto akcia sa nebude dať vrátiť.`"
+        @confirm="() => dropParticipantFromLeague(participant?.id)" @cancel="cancelDrop" />
 </template>
 
 
@@ -167,6 +178,7 @@ export default {
             league: {},
             freePlayers: [],
             freeTeams: [],
+            droppedParticipantsIds: [],
             groupedMatches: {},
             standings: [],
             selectedParticipants: [],
@@ -175,6 +187,7 @@ export default {
             loading: true,
             showAddParticipants: false,
             showDeleteModal: false,
+            showDropModal: false,
             participant: null,
             header: useHeaderStore()
 
@@ -257,7 +270,7 @@ export default {
 
                 const response = await axios.delete(`/api/rest/leagues/${this.league.leagueId}/participants/${id}`);
 
-                this.flash.showMessage(response.data,'info')
+                this.flash.showMessage(response.data, 'info')
 
                 // if (this.league.leagueType === 'SINGLES') {
                 //     this.flash.showMessage('Hráč ' + participant.name + ' bol úspešne odstránený z ligy.', 'info');
@@ -272,6 +285,33 @@ export default {
                 this.flash.showMessage('Nepodarilo sa odstrániť účastníka z ligy.', 'error');
             } finally {
                 this.cancelDelete();
+            }
+        },
+        async dropParticipantFromLeague(participantId) {
+            try {
+                let participant = null
+
+                if (this.league.leagueType === 'SINGLES') {
+                    participant = this.league.players.find(p => p.id === participantId);
+                } else if (this.league.leagueType === 'DOUBLES') {
+                    participant = this.league.teams.find(t => t.id === participantId);
+                }
+
+                if (!participant) {
+                    this.flash.showMessage('Účastník nebol nájdený.', 'warning');
+                    return;
+                }
+
+                const response = await axios.patch('/api/rest/leagues/' + this.league.leagueId + '/participants/' + participantId + '/drop')
+
+                this.flash.showMessage(response.data, 'info')
+
+                await this.loadInitialData()
+            } catch (err) {
+                console.error('Chyba pri odhlasovaní participanta z ligy:', err);
+                this.flash.showMessage('Nepodarilo sa odhlásiť účastníka z ligy.', 'error');
+            } finally {
+                this.cancelDrop()
             }
         },
         goToDetail(type, id) {
@@ -331,6 +371,24 @@ export default {
         cancelDelete() {
             this.participant = null;
             this.showDeleteModal = false;
+        },
+        confirmDropParticipant(type, id) {
+            let name = '';
+
+            if (this.league.leagueType === 'SINGLES') {
+                const player = this.league.players.find(p => p.id === id);
+                name = player?.name || '';
+            } else if (this.league.leagueType === 'DOUBLES') {
+                const team = this.league.teams.find(t => t.id === id);
+                name = team?.name || '';
+            }
+
+            this.participant = { id, type, name };
+            this.showDropModal = true;
+        },
+        cancelDrop() {
+            this.participant = null;
+            this.showDropModal = false;
         },
         async handleAddParticipants(selectedIds) {
             this.loading = true;
@@ -451,18 +509,29 @@ export default {
         isDoubles() {
             return this.league.leagueType === 'DOUBLES';
         },
-        hasMatches() {
-            return Object.keys(this.groupedMatches).length > 0;
+        participants() {
+            return this.isSingles ? this.league?.players || [] : this.league?.teams || [];
+        },
+        activeParticipants() {
+            return this.participants.filter(p => p.active
+                && !this.league?.droppedParticipantsIds?.includes(p.id)
+            )
+        },
+        inactiveParticipants() {
+            return this.participants.filter(p => !p.active
+                || this.league?.droppedParticipantsIds?.includes(p.id)
+            )
         },
         hasParticipants() {
-            return this.isSingles
-                ? this.league.players?.length
-                : this.league.teams?.length
+            return this.activeParticipants.length > 0 || this.inactiveParticipants.length > 0;
         },
         noParticipantsMessage() {
             return this.isSingles
                 ? 'Liga nemá žiadnych hráčov.'
                 : 'Liga nemá žiadne tímy.';
+        },
+        hasMatches() {
+            return Object.keys(this.groupedMatches).length > 0;
         },
         allRoundNumbers() {
             return Object.keys(this.groupedMatches);

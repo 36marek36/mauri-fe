@@ -2,10 +2,13 @@
     <div>
         <h3>{{ title }}</h3>
         <ul>
-            <li v-for="participant in participants" :key="participant.id">
+            <li v-for="participant in participants" :key="participant.id" :class="{ inactive: !participant.active }">
                 <div class="participant-content">
                     <span @click="openDetail(participant.id)">{{ participant.name }}</span>
-                    <AppButton v-if="remove" label="" icon="🗑️" type="delete" htmlType="button" @clicked="() => remove(participant.id)" />
+                    <AppButton v-if="remove" label="" icon="🗑️" type="delete" htmlType="button"
+                        @clicked="() => remove(participant.id)" />
+                    <AppButton v-if="drop" label="odhlásiť" type="edit" htmlType="button"
+                        @clicked="()=> drop(participant.id)"/>
                 </div>
 
             </li>
@@ -27,6 +30,10 @@ export default {
             required: true
         },
         remove: {
+            type: Function,
+            default: null
+        },
+        drop:{
             type: Function,
             default:null
         }
@@ -63,6 +70,12 @@ li:not(:last-child) {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.inactive {
+    color: #aaa;
+    /* text-decoration: line-through; */
+    font-style: italic;
 }
 
 @media (max-width: 768px) {

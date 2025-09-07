@@ -25,7 +25,8 @@
     </form>
 
   </div>
-  <AppModal :visible="showDeleteModal" :message="'Naozaj si chceš vymazať hráča?'" @confirm="deletePlayer" @cancel="cancelDelete" />
+  <AppModal :visible="showDeleteModal" :message="'Naozaj si chceš vymazať hráča?'" @confirm="deletePlayer"
+    @cancel="cancelDelete" />
 </template>
 
 <script>
@@ -94,7 +95,7 @@ export default {
     async deletePlayer() {
       try {
         await axios.delete('/api/rest/players/' + this.playerId)
-        this.flash.showMessage(`Hráč ${this.player.firstName} ${this.player.lastName} bol úspešne vymazaný.`,'success')
+        this.flash.showMessage(`Hráč ${this.player.firstName} ${this.player.lastName} bol úspešne vymazaný.`, 'success')
         await this.userStore.fetchCurrentUser();
         this.$router.push('/participants')
       } catch (err) {
@@ -106,7 +107,7 @@ export default {
     confirmDeletePlayer() {
       this.showDeleteModal = true
     },
-    cancelDelete(){
+    cancelDelete() {
       this.showDeleteModal = false
     },
     async submitForm() {
@@ -115,6 +116,8 @@ export default {
           // PATCH request na úpravu hráča
           await axios.patch(`/api/rest/players/${this.playerId}`, this.player);
           this.flash.showMessage('Hráč bol úspešne upravený.', 'success');
+          await this.userStore.fetchCurrentUser();
+          this.$router.push('/players/' + this.playerId)
         } else {
           // POST request na vytvorenie hráča
           const endpoint = this.isAdmin
