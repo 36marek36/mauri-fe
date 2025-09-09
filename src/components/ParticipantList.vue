@@ -4,9 +4,13 @@
         <ul>
             <li v-for="participant in participants" :key="participant.id" :class="{ inactive: !participant.active }">
                 <div class="participant-content">
-                    <span @click="openDetail(participant.id)">{{ participant.name }}</span>
+                    <div class="info">
+                        <span @click="openDetail(participant.id)">{{ participant.name }}</span>
+                        <CircularProgress v-if="participant.leagueProgress != null && participant.active"
+                            :progress="participant.leagueProgress" />
+                    </div>
                     <div class="actions">
-                        <AppButton v-if="drop" label="odhlásiť" type="edit" htmlType="button"
+                        <AppButton v-if="drop" label="" icon="🔓" type="edit" htmlType="button"
                             @clicked="() => drop(participant.id)" />
                         <AppButton v-if="remove" label="" icon="🗑️" type="delete" htmlType="button"
                             @clicked="() => remove(participant.id)" />
@@ -19,6 +23,7 @@
 
 <script>
 import AppButton from './AppButton.vue';
+import CircularProgress from './CircularProgress.vue';
 
 export default {
     name: 'ParticipantList',
@@ -44,7 +49,7 @@ export default {
             this.$emit('view-detail', participant)
         }
     },
-    components: { AppButton }
+    components: { AppButton, CircularProgress }
 }
 
 </script>
@@ -73,9 +78,36 @@ li:not(:last-child) {
     align-items: center;
 }
 
+.info {
+    display: flex;
+    justify-content: space-between;
+    /* meno vľavo, progress vpravo */
+    align-items: center;
+    gap: 10px;
+    width: 75%;
+}
+
+.info span {
+    /* meno úplne vľavo */
+    flex-grow: 1;
+    /* zaberie celý dostupný priestor */
+}
+
+
+
 .actions {
     display: flex;
+    flex-direction: column;
+    /* tlačidlá pod sebou */
     gap: 0.5em;
+    width: 20%;
+    align-items: flex-end;
+    /* tlačidlá zarovná napravo */
+}
+
+.actions>* {
+    width: 100%;
+    /* každý potomok (napr. AppButton) bude rovnako široký */
 }
 
 .inactive {

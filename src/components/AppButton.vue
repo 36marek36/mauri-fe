@@ -51,6 +51,7 @@ export default {
 .app-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.4rem 1rem;
   border: none;

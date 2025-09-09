@@ -61,11 +61,11 @@
                         <ul v-show="openedRounds.includes(roundNumber)">
                             <li v-for="match in roundMatches" :key="match.id" class="match-item">
                                 <div>
-                                    <span>
-                                        {{ isSingles
-                                            ? `${match.homePlayer?.name} vs ${match.awayPlayer?.name}`
-                                            : `${match.homeTeam?.name} vs ${match.awayTeam?.name}` }}
-                                    </span>
+                                    <div class="match-display">
+                                        <div>{{ isSingles ? match.homePlayer?.name : match.homeTeam?.name }}</div>
+                                        <div>vs</div>
+                                        <div>{{ isSingles ? match.awayPlayer?.name : match.awayTeam?.name }}</div>
+                                    </div>
 
                                     <!-- Pridanie výsledku (admin alebo hráč) -->
                                     <div
@@ -79,32 +79,36 @@
                                     </div>
 
                                     <!-- Výsledok zápasu -->
-                                    <div v-else-if="match.status === 'FINISHED'">
-                                        <strong>Výsledok:</strong>
-                                        {{ match.result?.score1 }} : {{ match.result?.score2 }}
-                                        <span v-if="match.result?.setScores?.length">
-                                            (
-                                            <span v-for="(set, index) in match.result.setScores" :key="index">
-                                                {{ set.score1 }}:{{ set.score2 }}
-                                                <span v-if="index < match.result.setScores.length - 1">, </span>
+                                    <div v-else-if="match.status === 'FINISHED'" class="match-result-wrapper">
+                                        <div class="match-result-text">
+                                            <strong>Výsledok:</strong>
+                                            {{ match.result?.score1 }} : {{ match.result?.score2 }}
+                                            <span v-if="match.result?.setScores?.length">
+                                                (
+                                                <span v-for="(set, index) in match.result.setScores" :key="index">
+                                                    {{ set.score1 }}:{{ set.score2 }}
+                                                    <span v-if="index < match.result.setScores.length - 1">, </span>
+                                                </span>
+                                                )
                                             </span>
-                                            )
-                                        </span>
-                                        <!-- 🔧 Admin môže upraviť výsledok -->
-                                        <div v-if="isAdmin && leagueStatus === 'ACTIVE'">
-                                            <AppButton
-                                                :label="activeMatchId === match.id ? 'Zavrieť úpravu' : 'Upraviť výsledok'"
-                                                :type="activeMatchId === match.id ? 'delete' : 'default'"
-                                                htmlType="button" icon="✏️" @clicked="toggleForm(match.id)" />
-                                            <AddMatchResult v-if="activeMatchId === match.id" :match="match"
-                                                :leagueType="league.leagueType"
-                                                @result-submitted="fetchMatchesAndClose" />
                                         </div>
-                                        <!-- Tlačidlo pre admina na zrušenie výsledku -->
-                                        <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Zrušiť výsledok"
-                                            icon="❌" type="delete" htmlType="button"
-                                            @clicked="cancelMatchResult(match.id)"
-                                            :disabled="activeMatchId === match.id" />
+
+                                        <!-- 🔧 Admin môže upraviť výsledok -->
+                                        <div class="match-result-buttons">
+                                            <div v-if="isAdmin && leagueStatus === 'ACTIVE'">
+                                                <AppButton
+                                                    :label="activeMatchId === match.id ? 'Zavrieť úpravu' : 'Upraviť výsledok'"
+                                                    :type="activeMatchId === match.id ? 'delete' : 'default'"
+                                                    htmlType="button" icon="✏️" @clicked="toggleForm(match.id)" />
+                                                <AddMatchResult v-if="activeMatchId === match.id" :match="match"
+                                                    :leagueType="league.leagueType"
+                                                    @result-submitted="fetchMatchesAndClose" />
+                                            </div>
+                                            <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'"
+                                                label="Zrušiť výsledok" icon="❌" type="delete" htmlType="button"
+                                                @clicked="cancelMatchResult(match.id)"
+                                                :disabled="activeMatchId === match.id" />
+                                        </div>
                                     </div>
                                 </div>
                             </li>
@@ -123,19 +127,19 @@
                     <table class="standings-table" v-if="hasParticipants">
                         <thead>
                             <tr>
-                                <th>Poradie</th>
-                                <th>{{ isSingles ? 'Hráč' : 'Tím' }}</th>
+                                <th>#</th>
+                                <th colspan="2">{{ isSingles ? 'Hráč' : 'Tím' }}</th>
                                 <th>Zápasy</th>
                                 <th>Výhry</th>
                                 <th>Prehry</th>
-                                <th>Prehraté sety</th>
-                                <th>Vyhraté sety</th>
+                                <th>Prehraté<br>sety</th>
+                                <th>Vyhraté<br>sety</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="(entry, index) in standings" :key="entry.id">
                                 <td>{{ index + 1 }}.</td>
-                                <td>{{ isSingles ? entry.playerName : entry.teamName }}</td>
+                                <td colspan="2">{{ isSingles ? entry.playerName : entry.teamName }}</td>
                                 <td>{{ entry.matches }}</td>
                                 <td>{{ entry.wins }}</td>
                                 <td>{{ entry.losses }}</td>
@@ -423,8 +427,9 @@ export default {
             }
         },
         async fetchMatchesAndClose() {
-            await this.fetchMatches();
-            await this.fetchStats()
+            // await this.fetchMatches();
+            // await this.fetchStats()
+            await this.loadInitialData()
             this.activeMatchId = null;
             this.flash.showMessage('✅ Výsledok bol úspešne uložený!', 'success');
         },
@@ -566,7 +571,7 @@ export default {
     max-width: 100%;
     width: 100%;
     margin: 0 auto;
-    padding: 1rem;
+    /* padding: 1rem; */
     box-sizing: border-box;
 }
 
@@ -580,29 +585,72 @@ export default {
 
 /* 🧍‍♂️ Účastníci */
 .participants {
-    flex: 1 1 220px;
+    flex: 2 1 0;
+    /* flex-grow:2, flex-shrink:1, flex-basis:0 */
     padding: 1rem;
 }
 
 /* 🎾 Zápasy */
+/* Základný layout pre zápasy */
 .matches {
-    flex: 2 1 350px;
+    flex: 1.5 1 0;
     padding: 1rem;
 }
 
+/* Trojriadkové meno zápasu */
+.match-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Položka zápasu */
 .match-item {
     list-style: none;
     padding: 12px 0;
     border-bottom: 1px solid #ddd;
 }
 
+/* Posledná položka bez spodného okraja */
 .match-item:last-child {
     border-bottom: none;
 }
 
+/* Wrapper pre výsledok a tlačidlá */
+.match-result-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    background-color: #6f4e37;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    font-size: 1rem;
+    color: #faf3e0;
+}
+
+/* Text výsledku - oddelený od tlačidiel */
+.match-result-text {
+    font-weight: 600;
+}
+
+/* Kontajner pre tlačidlá */
+.match-result-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 /* 📊 Tabuľka */
 .standings {
-    flex: 0 1 300px;
+    flex: 3 1 0;
     padding: 1rem;
 }
 
@@ -614,7 +662,7 @@ export default {
 .standings-table th,
 .standings-table td {
     padding: 0.5rem;
-    text-align: left;
+    text-align: center  ;
     border-bottom: 1px solid #eee;
     text-shadow: 0 0 1px brown, 0 0 2px brown
 }
@@ -623,6 +671,7 @@ export default {
     text-transform: uppercase;
     font-size: 0.85rem;
     color: whitesmoke;
+    line-height: 1.2; 
 }
 
 .admin-buttons {
@@ -642,31 +691,36 @@ export default {
     .standings {
         width: 100%;
         min-width: unset;
+
     }
 
     /* Voliteľne uprav poradie */
-    .standings {
+    .participants {
         order: 1;
+    }
+
+    .standings {
+        order: 2;
     }
 
     .matches {
         flex: 1 1 auto;
-        order: 2;
-    }
-
-    .participants {
         order: 3;
     }
+
+    .match-display {
+        font-size: 1rem;
+    }
+
 
     .standings-table th,
     .standings-table td {
         padding: 0.3rem 0.5rem;
-        font-size: 0.75rem;
     }
 
     /* Minimalna sirka tabuľky na mobil aby nebola natiahnuta */
     .standings-table {
-        min-width: 100%;
+        min-width: 600px;
     }
 }
 </style>
