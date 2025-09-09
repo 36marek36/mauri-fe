@@ -20,6 +20,7 @@
             <div v-else>
                 <ParticipantList :participants="paginatedPlayers"
                     :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
+                    :showProgress = "false"
                     @view-detail="(id) => goToDetail('players', id)" />
                 <div v-if="totalPagesPlayers > 1" class="pagination">
                     <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
@@ -71,6 +72,7 @@
                 <div v-else>
                     <ParticipantList :participants="paginatedTeams"
                         :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
+                        :showProgress = "false"
                         @view-detail="(id) => goToDetail('teams', id)" />
                     <div v-if="totalPagesTeams > 1" class="pagination">
                         <AppButton label="Predošlá" icon="←" type="default" htmlType="button"

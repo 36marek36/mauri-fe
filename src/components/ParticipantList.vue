@@ -6,8 +6,7 @@
                 <div class="participant-content">
                     <div class="info">
                         <span @click="openDetail(participant.id)">{{ participant.name }}</span>
-                        <CircularProgress v-if="participant.leagueProgress != null && participant.active"
-                            :progress="participant.leagueProgress" />
+                        <CircularProgress v-if="showProgress" :progress="participant.leagueProgress" />
                     </div>
                     <div class="actions">
                         <AppButton v-if="drop" label="" icon="🔓" type="edit" htmlType="button"
@@ -34,6 +33,10 @@ export default {
         participants: {
             type: Array,
             required: true
+        },
+        showProgress: {
+            type: Boolean,
+            default: true
         },
         remove: {
             type: Function,

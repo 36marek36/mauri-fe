@@ -38,6 +38,7 @@
                     :title="isSingles ? 'Neaktívni hráči v lige' : 'Neaktívne tímy v lige'"
                     :participants="inactiveParticipants"
                     :remove="isAdmin ? (id => confirmDeleteParticipant(isSingles ? 'players' : 'teams', id)) : null"
+                    :showProgress = "false"
                     @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
                 <h3 v-if="!hasParticipants">{{ noParticipantsMessage }}</h3>
             </aside>

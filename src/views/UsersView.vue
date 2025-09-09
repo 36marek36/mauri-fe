@@ -44,11 +44,13 @@
             <div class="inactive-participants">
                 <ParticipantList :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
                     @view-detail="(id) => goToDetail('players', id)"
+                    :showProgress = "false"
                     :remove="(id) => confirmDeleteParticipant('players', id)" />
             </div>
             <div class="inactive-participants">
                 <ParticipantList :title="'Neaktívne (vymazané) tími'" :participants="inactiveTeams"
                     @view-detail="(id) => goToDetail('teams', id)"
+                    :showProgress = "false"
                     :remove="(id) => confirmDeleteParticipant('teams', id)" />
             </div>
         </div>
