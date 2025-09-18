@@ -23,16 +23,26 @@
             </li>
             <li>
                 <span>Dátum registrácie: </span>
-                <span>{{ formatDate(player.registrationDate) }}</span>
+                <span>{{ player.registrationDate }}</span>
+            </li>
+            <li>
+                <span>Moje tímy:</span>
+                <span class="league-names">
+                    <span v-for="team in player.teams" :key="team.id">
+                        {{ team.name }}
+                    </span>
+                </span>
+
+
             </li>
             <li v-if="player.deletedDate">
                 <span>Dátum zmazania: </span>
-                <span>{{ formatDate(player.deletedDate) }}</span>
+                <span>{{ player.deletedDate }}</span>
             </li>
             <li>
                 <span>Zoznam líg:</span>
                 <span class="league-names">
-                    <span v-for="league in playerLeagues" :key="league.leagueName">
+                    <span v-for="league in player.leagues" :key="league.leagueId">
                         {{ league.leagueName }} ({{ league.seasonYear }})
                     </span>
                 </span>
@@ -95,7 +105,6 @@ export default {
     data() {
         return {
             player: null,
-            playerLeagues: [],
             createdMatches: [],
             finishedMatches: [],
             cancelledMatches: [],
@@ -109,16 +118,7 @@ export default {
     methods: {
         async fetchAll() {
             await this.fetchPlayer();
-            await this.loadPlayerLeagues();
             await this.fetchPlayerMatches();
-        },
-        formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('sk-SK', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
         },
         async fetchPlayer() {
             this.loading = true;
@@ -132,14 +132,7 @@ export default {
                 this.loading = false;
             }
         },
-        async loadPlayerLeagues() {
-            try {
-                const response = await axios.get('/api/rest/players/'+ this.playerId +'/leagues');
-                this.playerLeagues = response.data;
-            } catch (err) {
-                console.error('Chyba pri načítaní líg hráča:', err);
-            }
-        },
+        
         async fetchPlayerMatches() {
             try {
                 const [createdRes, finishedRes, cancelledRes] = await Promise.all([
@@ -161,7 +154,7 @@ export default {
         allMatches() {
             return [...this.createdMatches, ...this.finishedMatches, ...this.cancelledMatches];
         },
-        playerId(){
+        playerId() {
             return this.$route.params.id
         }
     }

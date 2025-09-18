@@ -30,7 +30,7 @@
                         <span v-else>Bez možnosti priradiť hráča</span>
                     </td>
                     <td>
-                        <span v-if="user.lastLogin"> {{ formatDate(user.lastLogin) }} </span>
+                        <span v-if="user.lastLogin"> {{ user.lastLogin }} </span>
                         <span v-else>Zatial žiadne prihlásenie</span>
                     </td>
                     <td>
@@ -233,17 +233,6 @@ export default {
         },
         goToDetail(type, id) {
             this.$router.push(`/${type}/${id}`);
-        },
-        // formatPlayerName(player) {
-        //     return player.firstName + ' ' + player.lastName
-        // },
-        // formatTeamName(team) {
-        //     if (!team || !team.player1 || !team.player2) return '';
-        //     return `${this.formatPlayerName(team.player1)} a ${this.formatPlayerName(team.player2)}`;
-        // },
-        formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleString();
         }
     }, computed: {
         flash() {

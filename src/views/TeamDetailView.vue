@@ -2,7 +2,80 @@
 
     <div v-if="loading">... loading ...</div>
 
-    <ul v-else>
+    <div v-else>
+        <!-- Hráči vedľa seba -->
+        <div class="players-container">
+            <!-- Hráč 1 -->
+            <div class="player-card">
+                <h3>Hráč 1:</h3>
+                <p><span>Meno:</span> <span>{{ team.player1.name }}</span></p>
+                <p><span>Email:</span> <span>{{ team.player1.email || 'nezadaný' }}</span></p>
+            </div>
+
+            <!-- Hráč 2 -->
+            <div class="player-card">
+                <h3>Hráč 2:</h3>
+                <p><span>Meno:</span> <span>{{ team.player2.name }}</span></p>
+                <p><span>Email:</span> <span>{{ team.player2.email || 'nezadaný' }}</span></p>
+            </div>
+        </div>
+
+        <!-- Zápasy -->
+        <div>
+            <h3>Všetky zápasy aktuálnej sezóny</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domáci</th>
+                            <th>Hostia</th>
+                            <th>Výsledok</th>
+                            <th>Kolo</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="match in allMatches" :key="match.id">
+                            <td>{{ match.homeTeam.name }}</td>
+                            <td>{{ match.awayTeam.name }}</td>
+                            <td>
+                                <span v-if="match.status === 'FINISHED' && match.result">
+                                    {{ match.result.score1 }} : {{ match.result.score2 }}
+                                </span>
+                                <span v-else>-</span>
+                            </td>
+                            <td>{{ match.roundNumber }}</td>
+                            <td>
+                                <span :class="{
+                                    'badge-finished': match.status === 'FINISHED',
+                                    'badge-cancelled': match.status === 'CANCELLED',
+                                    'badge-pending': match.status !== 'FINISHED' && match.status !== 'CANCELLED'
+                                }">
+                                    {{ match.status === 'FINISHED' ? 'Odohratý' : (match.status === 'CANCELLED' ?
+                                        'Zrušený' : 'Neodohratý') }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3>{{ 'Založenie tímu: ' + team.registrationDate }}</h3>
+    </div>
+
+    <!-- <ul v-else>
+
+        <div>
+            <ul>
+                <li>
+                    <span>Hráč 1:</span>
+                    <span>{{ team.player1.name }}</span>
+                </li>
+            </ul>
+
+        </div>
+
         <div>
             <h3>Všetky zápasy aktuálnej sezóny</h3>
             <div class="table-wrapper">
@@ -48,7 +121,9 @@
             </div>
 
         </div>
-    </ul>
+
+        <h3>{{ 'Založenie tímu: ' + team.registrationDate }}</h3>
+    </ul> -->
 
 </template>
 
@@ -111,7 +186,7 @@ export default {
         allMatches() {
             return [...this.createdMatches, ...this.finishedMatches, ...this.cancelledMatches];
         },
-        teamId(){
+        teamId() {
             return this.$route.params.id
         }
     }
@@ -120,6 +195,34 @@ export default {
 </script>
 
 <style scoped>
+.players-container {
+    display: flex;
+    justify-content: space-between;
+    width: 60%;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.player-card {
+    flex: 1;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.player-card p {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.3rem 0;
+    /* Trochu medzery medzi riadkami */
+}
+
+.player-card p span:first-child {
+    font-weight: 600;
+}
+
 .table-wrapper {
     display: flex;
     justify-content: center;

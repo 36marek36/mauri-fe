@@ -3,11 +3,11 @@
     <div class="admin-buttons">
         <!-- 🟢 Štart ligy -->
         <AppButton v-if="isAdmin && hasParticipants && leagueStatus === 'CREATED'" label="Odštartovať ligu" icon="🏁"
-            type="create" htmlType="button" @clicked="generateMatches" />
+            type="create" htmlType="button" @clicked="openGenerateModal" />
 
         <!-- 🔴 Ukončenie ligy -->
         <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Ukončiť ligu" icon="🛑" type="delete"
-            htmlType="button" @clicked="finishLeague" />
+            htmlType="button" @clicked="openFinishModal" />
 
         <!--    Pridávanie účastníkov -->
         <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
@@ -38,7 +38,8 @@
                     :title="isSingles ? 'Neaktívni hráči v lige' : 'Neaktívne tímy v lige'"
                     :participants="inactiveParticipants"
                     :remove="isAdmin ? (id => confirmDeleteParticipant(isSingles ? 'players' : 'teams', id)) : null"
-                    :showProgress = "false"
+                    :drop="isAdmin && league.leagueStatus === 'ACTIVE' ? (id => confirmDropParticipant(isSingles ? 'players' : 'teams', id)) : null"
+                    :showProgress="false"
                     @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
                 <h3 v-if="!hasParticipants">{{ noParticipantsMessage }}</h3>
             </aside>
@@ -161,6 +162,8 @@
     <AppModal :visible="showDropModal" :message="`Naozaj chcete odhlásiť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy? 
         Všetky jeho zapasy budú kontumačne prehraté 0:6, 0:6. Táto akcia sa nebude dať vrátiť.`"
         @confirm="() => dropParticipantFromLeague(participant?.id)" @cancel="cancelDrop" />
+    <AppModal :visible="showConfirmModal" :message="modalMessage" @confirm="onModalConfirm"
+        @cancel="onModalCancel" />
 </template>
 
 
@@ -193,6 +196,8 @@ export default {
             showAddParticipants: false,
             showDeleteModal: false,
             showDropModal: false,
+            showConfirmModal: false,
+            confirmationAction: null, // 'generate' alebo 'finish'
             participant: null,
             header: useHeaderStore()
 
@@ -395,6 +400,29 @@ export default {
             this.participant = null;
             this.showDropModal = false;
         },
+        openGenerateModal() {
+            this.confirmationAction = 'generate';
+            this.showConfirmModal = true;
+        },
+        openFinishModal() {
+            this.confirmationAction = 'finish';
+            this.showConfirmModal = true;
+        },
+        onModalCancel() {
+            this.showConfirmModal = false;
+            this.confirmationAction = null;
+        },
+        async onModalConfirm() {
+            this.showConfirmModal = false;
+
+            if (this.confirmationAction === 'generate') {
+                await this.generateMatches();
+            } else if (this.confirmationAction === 'finish') {
+                await this.finishLeague();
+            }
+
+            this.confirmationAction = null;
+        },
         async handleAddParticipants(selectedIds) {
             this.loading = true;
             try {
@@ -559,6 +587,11 @@ export default {
         },
         isLoggedIn() {
             return this.userStore.isLoggedIn
+        },
+        modalMessage() {
+            return this.confirmationAction === 'generate'
+                ? 'Naozaj chcete spustiť ligu a vygenerovať zápasy?'
+                : 'Naozaj chcete ukončiť túto ligu? Táto akcia je nezvratná.';
         }
     },
     components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppModal }
@@ -663,7 +696,7 @@ export default {
 .standings-table th,
 .standings-table td {
     padding: 0.5rem;
-    text-align: center  ;
+    text-align: center;
     border-bottom: 1px solid #eee;
     text-shadow: 0 0 1px brown, 0 0 2px brown
 }
@@ -672,7 +705,7 @@ export default {
     text-transform: uppercase;
     font-size: 0.85rem;
     color: whitesmoke;
-    line-height: 1.2; 
+    line-height: 1.2;
 }
 
 .admin-buttons {
