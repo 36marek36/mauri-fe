@@ -128,8 +128,7 @@
 </template>
 
 <script>
-
-import axios from 'axios';
+import api from '@/axios-interceptor';
 import { useHeaderStore } from '@/stores/header';
 
 export default {
@@ -156,7 +155,7 @@ export default {
 
         async fetchTeam() {
             try {
-                const response = await axios.get('/api/rest/teams/' + this.teamId);
+                const response = await api.get('/teams/' + this.teamId);
                 this.team = response.data;
                 this.header.setTitle('Detail tímu', this.team.name);
                 this.loading = false
@@ -168,9 +167,9 @@ export default {
         async fetchTeamMatches() {
             try {
                 const [createdRes, finishedRes, cancelledRes] = await Promise.all([
-                    axios.get(`/api/rest/matches/team/${this.teamId}/status/CREATED`),
-                    axios.get(`/api/rest/matches/team/${this.teamId}/status/FINISHED`),
-                    axios.get(`/api/rest/matches/team/${this.teamId}/status/CANCELLED`)
+                    api.get(`/matches/team/${this.teamId}/status/CREATED`),
+                    api.get(`/matches/team/${this.teamId}/status/FINISHED`),
+                    api.get(`/matches/team/${this.teamId}/status/CANCELLED`)
                 ]);
 
                 this.createdMatches = createdRes.data;
