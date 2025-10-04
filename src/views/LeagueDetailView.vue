@@ -174,7 +174,7 @@
 <script>
 import AppButton from '@/components/AppButton.vue';
 import AddMatchResult from '@/components/AddMatchResult.vue';
-import axios from 'axios';
+import api from '@/axios-interceptor';
 import ParticipantList from '@/components/ParticipantList.vue';
 import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
 import { useUserStore } from '@/stores/user';
@@ -228,7 +228,7 @@ export default {
             }
         },
         async fetchLeague() {
-            const res = await axios.get('/api/rest/leagues/' + this.leagueId);
+            const res = await api.get('/leagues/' + this.leagueId);
             this.league = res.data;
             this.header.setTitle(this.league.leagueName, this.league.leagueType)
         },
@@ -242,8 +242,8 @@ export default {
 
             try {
                 const [playersRes, teamsRes] = await Promise.all([
-                    axios.get('/api/rest/players/not-in-any-active-league'),
-                    axios.get('/api/rest/teams/not-in-any-active-league')
+                    api.get('/players/not-in-any-active-league'),
+                    api.get('/teams/not-in-any-active-league')
                 ]);
 
                 this.freePlayers = playersRes.data;
@@ -261,7 +261,7 @@ export default {
             };
 
             try {
-                const res = await axios.patch(`/api/rest/leagues/${leagueId}/addParticipants`, payload);
+                const res = await api.patch(`/leagues/${leagueId}/addParticipants`, payload);
                 await this.loadInitialData();
                 this.flash.showMessage(res.data, 'success');
                 this.selectedParticipants = [];
@@ -285,7 +285,7 @@ export default {
                     return;
                 }
 
-                const response = await axios.delete(`/api/rest/leagues/${this.league.leagueId}/participants/${id}`);
+                const response = await api.delete(`/leagues/${this.league.leagueId}/participants/${id}`);
 
                 this.flash.showMessage(response.data, 'info')
 
@@ -319,7 +319,7 @@ export default {
                     return;
                 }
 
-                const response = await axios.patch('/api/rest/leagues/' + this.league.leagueId + '/participants/' + participantId + '/drop')
+                const response = await api.patch('/leagues/' + this.league.leagueId + '/participants/' + participantId + '/drop')
 
                 this.flash.showMessage(response.data, 'info')
 
@@ -341,7 +341,7 @@ export default {
         async fetchMatches() {
             const leagueId = this.leagueId
             try {
-                const res = await axios.get('/api/rest/matches/' + leagueId + '/grouped-by-round');
+                const res = await api.get('/matches/' + leagueId + '/grouped-by-round');
                 this.groupedMatches = res.data;
                 console.log('Zapasy v lige boli nacitane:', this.groupedMatches);
             } catch (err) {
@@ -355,7 +355,7 @@ export default {
                 const leagueId = this.leagueId;
 
                 // Vygenerovanie zápasov
-                await axios.patch(`/api/rest/matches/${leagueId}/generate-matches`);
+                await api.patch(`/matches/${leagueId}/generate-matches`);
                 this.flash.showMessage('✅ Zápasy boli úspešne vygenerované', 'info');
 
                 await this.loadInitialData();
@@ -500,10 +500,10 @@ export default {
             const leagueId = this.leagueId
             try {
                 const url = this.league.leagueType === 'DOUBLES'
-                    ? '/api/rest/leagues/' + leagueId + '/teams/stats'
-                    : '/api/rest/leagues/' + leagueId + '/players/stats'
+                    ? '/leagues/' + leagueId + '/teams/stats'
+                    : '/leagues/' + leagueId + '/players/stats'
 
-                const res = await axios.get(url);
+                const res = await api.get(url);
                 this.standings = res.data;
                 console.log('Štatistiky načítané:', this.standings);
             } catch (err) {
@@ -517,7 +517,7 @@ export default {
                 const leagueId = this.leagueId;
 
                 // Ukončenie ligy
-                await axios.patch(`/api/rest/leagues/${leagueId}/finish`);
+                await api.patch(`/leagues/${leagueId}/finish`);
                 this.flash.showMessage('✅ Liga bola úspešne ukončená', 'info');
 
                 await this.loadInitialData();
@@ -556,7 +556,7 @@ export default {
         async cancelMatchResult(matchId) {
             this.loading = true;
             try {
-                await axios.patch(`/api/rest/matches/${matchId}/cancel-result`);
+                await api.patch(`/matches/${matchId}/cancel-result`);
                 this.flash.showMessage('✅ Výsledok zápasu bol zrušený', 'warning');
                 await this.loadInitialData();
             } catch (error) {
