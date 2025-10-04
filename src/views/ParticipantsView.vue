@@ -92,6 +92,7 @@
 
 <script>
 import axios from 'axios'
+import api from '@/axios-interceptor'
 import ParticipantList from '@/components/ParticipantList.vue'
 import AppButton from '@/components/AppButton.vue'
 import { useUserStore } from '@/stores/user'
@@ -131,7 +132,7 @@ export default {
         async fetchPlayers() {
             this.loadingPlayers = true;
             try {
-                const response = await axios.get('/api/rest/players/')
+                const response = await api.get('/players/')
                 this.players = response.data
             } catch (error) {
                 console.error('Chyba pri načítaní hráčov:', error)

@@ -26,8 +26,12 @@ import axios from 'axios'
 import { useUserStore } from './stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage'
 
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+})
+
 // Request interceptor – pridá token do každého requestu
-axios.interceptors.request.use(config => {
+api.interceptors.request.use(config => {
   const token = localStorage.getItem('jwt')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -36,7 +40,7 @@ axios.interceptors.request.use(config => {
 })
 
 // Response interceptor – rieši 401 chybu
-axios.interceptors.response.use(
+api.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 401 && localStorage.getItem('jwt')) {
@@ -55,4 +59,4 @@ axios.interceptors.response.use(
   }
 )
 
-export default axios
+export default api
