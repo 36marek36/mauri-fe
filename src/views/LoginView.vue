@@ -21,6 +21,7 @@
 <script>
 import AppButton from '@/components/AppButton.vue'
 import axios from '@/axios-interceptor'
+import api from '@/axios-interceptor';
 import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
@@ -60,7 +61,7 @@ export default {
       try {
         if (this.isLogin) {
           // Login API call
-          const res = await axios.post('/api/rest/auth/login', {
+          const res = await api.post('/auth/login', {
             username: this.username,
             password: this.password
           })
@@ -75,7 +76,7 @@ export default {
           this.$router.push('/')
         } else {
           // Signup API call
-          await axios.post('/api/rest/auth/register', {
+          await api.post('/auth/register', {
             username: this.username,
             password: this.password
           })
