@@ -20,7 +20,6 @@
 
 <script>
 import AppButton from '@/components/AppButton.vue'
-import axios from '@/axios-interceptor'
 import api from '@/axios-interceptor';
 import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage';

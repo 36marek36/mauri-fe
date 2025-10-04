@@ -96,8 +96,6 @@
 </template>
 
 <script>
-
-import axios from 'axios';
 import api from '@/axios-interceptor';
 import { useHeaderStore } from '@/stores/header';
 

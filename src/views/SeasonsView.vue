@@ -43,6 +43,7 @@
 
 <script>
 import axios from 'axios';
+import api from '@/axios-interceptor';
 import AppButton from '@/components/AppButton.vue';
 import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
@@ -70,7 +71,7 @@ export default {
         async fetchSeasons() {
             this.loading = true
             try {
-                const res = await axios.get('/api/rest/seasons/')
+                const res = await api.get('/seasons/')
                 this.seasons = res.data
 
                 const header = useHeaderStore()
@@ -86,7 +87,7 @@ export default {
         },
         async createSeason() {
             try {
-                const res = await axios.post('/api/rest/seasons/create', this.newSeason);
+                const res = await api.post('/seasons/create', this.newSeason);
                 console.log('Sezóna: ' + res.data.year + ' bola úspešne vytvorená.')
                 this.flash.showMessage('Sezóna bola úspešne vytvorená', 'success');
                 this.showCreateSeasonForm = false;
@@ -109,7 +110,7 @@ export default {
         },
         async deleteSeason() {
             try {
-                await axios.delete('/api/rest/seasons/' + this.season?.id);
+                await api.delete('/seasons/' + this.season?.id);
                 this.fetchSeasons();
                 this.flash.showMessage('Sezóna bola úspešne zmazaná.', 'success')
                 console.log('Sezóna bola úspešne zmazaná.');
