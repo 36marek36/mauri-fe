@@ -78,7 +78,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/axios-interceptor';
 import AppButton from '@/components/AppButton.vue';
 import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
@@ -114,7 +114,7 @@ export default {
     methods: {
         async fetchSeason(seasonId) {
             try {
-                const response = await axios.get('/api/rest/seasons/' + seasonId + '/stats');
+                const response = await api.get('/seasons/' + seasonId + '/stats');
                 const season = response.data;
 
                 this.season = season;
@@ -140,7 +140,7 @@ export default {
                     seasonId // pridáme do payloadu
                 };
 
-                const res = await axios.post('/api/rest/leagues/create', payload);
+                const res = await api.post('/leagues/create', payload);
                 const { leagueName } = res.data;
 
                 this.flash.showMessage(`✅ Liga ${leagueName} bola úspešne vytvorená a pridaná do sezóny`, 'success');
@@ -175,7 +175,7 @@ export default {
         },
         async deleteLeague() {
             try {
-                await axios.delete('/api/rest/leagues/' + this.leagueToDelete.leagueId);
+                await api.delete('/leagues/' + this.leagueToDelete.leagueId);
                 await this.fetchSeason(this.season.id);
                 this.flash.showMessage('Liga bola úspešne vymazaná', 'info')
                 console.log('Liga bola úspešne zmazaná.');
@@ -215,7 +215,7 @@ export default {
             const action = this.seasonModalType; // 'start' alebo 'finish'
 
             try {
-                const response = await axios.patch(`/api/rest/seasons/${id}/${action}`);
+                const response = await api.patch(`/seasons/${id}/${action}`);
                 this.flash.showMessage(response.data, 'success');
 
                 await this.fetchSeason(id);
