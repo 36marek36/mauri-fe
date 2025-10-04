@@ -68,7 +68,7 @@ export default {
           const token = res.data.token
           // ulož token, presmeruj atď.
           localStorage.setItem('jwt', token)
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+          // api.defaults.headers.common['Authorization'] = `Bearer ${token}`
           await userStore.fetchCurrentUser()
 
           // Vypíš do konzoly
