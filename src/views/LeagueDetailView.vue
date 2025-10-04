@@ -101,14 +101,15 @@
                                                 <AppButton
                                                     :label="activeMatchId === match.id ? 'Zavrieť úpravu' : 'Upraviť výsledok'"
                                                     :type="activeMatchId === match.id ? 'delete' : 'default'"
-                                                    htmlType="button" icon="✏️" @clicked="toggleForm(match.id)" />
+                                                    htmlType="button" icon="✏️"
+                                                    @clicked="requestEditResult(match.id)" />
                                                 <AddMatchResult v-if="activeMatchId === match.id" :match="match"
                                                     :leagueType="league.leagueType"
                                                     @result-submitted="fetchMatchesAndClose" />
                                             </div>
                                             <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'"
                                                 label="Zrušiť výsledok" icon="❌" type="delete" htmlType="button"
-                                                @clicked="cancelMatchResult(match.id)"
+                                                @clicked="requestCancelResult(match.id)"
                                                 :disabled="activeMatchId === match.id" />
                                         </div>
                                     </div>
@@ -162,8 +163,11 @@
     <AppModal :visible="showDropModal" :message="`Naozaj chcete odhlásiť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy? 
         Všetky jeho zapasy budú kontumačne prehraté 0:6, 0:6. Táto akcia sa nebude dať vrátiť.`"
         @confirm="() => dropParticipantFromLeague(participant?.id)" @cancel="cancelDrop" />
-    <AppModal :visible="showConfirmModal" :message="modalMessage" @confirm="onModalConfirm"
-        @cancel="onModalCancel" />
+    <AppModal :visible="showConfirmModal" :message="modalMessage" @confirm="onModalConfirm" @cancel="onModalCancel" />
+    <AppModal :visible="showActionModal" :title="actionType === 'edit' ? 'Úprava výsledku' : 'Zrušenie výsledku'" :message="actionType === 'edit'
+        ? 'Naozaj chcete upraviť výsledok tohto zápasu?'
+        : 'Naozaj chcete zrušiť výsledok tohto zápasu? Táto akcia je nevratná.'" @confirm="onActionModalConfirm"
+        @cancel="onActionModalCancel" />
 </template>
 
 
@@ -198,6 +202,9 @@ export default {
             showDropModal: false,
             showConfirmModal: false,
             confirmationAction: null, // 'generate' alebo 'finish'
+            showActionModal: false,
+            actionType: null, // 'edit' alebo 'cancel'
+            targetMatchId:null,
             participant: null,
             header: useHeaderStore()
 
@@ -422,6 +429,33 @@ export default {
             }
 
             this.confirmationAction = null;
+        },
+        requestEditResult(matchId) {
+            this.targetMatchId = matchId;
+            this.actionType = 'edit';
+            this.showActionModal = true;
+        },
+        requestCancelResult(matchId) {
+            this.targetMatchId = matchId;
+            this.actionType = 'cancel';
+            this.showActionModal = true;
+        },
+        onActionModalConfirm() {
+            if (this.actionType === 'edit') {
+                this.toggleForm(this.targetMatchId);
+            } else if (this.actionType === 'cancel') {
+                this.cancelMatchResult(this.targetMatchId);
+            }
+
+            this.resetActionModal();
+        },
+        onActionModalCancel() {
+            this.resetActionModal();
+        },
+        resetActionModal() {
+            this.showActionModal = false;
+            this.actionType = null;
+            this.targetMatchId = null;
         },
         async handleAddParticipants(selectedIds) {
             this.loading = true;

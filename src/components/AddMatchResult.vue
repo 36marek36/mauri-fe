@@ -56,24 +56,29 @@
             <AppButton label="Odoslať výsledok" type="create" htmlType="submit" icon="✅" />
         </div>
     </form>
+    <AppModal :visible="showConfirmModal" :message="'Naozaj chcete odoslať výsledok tohto zápasu?'"
+        @confirm="onModalConfirm" @cancel="onModalCancel" />
 </template>
 
 <script>
 import axios from 'axios';
 import AppButton from '@/components/AppButton.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
+import AppModal from './AppModal.vue';
 
 export default {
     props: {
         match: { type: Object, required: true },
         leagueType: { type: String, required: true }
     },
+    emits: ['result-submitted'],
     data() {
         return {
             formData: {
                 scratchedId: null,
                 setScores: [{ score1: 0, score2: 0 }]
-            }
+            },
+            showConfirmModal: false
         };
     },
     computed: {
@@ -97,7 +102,14 @@ export default {
         removeSet(index) {
             this.formData.setScores.splice(index, 1);
         },
-        async submitResult() {
+        // volá sa pri odoslaní formulára
+        submitResult() {
+            this.showConfirmModal = true;
+        },
+        // volá sa pri potvrdení modalu
+        async onModalConfirm() {
+            this.showConfirmModal = false;
+
             try {
                 await axios.patch(`/api/rest/matches/${this.match.id}/result`, this.formData);
                 this.$emit('result-submitted', this.match.id);
@@ -105,9 +117,21 @@ export default {
                 const msg = err.response?.data?.message || 'Nepodarilo sa odoslať výsledok.';
                 this.flash.showMessage(msg, 'error');
             }
+        },
+        onModalCancel() {
+            this.showConfirmModal = false;
         }
+        // async submitResult() {
+        //     try {
+        //         await axios.patch(`/api/rest/matches/${this.match.id}/result`, this.formData);
+        //         this.$emit('result-submitted', this.match.id);
+        //     } catch (err) {
+        //         const msg = err.response?.data?.message || 'Nepodarilo sa odoslať výsledok.';
+        //         this.flash.showMessage(msg, 'error');
+        //     }
+        // }
     },
-    components: { AppButton }
+    components: { AppButton, AppModal }
 };
 </script>
 
