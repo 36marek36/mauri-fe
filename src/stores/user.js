@@ -27,7 +27,7 @@ export const useUserStore = defineStore('user', {
                 const response = await api.get('/users/me')
                 this.user = response.data
                 this.error = null
-                console.log('User fetched:', this.user)
+                // console.log('User fetched:', this.user)
             } catch (err) {
                 this.user = null
                 this.error = err.response?.data?.message || 'Chyba pri načítaní používateľa'

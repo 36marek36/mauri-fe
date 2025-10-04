@@ -172,7 +172,7 @@ export default {
             };
 
             try {
-                const res = await axios.post('/api/rest/teams/create', payload);
+                const res = await api.post('/teams/create', payload);
 
                 this.flash.showMessage('Tim bol úspešne vytvoreny.', 'success')
                 console.log('Tim: ' + res.data.id + ' bol úspešne vytvoreny.')
@@ -202,7 +202,7 @@ export default {
     },
     async deleteParticipant() {
         try {
-            await axios.delete('/api/rest/' + this.participant.type + '/' + this.participant.id);
+            await api.delete('/' + this.participant.type + '/' + this.participant.id);
             const type = this.participant.type === 'players' ? 'Hráč' : 'Tím';
             this.flash.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný`, 'success');
             console.log(`${this.participant.type.slice(0, -1)} bol vymazaný.`);
