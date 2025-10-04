@@ -31,6 +31,7 @@
 
 <script>
 import axios from 'axios'
+import api from '@/axios-interceptor';
 import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
@@ -79,7 +80,7 @@ export default {
   methods: {
     async loadPlayer() {
       try {
-        const response = await axios.get(`/api/rest/players/${this.playerId}`);
+        const response = await api.get(`/players/${this.playerId}`);
         this.player = {
           firstName: response.data.firstName,
           lastName: response.data.lastName,
@@ -94,7 +95,7 @@ export default {
     },
     async deletePlayer() {
       try {
-        await axios.delete('/api/rest/players/' + this.playerId)
+        await api.delete('/players/' + this.playerId)
         this.flash.showMessage(`Hráč ${this.player.firstName} ${this.player.lastName} bol úspešne vymazaný.`, 'success')
         await this.userStore.fetchCurrentUser();
         this.$router.push('/participants')
@@ -114,17 +115,17 @@ export default {
       try {
         if (this.isEdit) {
           // PATCH request na úpravu hráča
-          await axios.patch(`/api/rest/players/${this.playerId}`, this.player);
+          await api.patch(`/players/${this.playerId}`, this.player);
           this.flash.showMessage('Hráč bol úspešne upravený.', 'success');
           await this.userStore.fetchCurrentUser();
           this.$router.push('/players/' + this.playerId)
         } else {
           // POST request na vytvorenie hráča
           const endpoint = this.isAdmin
-            ? '/api/rest/players/admin/createPlayer'
-            : '/api/rest/players/user/createPlayer'
+            ? '/players/admin/createPlayer'
+            : '/players/user/createPlayer'
 
-          const response = await axios.post(endpoint, this.player);
+          const response = await api.post(endpoint, this.player);
           this.flash.showMessage(`Hráč ${response.data.firstName} bol úspešne vytvorený.`, 'success');
           await this.userStore.fetchCurrentUser();
           this.$router.push('/participants');

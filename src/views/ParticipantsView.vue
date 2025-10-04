@@ -91,7 +91,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import api from '@/axios-interceptor'
 import ParticipantList from '@/components/ParticipantList.vue'
 import AppButton from '@/components/AppButton.vue'
