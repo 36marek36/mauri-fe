@@ -143,7 +143,7 @@ export default {
         async fetchTeams() {
             this.loadingTeams = true;
             try {
-                const response = await axios.get('/api/rest/teams/')
+                const response = await api.get('/teams/')
                 this.teams = response.data
             }
             catch (error) {
