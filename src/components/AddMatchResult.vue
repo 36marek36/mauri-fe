@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/axios-interceptor';
 import AppButton from '@/components/AppButton.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import AppModal from './AppModal.vue';
@@ -111,7 +111,7 @@ export default {
             this.showConfirmModal = false;
 
             try {
-                await axios.patch(`/api/rest/matches/${this.match.id}/result`, this.formData);
+                await api.patch(`/matches/${this.match.id}/result`, this.formData);
                 this.$emit('result-submitted', this.match.id);
             } catch (err) {
                 const msg = err.response?.data?.message || 'Nepodarilo sa odoslať výsledok.';
