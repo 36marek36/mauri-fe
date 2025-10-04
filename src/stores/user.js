@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import api from "@/axios-interceptor";
 import axios from "axios";
 
 export const useUserStore = defineStore('user', {
@@ -23,7 +24,7 @@ export const useUserStore = defineStore('user', {
             this.isLoading = true
 
             try {
-                const response = await axios.get('/api/rest/users/me')
+                const response = await api.get('/users/me')
                 this.user = response.data
                 this.error = null
                 // console.log('User fetched:', this.user)
@@ -36,7 +37,7 @@ export const useUserStore = defineStore('user', {
         },
         logout() {
             localStorage.removeItem('jwt')  // odstráni token zo storage
-            delete axios.defaults.headers.common['Authorization']    // odstráni token z hlavičiek pre ďalšie požiadavky
+            delete api.defaults.headers.common['Authorization']    // odstráni token z hlavičiek pre ďalšie požiadavky
             this.user = null    // resetuje používateľa
             console.log('Uzivatel odhlaseny')
         }
