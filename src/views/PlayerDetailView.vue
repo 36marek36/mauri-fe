@@ -98,6 +98,7 @@
 <script>
 
 import axios from 'axios';
+import api from '@/axios-interceptor';
 import { useHeaderStore } from '@/stores/header';
 
 export default {
@@ -123,7 +124,7 @@ export default {
         async fetchPlayer() {
             this.loading = true;
             try {
-                const response = await axios.get('/api/rest/players/' + this.playerId);
+                const response = await api.get('/players/' + this.playerId);
                 this.player = response.data;
                 this.header.setTitle('Detail hráča', this.player.name);
             } catch (error) {
@@ -136,9 +137,9 @@ export default {
         async fetchPlayerMatches() {
             try {
                 const [createdRes, finishedRes, cancelledRes] = await Promise.all([
-                    axios.get(`/api/rest/matches/player/${this.playerId}/status/CREATED`),
-                    axios.get(`/api/rest/matches/player/${this.playerId}/status/FINISHED`),
-                    axios.get(`/api/rest/matches/player/${this.playerId}/status/CANCELLED`)
+                    api.get(`/matches/player/${this.playerId}/status/CREATED`),
+                    api.get(`/matches/player/${this.playerId}/status/FINISHED`),
+                    api.get(`/matches/player/${this.playerId}/status/CANCELLED`)
                 ]);
 
                 this.createdMatches = createdRes.data;

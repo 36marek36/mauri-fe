@@ -30,7 +30,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import api from '@/axios-interceptor';
 import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage';
