@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/axios-interceptor';
 import AppButton from '@/components/AppButton.vue';
 import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
@@ -107,7 +107,7 @@ export default {
             this.loading = true;
             const header = useHeaderStore();
             try {
-                const response = await axios.get('/api/rest/users/');
+                const response = await api.get('/users/');
                 this.users = response.data;
                 header.setTitle('Zoznam používateľov', '');
             } catch (error) {
@@ -119,7 +119,7 @@ export default {
         async fetchUnassignedPlayers() {
             this.loading = true;
             try {
-                const response = await axios.get('/api/rest/players/without-user')
+                const response = await api.get('/players/without-user')
                 this.unassignedPlayers = response.data
             } catch (error) {
                 console.error('Chyba pri načítaní hráčov:', error)
@@ -131,8 +131,8 @@ export default {
             this.loading = true;
             try {
                 const [playersRes, teamsRes] = await Promise.all([
-                    axios.get('/api/rest/players/inactive'),
-                    axios.get('/api/rest/teams/inactive')
+                    api.get('/players/inactive'),
+                    api.get('/teams/inactive')
                 ]);
                 this.inactivePlayers = playersRes.data;
                 this.inactiveTeams = teamsRes.data;
@@ -151,7 +151,7 @@ export default {
             }
 
             try {
-                const res = await axios.patch(`/api/rest/players/assignToUser/${user.id}`, {
+                const res = await api.patch(`/players/assignToUser/${user.id}`, {
                     playerId: playerId
                 })
                 this.flash.showMessage(res.data, 'success')
@@ -166,7 +166,7 @@ export default {
         },
         async deleteUser() {
             try {
-                await axios.delete('/api/rest/users/' + this.user?.id);
+                await api.delete('/users/' + this.user?.id);
                 this.loadInitialData()
                 this.flash.showMessage('Užívatel ' + this.user?.username + ' úspešne vymazaný', 'success')
                 console.log('Používatel vymazaný.');
@@ -178,7 +178,7 @@ export default {
         },
         async deleteParticipant() {
             try {
-                const response = await axios.delete('/api/rest/' + this.participant.type + '/' + this.participant.id);
+                const response = await api.delete('/' + this.participant.type + '/' + this.participant.id);
                 const status = response.data.status;
                 const type = this.participant.type === 'players' ? 'Hráč' : 'Tím';
 
