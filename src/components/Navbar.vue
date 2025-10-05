@@ -121,6 +121,7 @@ export default {
 .user-dropdown {
   position: relative;
   cursor: pointer;
+  z-index: 1000;
 }
 
 .username {
