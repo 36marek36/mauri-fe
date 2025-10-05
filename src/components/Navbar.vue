@@ -20,6 +20,7 @@
           <AppButton v-if="playerId" label="Detail hráča" type="create" @clicked="goToPlayerDetail" htmlType="button" />
           <AppButton v-else label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" />
           <AppButton v-if="playerId" label="Upraviť profil hráča" type="edit" @clicked="goToEditPlayer" />
+          <AppButton label="Zmeniť prihlasovacie meno" type="edit" @clicked="goToChangeUsername" />
           <AppButton label="Zmeniť heslo" type="edit" @clicked="goToChangePassword" />
           <AppButton label="Odhlásiť sa" type="delete" @clicked="logout" />
         </div>
@@ -81,6 +82,10 @@ export default {
       this.closeDropdown()
       this.userStore.logout()
       this.$router.push({ path: '/login', query: { message: 'logout' } })
+    },
+    goToChangeUsername() {
+      this.closeDropdown();
+      this.$router.push('/change-username');
     },
     goToChangePassword() {
       this.closeDropdown()

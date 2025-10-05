@@ -35,7 +35,7 @@ const router = createRouter({
       name: 'newPlayer',
       component: () => import('../views/PlayerFormView.vue'),
     },
-     {
+    {
       path: '/players/edit/:id',
       name: 'editPlayer',
       component: () => import('../views/PlayerFormView.vue'),
@@ -59,6 +59,12 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('../views/LoginView.vue'),
+    },
+    {
+      path: '/change-username',
+      name: 'ChangeUsername',
+      component: () => import('@/views/ChangeUsernameView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/change-password',
