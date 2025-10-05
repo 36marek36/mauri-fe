@@ -30,7 +30,7 @@
 
 <script>
 import AppButton from '@/components/AppButton.vue'
-import axios from 'axios'
+import api from '@/axios-interceptor';
 import { useHeaderStore } from '@/stores/header'
 import { useFlashMessageStore } from '@/stores/flashMessage';
 
@@ -70,7 +70,7 @@ export default {
             }
 
             try {
-                await axios.patch('/api/rest/auth/change-password', {
+                await api.patch('/auth/change-password', {
                     oldPassword: this.oldPassword,
                     newPassword: this.newPassword
                 })

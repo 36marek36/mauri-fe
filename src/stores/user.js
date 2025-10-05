@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import axios from "axios";
 import api from "@/axios-interceptor";
 
 export const useUserStore = defineStore('user', {
