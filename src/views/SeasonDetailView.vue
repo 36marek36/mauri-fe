@@ -2,11 +2,15 @@
 
     <div class="admin-buttons">
 
-        <AppButton v-if="season.status === 'CREATED' && !showCreateLeagueForm" label="Spustiť sezónu" type="create"
-            htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'start')" />
-        <AppButton v-if="season.status === 'ACTIVE' && !showCreateLeagueForm" label="Ukončiť sezónu" type="delete"
-            htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'finish')" />
+        <!-- Tlačidlo: Spustiť sezónu -->
+        <AppButton v-if="isAdmin && season.status === 'CREATED' && !showCreateLeagueForm" label="Spustiť sezónu"
+            type="create" htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'start')" />
 
+        <!-- Tlačidlo: Ukončiť sezónu -->
+        <AppButton v-if="isAdmin && season.status === 'ACTIVE' && !showCreateLeagueForm" label="Ukončiť sezónu"
+            type="delete" htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'finish')" />
+
+        <!-- Tlačidlo: Vytvoriť novú ligu / Zavrieť formulár -->
         <AppButton v-if="isAdmin" :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
             :type="showCreateLeagueForm ? 'delete' : 'default'" htmlType="button" @clicked="toggleCreateForm"
             icon="➕" />
