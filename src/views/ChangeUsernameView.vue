@@ -70,7 +70,9 @@ export default {
 
 <style scoped>
 .change-username-form {
-    max-width: 400px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
     margin: 0 auto;
     padding: 1.5rem 2rem;
     border-radius: 12px;
@@ -82,24 +84,26 @@ export default {
 
 form>div {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     margin-bottom: 1rem;
 }
 
 label {
-    flex: 0 0 130px;
-    text-align: left;
-    margin-right: 1rem;
+    flex: 1 0 130px;
+    min-width: 130px;
+    margin-bottom: 0.5rem;
     font-weight: bold;
 }
 
 input {
-    flex: 1;
+    flex: 2 1 200px;
+    width: 100%;
     padding: 0.4rem 0.6rem;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 1rem;
-    transition: border-color 0.2s;
+    box-sizing: border-box;
 }
 
 input:focus {
@@ -109,8 +113,24 @@ input:focus {
 
 .submit-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .change-username-form {
+        padding: 1rem;
+    }
+
+    label {
+        flex: 1 0 100%;
+        margin-right: 0;
+    }
+
+    input {
+        flex: 1 0 100%;
+    }
 }
 </style>
