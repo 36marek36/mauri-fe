@@ -70,7 +70,7 @@ export default {
 
 <style scoped>
 .change-username-form {
-    max-width: 100%;
+    max-width: 400px;
     width: 100%;
     box-sizing: border-box;
     margin: 0 auto;
