@@ -1,85 +1,87 @@
 <template>
 
-    <div class="container">
+    <div class="main-layout">
 
-        <!-- Ľavý stĺpec: Hráči -->
-        <div class="players">
-            <h2>Zoznam hráčov:</h2>
-
-            <AppButton v-if="isAdmin" label="Vytvoriť hráča" icon="➕" type="create" htmlType="button"
-                @clicked="addPlayer" />
-
-            <div v-if="loadingPlayers">
-                ... loading players...
-            </div>
-
-            <div v-else-if="players.length === 0">
-                <p>Žiadni hráči nie sú k dispozícii.</p>
-            </div>
-
-            <div v-else>
-                <ParticipantList :participants="paginatedPlayers"
-                    :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
-                    :showProgress = "false"
-                    @view-detail="(id) => goToDetail('players', id)" />
-                <div v-if="totalPagesPlayers > 1" class="pagination">
-                    <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
-                        @clicked="currentPagePlayers--" :disabled="currentPagePlayers === 1" />
-                    <span>{{ currentPagePlayers }} / {{ totalPagesPlayers }}</span>
-                    <AppButton label="Ďalšia" icon="→" type="default" htmlType="button" @clicked="currentPagePlayers++"
-                        :disabled="currentPagePlayers === totalPagesPlayers" />
-                </div>
-            </div>
+        <div class="left-side">
         </div>
+        <div class="right-side">
+            <!-- Ľavý stĺpec: Hráči -->
+            <div class="players">
+                <h2>Zoznam hráčov:</h2>
 
-        <!-- Pravý stĺpec: Tímy -->
-        <div class="teams">
-            <h2>Zoznam tímov:</h2>
+                <AppButton v-if="isAdmin" label="Vytvoriť hráča" icon="➕" type="create" htmlType="button"
+                    @clicked="addPlayer" />
 
-            <div v-if="loadingTeams">
-                ... loading teams...
-            </div>
-
-            <div v-else>
-                <AppButton v-if="isAdmin" :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'"
-                    icon="➕" :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button"
-                    @clicked="toggleCreateForm" />
-
-                <div v-if="showCreateTeamForm">
-                    <label for="player1">Hráč 1:</label>
-                    <select id="player1" v-model="newTeam.player1Id">
-                        <option disabled value="">-- Vyber hráča --</option>
-                        <option v-for="player in players" :key="player.id" :value="player.id">
-                            {{ player.firstName }} {{ player.lastName }}
-                        </option>
-                    </select>
-
-                    <label for="player2">Hráč 2:</label>
-                    <select id="player2" v-model="newTeam.player2Id">
-                        <option disabled value="">-- Vyber hráča --</option>
-                        <option v-for="player in players" :key="player.id" :value="player.id">
-                            {{ player.firstName }} {{ player.lastName }}
-                        </option>
-                    </select>
-
-                    <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button" @clicked="createTeam" />
+                <div v-if="loadingPlayers">
+                    ... loading players...
                 </div>
 
-                <div v-if="teams.length === 0">
-                    <p>Žiadne tímy neboli zatiaľ vytvorené.</p>
+                <div v-else-if="players.length === 0">
+                    <p>Žiadni hráči nie sú k dispozícii.</p>
                 </div>
 
                 <div v-else>
-                    <ParticipantList :participants="paginatedTeams"
-                        :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
-                        :showProgress = "false"
-                        @view-detail="(id) => goToDetail('teams', id)" />
-                    <div v-if="totalPagesTeams > 1" class="pagination">
+                    <ParticipantList :participants="paginatedPlayers"
+                        :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null" :showProgress="false"
+                        @view-detail="(id) => goToDetail('players', id)" />
+                    <div v-if="totalPagesPlayers > 1" class="pagination">
                         <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
-                            @clicked="currentPageTeams--" :disabled="currentPageTeams === 1" />
-                        <span>Strana {{ currentPageTeams }} z {{ totalPagesTeams }}</span>
+                            @clicked="currentPagePlayers--" :disabled="currentPagePlayers === 1" />
+                        <span>{{ currentPagePlayers }} / {{ totalPagesPlayers }}</span>
                         <AppButton label="Ďalšia" icon="→" type="default" htmlType="button"
-                            @clicked="currentPageTeams++" :disabled="currentPageTeams === totalPagesTeams" />
+                            @clicked="currentPagePlayers++" :disabled="currentPagePlayers === totalPagesPlayers" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pravý stĺpec: Tímy -->
+            <div class="teams">
+                <h2>Zoznam tímov:</h2>
+
+                <div v-if="loadingTeams">
+                    ... loading teams...
+                </div>
+
+                <div v-else>
+                    <AppButton v-if="isAdmin" :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'"
+                        icon="➕" :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button"
+                        @clicked="toggleCreateForm" />
+
+                    <div v-if="showCreateTeamForm">
+                        <label for="player1">Hráč 1:</label>
+                        <select id="player1" v-model="newTeam.player1Id">
+                            <option disabled value="">-- Vyber hráča --</option>
+                            <option v-for="player in players" :key="player.id" :value="player.id">
+                                {{ player.firstName }} {{ player.lastName }}
+                            </option>
+                        </select>
+
+                        <label for="player2">Hráč 2:</label>
+                        <select id="player2" v-model="newTeam.player2Id">
+                            <option disabled value="">-- Vyber hráča --</option>
+                            <option v-for="player in players" :key="player.id" :value="player.id">
+                                {{ player.firstName }} {{ player.lastName }}
+                            </option>
+                        </select>
+
+                        <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button" @clicked="createTeam" />
+                    </div>
+
+                    <div v-if="teams.length === 0">
+                        <p>Žiadne tímy neboli zatiaľ vytvorené.</p>
+                    </div>
+
+                    <div v-else>
+                        <ParticipantList :participants="paginatedTeams"
+                            :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
+                            :showProgress="false" @view-detail="(id) => goToDetail('teams', id)" />
+                        <div v-if="totalPagesTeams > 1" class="pagination">
+                            <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
+                                @clicked="currentPageTeams--" :disabled="currentPageTeams === 1" />
+                            <span>Strana {{ currentPageTeams }} z {{ totalPagesTeams }}</span>
+                            <AppButton label="Ďalšia" icon="→" type="default" htmlType="button"
+                                @clicked="currentPageTeams++" :disabled="currentPageTeams === totalPagesTeams" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -198,89 +200,82 @@ export default {
                     console.error('Chyba pri vytváraní tímu:', err);
                 }
             }
-    },
-    async deleteParticipant() {
-        try {
-            await api.delete('/' + this.participant.type + '/' + this.participant.id);
-            const type = this.participant.type === 'players' ? 'Hráč' : 'Tím';
-            this.flash.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný`, 'success');
-            console.log(`${this.participant.type.slice(0, -1)} bol vymazaný.`);
+        },
+        async deleteParticipant() {
+            try {
+                await api.delete('/' + this.participant.type + '/' + this.participant.id);
+                const type = this.participant.type === 'players' ? 'Hráč' : 'Tím';
+                this.flash.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný`, 'success');
+                console.log(`${this.participant.type.slice(0, -1)} bol vymazaný.`);
 
-            if (this.participant.type === 'teams') {
-                this.currentPageTeams = 1;
-                this.fetchTeams();
-            } else if (this.participant.type === 'players') {
-                this.currentPagePlayers = 1;
-                this.fetchPlayers();
+                if (this.participant.type === 'teams') {
+                    this.currentPageTeams = 1;
+                    this.fetchTeams();
+                } else if (this.participant.type === 'players') {
+                    this.currentPagePlayers = 1;
+                    this.fetchPlayers();
+                }
+            } catch (err) {
+                console.error(`Chyba pri mazaní ${this.participant.type.slice(0, -1)}a:`, err);
+            } finally {
+                this.cancelDelete();
             }
-        } catch (err) {
-            console.error(`Chyba pri mazaní ${this.participant.type.slice(0, -1)}a:`, err);
-        } finally {
-            this.cancelDelete();
+        },
+        confirmDeleteParticipant(type, id) {
+            let name = '';
+
+            if (type === 'players') {
+                const player = this.players.find(p => p.id === id);
+                name = player?.name || '';
+            } else if (type === 'teams') {
+                const team = this.teams.find(t => t.id === id);
+                name = team.name || '';
+            }
+
+            this.participant = { id, type, name };
+            this.showDeleteModal = true;
+        },
+        cancelDelete() {
+            this.participant = null;
+            this.showDeleteModal = false;
         }
     },
-    confirmDeleteParticipant(type, id) {
-        let name = '';
-
-        if (type === 'players') {
-            const player = this.players.find(p => p.id === id);
-            name = player?.name || '';
-        } else if (type === 'teams') {
-            const team = this.teams.find(t => t.id === id);
-            name =team.name || '';
+    computed: {
+        userStore() {
+            return useUserStore()
+        },
+        flash() {
+            return useFlashMessageStore();
+        },
+        isAdmin() {
+            return this.userStore.isAdmin
+        },
+        isLoggedIn() {
+            return this.userStore.isLoggedIn
+        },
+        totalPagesPlayers() {
+            return Math.ceil(this.players.length / this.participantsPerPage);
+        },
+        paginatedPlayers() {
+            const start = (this.currentPagePlayers - 1) * this.participantsPerPage;
+            const end = start + this.participantsPerPage;
+            return this.players.slice(start, end);
+        },
+        totalPagesTeams() {
+            return Math.ceil(this.teams.length / this.participantsPerPage);
+        },
+        paginatedTeams() {
+            const start = (this.currentPageTeams - 1) * this.participantsPerPage;
+            const end = start + this.participantsPerPage;
+            return this.teams.slice(start, end);
         }
-
-        this.participant = { id, type, name };
-        this.showDeleteModal = true;
     },
-    cancelDelete() {
-        this.participant = null;
-        this.showDeleteModal = false;
-    }
-},
-computed: {
-    userStore() {
-        return useUserStore()
-    },
-    flash() {
-        return useFlashMessageStore();
-    },
-    isAdmin() {
-        return this.userStore.isAdmin
-    },
-    isLoggedIn() {
-        return this.userStore.isLoggedIn
-    },
-    totalPagesPlayers() {
-        return Math.ceil(this.players.length / this.participantsPerPage);
-    },
-    paginatedPlayers() {
-        const start = (this.currentPagePlayers - 1) * this.participantsPerPage;
-        const end = start + this.participantsPerPage;
-        return this.players.slice(start, end);
-    },
-    totalPagesTeams() {
-        return Math.ceil(this.teams.length / this.participantsPerPage);
-    },
-    paginatedTeams() {
-        const start = (this.currentPageTeams - 1) * this.participantsPerPage;
-        const end = start + this.participantsPerPage;
-        return this.teams.slice(start, end);
-    }
-},
-components: { AppButton, ParticipantList, AppModal }
+    components: { AppButton, ParticipantList, AppModal }
 }
 
 </script>
 
 <style scoped>
-.container {
-    display: flex;
-    gap: 2rem;
-    /* Medzera medzi stĺpcami */
-    align-items: flex-start;
-    /* Zarovná obsah hore */
-}
 
 .players {
     flex: 1;
@@ -291,10 +286,6 @@ components: { AppButton, ParticipantList, AppModal }
 .teams {
     flex: 1;
     padding-left: 1rem;
-}
-
-:deep(ul) {
-    width: 50%;
 }
 
 .pagination {
@@ -325,14 +316,6 @@ components: { AppButton, ParticipantList, AppModal }
 }
 
 @media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    :deep(ul) {
-        width: 100%;
-    }
 
     .players {
         border-right: none;
@@ -348,10 +331,6 @@ components: { AppButton, ParticipantList, AppModal }
         /* padding-top: 1rem; */
         width: 100%;
         text-align: center;
-    }
-
-    .app-header :deep(.headings) {
-        display: none !important;
     }
 
     .pagination :deep(.app-button) {

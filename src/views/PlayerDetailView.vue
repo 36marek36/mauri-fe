@@ -2,96 +2,103 @@
 
     <div v-if="loading">... loading ...</div>
 
-    <div v-else class="player-detail-layout">
-        <!-- Ľavý stĺpec – údaje o hráčovi -->
-        <ul class="player-info">
-            <li>
-                <span>Meno: </span>
-                <span>{{ player.firstName }}</span>
-            </li>
-            <li>
-                <span>Priezvisko: </span>
-                <span>{{ player.lastName }}</span>
-            </li>
-            <li>
-                <span>Email: </span>
-                <span>{{ player.email || 'nezadaný' }}</span>
-            </li>
-            <li>
-                <span>Telefón: </span>
-                <span>{{ player.phone || 'nezadaný' }}</span>
-            </li>
-            <li>
-                <span>Dátum registrácie: </span>
-                <span>{{ player.registrationDate }}</span>
-            </li>
-            <li>
-                <span>Moje tímy:</span>
-                <span class="league-names">
-                    <span v-for="team in player.teams" :key="team.id">
-                        {{ team.name }}
-                    </span>
-                </span>
 
 
-            </li>
-            <li v-if="player.deletedDate">
-                <span>Dátum zmazania: </span>
-                <span>{{ player.deletedDate }}</span>
-            </li>
-            <li>
-                <span>Zoznam líg:</span>
-                <span class="league-names">
-                    <span v-for="league in player.leagues" :key="league.leagueId">
-                        {{ league.leagueName }} ({{ league.seasonYear }})
-                    </span>
-                </span>
-            </li>
-        </ul>
-
-        <!-- Pravý stĺpec – tabuľka zápasov -->
-        <div v-if="player.active" class="matches-table">
-            <h3 class="matches-title">Všetky zápasy aktuálnej sezóny</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Domáci</th>
-                        <th>Hosť</th>
-                        <th>Výsledok</th>
-                        <th>Kolo</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="match in allMatches" :key="match.id">
-                        <td>{{ match.homePlayer.name }}</td>
-                        <td>{{ match.awayPlayer.name }}</td>
-                        <td>
-                            <span v-if="match.status === 'FINISHED' && match.result">
-                                {{ match.result.score1 }} : {{ match.result.score2 }}
-                            </span>
-                            <span v-else>-</span>
-                        </td>
-                        <td>{{ match.roundNumber }}</td>
-                        <td>
-                            <span :class="{
-                                'badge-finished': match.status === 'FINISHED',
-                                'badge-cancelled': match.status === 'CANCELLED',
-                                'badge-pending': match.status !== 'FINISHED' && match.status !== 'CANCELLED'
-                            }">
-                                {{
-                                    match.status === 'FINISHED'
-                                        ? 'Odohratý'
-                                        : match.status === 'CANCELLED'
-                                            ? 'Zrušený'
-                                            : 'Neodohratý'
-                                }}
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div v-else class="main-layout">
+        <div class="left-side">
         </div>
+        <div class="right-side">
+            <!-- Ľavý stĺpec – údaje o hráčovi -->
+            <ul class="player-info">
+                <li>
+                    <h3 class="label">Meno: </h3>
+                    <span class="value">{{ player.firstName }}</span>
+                </li>
+                <li>
+                    <h3 class="label">Priezvisko: </h3>
+                    <span class="value">{{ player.lastName }}</span>
+                </li>
+                <li>
+                    <h3 class="label">Email: </h3>
+                    <span class="value">{{ player.email || 'nezadaný' }}</span>
+                </li>
+                <li>
+                    <h3 class="label">Telefón: </h3>
+                    <span class="value">{{ player.phone || 'nezadaný' }}</span>
+                </li>
+                <li>
+                    <h3 class="label">Dátum registrácie: </h3>
+                    <span class="value">{{ player.registrationDate }}</span>
+                </li>
+                <li>
+                    <h3 class="label">Moje tímy:</h3>
+                    <span>
+                        <div class="value" v-for="team in player.teams" :key="team.id">
+                            {{ team.name }}
+                        </div>
+                    </span>
+
+                </li>
+                <li v-if="player.deletedDate">
+                    <h3 class="label">Dátum zmazania: </h3>
+                    <span class="value">{{ player.deletedDate }}</span>
+                </li>
+                <li>
+                    <h3 class="label">Zoznam líg:</h3>
+                    <span>
+                        <div class="value" v-for="league in player.leagues" :key="league.leagueId">
+                            {{ league.leagueName }} ({{ league.seasonYear }})
+                        </div>
+                    </span>
+                </li>
+            </ul>
+
+            <!-- Pravý stĺpec – tabuľka zápasov -->
+            <div v-if="player.active" class="matches-table">
+                <h3 class="matches-title">Všetky zápasy aktuálnej sezóny</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domáci</th>
+                            <th>Hosť</th>
+                            <th>Výsledok</th>
+                            <th>Kolo</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="match in allMatches" :key="match.id">
+                            <td>{{ match.homePlayer.name }}</td>
+                            <td>{{ match.awayPlayer.name }}</td>
+                            <td>
+                                <span
+                                    v-if="match.status === 'FINISHED' || match.status === 'CANCELLED' && match.result">
+                                    {{ match.result.score1 }} : {{ match.result.score2 }}
+                                </span>
+                                <span v-else>-</span>
+                            </td>
+                            <td>{{ match.roundNumber }}</td>
+                            <td>
+                                <span :class="{
+                                    'badge-finished': match.status === 'FINISHED',
+                                    'badge-cancelled': match.status === 'CANCELLED',
+                                    'badge-pending': match.status !== 'FINISHED' && match.status !== 'CANCELLED'
+                                }">
+                                    {{
+                                        match.status === 'FINISHED'
+                                            ? 'Odohratý'
+                                            : match.status === 'CANCELLED'
+                                                ? 'Zrušený'
+                                                : 'Neodohratý'
+                                    }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -131,7 +138,7 @@ export default {
                 this.loading = false;
             }
         },
-        
+
         async fetchPlayerMatches() {
             try {
                 const [createdRes, finishedRes, cancelledRes] = await Promise.all([
@@ -162,46 +169,36 @@ export default {
 </script>
 
 <style scoped>
-li {
-    display: flex;
-    justify-content: space-between;
+.player-info {
+    list-style: none;
+    padding: 0.5rem;
+    margin: 0;
+    flex: 1;
+    max-width: 400px;
+}
+
+.player-info li {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    /* 1. stĺpec pevný pre label, 2. pre hodnotu */
     gap: 0.5rem;
     margin-bottom: 0.3rem;
     word-break: break-word;
+    align-items: start;
 }
 
-li span:nth-child(2) {
-    font-weight: bold;
+.label {
+    text-align: left;
 }
 
-.league-names {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    /* Toto zarovná vnútorné span-y doprava */
-}
-
-.league-names span {
-    font-weight: bold;
-}
-
-.player-detail-layout {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-    justify-content: flex-start;
-}
-
-.player-info {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    flex: 1;
-    max-width: 300px;
+.value {
+    /* font-weight: bold; */
+    color: whitesmoke;
 }
 
 .matches-table {
     flex: 2;
+    margin-bottom: 1rem;
     overflow-x: auto;
 }
 
@@ -223,8 +220,8 @@ li span:nth-child(2) {
 }
 
 .badge-finished {
-    color: green;
-    font-weight: bold;
+    color: greenyellow;
+    /* font-weight: normal; */
 }
 
 .badge-cancelled {
@@ -233,15 +230,12 @@ li span:nth-child(2) {
 }
 
 .badge-pending {
-    color: gray;
+    color: whitesmoke;
     font-style: italic;
+
 }
 
 @media (max-width: 768px) {
-    .player-detail-layout {
-        flex-direction: column;
-    }
-
     .matches-table {
         margin-top: 1rem;
     }

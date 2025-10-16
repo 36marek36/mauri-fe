@@ -2,7 +2,7 @@
   <div class="header">
     <div class="top-row">
       <div class="left-side">
-        <div class="logo"></div>
+        <FlashMessage />
       </div>
       <div class="headings">
         <h1>{{ title }}</h1>
@@ -10,7 +10,7 @@
       </div>
     </div>
     <div class="right-side">
-      <FlashMessage />
+      <div class="logo"></div>
     </div>
   </div>
 </template>
@@ -63,6 +63,7 @@ export default {
   justify-content: flex-start;
   text-align: center;
   min-width: 200px;
+  padding: 100px 0 0 0;
 }
 
 .right-side {
@@ -70,12 +71,12 @@ export default {
   /* 25% z header */
   display: flex;
   justify-content: flex-end;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .logo {
-  max-width: 320px;
-  width: 20vw;
+  max-width: 250px;
+  width: 40vw;
   aspect-ratio: 1 / 1;
   background-size: contain;
   background-repeat: no-repeat;
@@ -101,11 +102,11 @@ export default {
     width: 50%;
     justify-content: center;
     text-align: center;
+     padding: 70px 0 0 0;
   }
 
   .right-side {
     width: 100%;
-    justify-content: center;
     margin-top: 0.5rem;
   }
 }

@@ -8,7 +8,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { hideHeader: true }
+      // meta: { hideHeader: true }
     },
     {
       path: '/users',
@@ -69,7 +69,7 @@ const router = createRouter({
     {
       path: '/change-password',
       name: 'ChangePassword',
-      component: () => import('../views/ChangePassword.vue'),
+      component: () => import('../views/ChangePasswordView.vue'),
       meta: { requiresAuth: true }
     }
   ],

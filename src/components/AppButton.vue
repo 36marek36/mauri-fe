@@ -54,6 +54,7 @@ export default {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.4rem 1rem;
+  margin: 0.2rem;
   border: none;
   border-radius: 4px;
   font-weight: bold;

@@ -98,15 +98,18 @@ export default {
 
 <style scoped>
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   padding: 1rem;
   text-align: center;
 }
 
 .navbar ul {
   background: transparent;
-  backdrop-filter: none;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  /* jemne biely okraj */
+  border: 2px solid rgba(255, 255, 255, 0.863);
   padding: 0.5rem 1rem;
   width: fit-content;
   margin: auto;

@@ -21,10 +21,8 @@ import AppHeader from './components/AppHeader.vue';
     min-height: 100vh;
 }
 
-
 .main-content {
     flex-grow: 1;
     padding: 0 20px;
-    /* 0 hore/dole, 20px vľavo/vpravo */
 }
 </style>

@@ -48,7 +48,7 @@
             <section class="matches">
                 <h3 v-if="hasMatches">Zápasy ligy</h3>
 
-                <div v-if="hasMatches">
+                <div class="matches-wrapper" v-if="hasMatches">
                     <AppButton :label="areAnyRoundsOpened ? 'Skryť všetky kolá' : 'Zobraziť všetky kolá'"
                         :icon="areAnyRoundsOpened ? '🔼' : '🔽'" type="default" htmlType="button"
                         @clicked="toggleAllRounds" />
@@ -81,7 +81,7 @@
                                     </div>
 
                                     <!-- Výsledok zápasu -->
-                                    <div v-else-if="match.status === 'FINISHED'" class="match-result-wrapper">
+                                    <div v-else-if="match.status === 'FINISHED' || match.status === 'CANCELLED'" class="match-result-wrapper">
                                         <div class="match-result-text">
                                             <strong>Výsledok:</strong>
                                             {{ match.result?.score1 }} : {{ match.result?.score2 }}
@@ -164,9 +164,10 @@
         Všetky jeho zapasy budú kontumačne prehraté 0:6, 0:6. Táto akcia sa nebude dať vrátiť.`"
         @confirm="() => dropParticipantFromLeague(participant?.id)" @cancel="cancelDrop" />
     <AppModal :visible="showConfirmModal" :message="modalMessage" @confirm="onModalConfirm" @cancel="onModalCancel" />
-    <AppModal :visible="showActionModal" :title="actionType === 'edit' ? 'Úprava výsledku' : 'Zrušenie výsledku'" :message="actionType === 'edit'
-        ? 'Naozaj chcete upraviť výsledok tohto zápasu?'
-        : 'Naozaj chcete zrušiť výsledok tohto zápasu? Táto akcia je nevratná.'" @confirm="onActionModalConfirm"
+    <AppModal :visible="showActionModal" :title="actionType === 'edit' ? 'Úprava výsledku' : 'Zrušenie výsledku'"
+        :message="actionType === 'edit'
+            ? 'Naozaj chcete upraviť výsledok tohto zápasu?'
+            : 'Naozaj chcete zrušiť výsledok tohto zápasu? Táto akcia je nevratná.'" @confirm="onActionModalConfirm"
         @cancel="onActionModalCancel" />
 </template>
 
@@ -204,7 +205,7 @@ export default {
             confirmationAction: null, // 'generate' alebo 'finish'
             showActionModal: false,
             actionType: null, // 'edit' alebo 'cancel'
-            targetMatchId:null,
+            targetMatchId: null,
             participant: null,
             header: useHeaderStore()
 
@@ -663,6 +664,13 @@ export default {
 .matches {
     flex: 1.5 1 0;
     padding: 1rem;
+
+}
+
+.matches-wrapper {
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    text-align: center;
 }
 
 /* Trojriadkové meno zápasu */
@@ -674,6 +682,7 @@ export default {
     font-weight: 600;
     font-size: 1.1rem;
     margin-bottom: 0.75rem;
+
 }
 
 /* Položka zápasu */
@@ -681,6 +690,7 @@ export default {
     list-style: none;
     padding: 12px 0;
     border-bottom: 1px solid #ddd;
+
 }
 
 /* Posledná položka bez spodného okraja */
@@ -701,6 +711,7 @@ export default {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
     font-size: 1rem;
     color: #faf3e0;
+
 }
 
 /* Text výsledku - oddelený od tlačidiel */

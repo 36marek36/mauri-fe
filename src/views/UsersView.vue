@@ -1,60 +1,67 @@
 <template>
 
-    <div v-if="!loading">
-        <table class="users-table">
-            <thead>
-                <tr>
-                    <th>Meno používateľa</th>
-                    <th>Rola</th>
-                    <th>Hráč</th>
-                    <th>Posledne prihlasenie</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="user in users" :key="user.id">
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.role }}</td>
-                    <td>
-                        <RouterLink v-if="user.playerId" :to="`/players/${user.playerId}`">
-                            {{ user.playerName }}
-                        </RouterLink>
-                        <div v-else-if="user.role === 'USER'">
-                            <select v-model="selectedPlayers[user.id]">
-                                <option disabled value="">-- Vyber hráča --</option>
-                                <option v-for="player in unassignedPlayers" :key="player.id" :value="player.id">
-                                    {{ player.name }}
-                                </option>
-                            </select>
-                            <AppButton type="submit" label="Priradiť" @clicked="() => assignPlayerToUser(user)" />
-                        </div>
-                        <span v-else>Bez možnosti priradiť hráča</span>
-                    </td>
-                    <td>
-                        <span v-if="user.lastLogin"> {{ user.lastLogin }} </span>
-                        <span v-else>Zatial žiadne prihlásenie</span>
-                    </td>
-                    <td>
-                        <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete" htmltype="button"
-                            @clicked="() => confirmDeleteUser(user)" />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="ip-wrapper">
-            <div class="inactive-participants">
-                <ParticipantList :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
-                    @view-detail="(id) => goToDetail('players', id)"
-                    :showProgress = "false"
-                    :remove="(id) => confirmDeleteParticipant('players', id)" />
+    <div class="main-layout" v-if="!loading">
+
+        <div class="left-side">
+        </div>
+        <div class="right-side">
+            <div class="table-wrapper">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Meno používateľa</th>
+                            <th>Rola</th>
+                            <th>Hráč</th>
+                            <th>Posledne prihlasenie</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="user in users" :key="user.id">
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.role }}</td>
+                            <td>
+                                <RouterLink v-if="user.playerId" :to="`/players/${user.playerId}`">
+                                    {{ user.playerName }}
+                                </RouterLink>
+                                <div v-else-if="user.role === 'USER'">
+                                    <select v-model="selectedPlayers[user.id]">
+                                        <option disabled value="">-- Vyber hráča --</option>
+                                        <option v-for="player in unassignedPlayers" :key="player.id" :value="player.id">
+                                            {{ player.name }}
+                                        </option>
+                                    </select>
+                                    <AppButton type="submit" label="Priradiť"
+                                        @clicked="() => assignPlayerToUser(user)" />
+                                </div>
+                                <span v-else>Bez možnosti priradiť hráča</span>
+                            </td>
+                            <td>
+                                <span v-if="user.lastLogin"> {{ user.lastLogin }} </span>
+                                <span v-else>Zatial žiadne prihlásenie</span>
+                            </td>
+                            <td>
+                                <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete" htmltype="button"
+                                    @clicked="() => confirmDeleteUser(user)" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
             </div>
-            <div class="inactive-participants">
-                <ParticipantList :title="'Neaktívne (vymazané) tími'" :participants="inactiveTeams"
-                    @view-detail="(id) => goToDetail('teams', id)"
-                    :showProgress = "false"
-                    :remove="(id) => confirmDeleteParticipant('teams', id)" />
+
+            <div class="ip-wrapper">
+                <div class="inactive-participants">
+                    <ParticipantList :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
+                        @view-detail="(id) => goToDetail('players', id)" :showProgress="false"
+                        :remove="(id) => confirmDeleteParticipant('players', id)" />
+                </div>
+                <div class="inactive-participants">
+                    <ParticipantList :title="'Neaktívne (vymazané) tími'" :participants="inactiveTeams"
+                        @view-detail="(id) => goToDetail('teams', id)" :showProgress="false"
+                        :remove="(id) => confirmDeleteParticipant('teams', id)" />
+                </div>
             </div>
         </div>
-
     </div>
 
     <div v-else>Načítavam používateľov...</div>
@@ -254,8 +261,14 @@ export default {
 </script>
 
 <style scoped>
+.table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+}
+
 .users-table {
     width: 100%;
+    min-width: 600px;
     border-collapse: collapse;
     margin-top: 1rem;
 }
@@ -282,6 +295,7 @@ export default {
 }
 
 @media (max-width: 768px) {
+
     .ip-wrapper {
         flex-direction: column;
         align-items: center;
