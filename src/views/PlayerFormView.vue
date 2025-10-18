@@ -130,49 +130,25 @@ export default {
           this.$router.push('/participants');
         }
       } catch (err) {
-        if (err.response && err.response.status === 400) {
+        if (err.response) {
+          const status = err.response.status;
           const data = err.response.data;
-          if (data.message) {
-            this.flash.showMessage(data.message, 'warning');
+
+          if (status === 400) {
+            this.flash.showMessage(data.message || 'Chyba: neplatné dáta.', 'warning');
+          } else if (status === 409) {
+            this.flash.showMessage(data.message || 'Hráč už existuje.', 'warning');
           } else {
-            this.flash.showMessage('Chyba: neplatné dáta.', 'warning');
+            this.flash.showMessage('Neznáma chyba pri ukladaní hráča.', 'error');
           }
-        } else {
-          this.flash.showMessage('Neznáma chyba pri ukladaní hráča.', 'error');
+
           console.error('Chyba pri ukladaní hráča:', err);
+        } else {
+          this.flash.showMessage('Nepodarilo sa pripojiť k serveru.', 'error');
+          console.error('Sieťová chyba:', err);
         }
       }
-    },
-    // async submitForm() {
-    //   const endpoint = this.isAdmin
-    //     ? '/api/rest/players/admin/createPlayer'
-    //     : '/api/rest/players/user/createPlayer'
-
-    //   try {
-    //     const response = await axios.post(endpoint, this.player)
-    //     console.log('Hráč: ' + response.data.firstName + ' bol úspešne vytvorený.')
-    //     this.flash.showMessage('Hráč ' + response.data.firstName + ' bol úspešne vytvorený.', 'success')
-
-    //     await this.userStore.fetchCurrentUser()
-
-    //     setTimeout(() => {
-    //       this.$router.push('/participants')
-    //     }, 2000)
-    //   } catch (err) {
-    //     if (err.response && err.response.status === 400) {
-    //       const data = err.response.data;
-    //       if (data.message) {
-    //         this.flash.showMessage(data.message, 'warning');
-    //       } else {
-    //         this.flash.showMessage('Chyba: neplatné dáta.', 'warning');
-    //       }
-    //     } else {
-    //       // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
-    //       this.flash.showMessage('Neznáma chyba pri vytváraní hráča.', 'error');
-    //       console.error('Chyba pri vytváraní hráča:', err);
-    //     }
-    //   }
-    // }
+    }
   },
   components: { AppButton, AppModal }
 }
