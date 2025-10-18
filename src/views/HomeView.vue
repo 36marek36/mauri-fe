@@ -6,30 +6,7 @@
       <div class="rules">
         <h3>pravidlá:</h3>
         <div class="rules-area">
-          <p>
-            Handlovská tenisová liga je organizovaná jednokolovo, čo znamená, že každý hráč sa stretne s každým súperom
-            iba raz. O konečnom poradí rozhoduje umiestnenie v tabuľke. Hráč na prvom mieste automaticky postupuje do
-            vyššej ligy (najmä v mužskej časti súťaže). Pre hráčov na hranici postupu je pripravený barážový systém –
-            zápasy, ktoré často rozhodujú o osude hráčov a ich zaradení v nasledujúcej sezóne.
-          </p>
-
-          <p>
-            Zápasy sa odohrávajú na tradičnom antukovom povrchu, ktorý je obľúbený pre svoj pomalší charakter, no
-            zároveň kladie vyššie nároky na techniku aj fyzickú kondíciu. Hráči musia byť pripravení na dlhé výmeny a
-            náročné pohybové nasadenie, čo prináša atraktívny zážitok aj pre divákov. Liga prebieha každoročne od mája
-            do septembra, pričom na jej konci prebieha vyhodnotenie sezóny.
-          </p>
-
-          <p>
-            Prví traja hráči z každej ligy sú ocenení za svoje výkony a výsledky. Okrem týchto hlavných ocenení sa
-            udeľujú aj špeciálne ceny – „Skokan sezóny“, „Skokanka sezóny“ a „Obdiv sezóny“, ktoré zvýrazňujú mimoriadne
-            výkony alebo výnimočné momenty.
-          </p>
-          <p>
-            A keďže má tenis v našom meste svoje pevné miesto, radi Vás privítame v areáli Hutira Relax Club, kde si
-            tenis môžete skúsiť aj zahrať a následne si oddýchnuť pri vychladenom pive Baník od lokálneho výrobcu u nás
-            v Mauribare.
-          </p>
+          <p ref="rulesText"></p>
         </div>
       </div>
       <LoginRegisterForm />
@@ -40,6 +17,8 @@
 <script>
 import LoginRegisterForm from '@/components/LoginRegisterForm.vue';
 import { useHeaderStore } from '@/stores/header';
+import { typeText } from '@/utils/typingEffect';
+import { text } from '@/assets/rulesText';
 
 export default {
   name: 'Home Page',
@@ -51,13 +30,15 @@ export default {
   created() {
     this.header.setTitle('Vitajte', '')
   },
+  mounted() {
+    typeText(text, this.$refs.rulesText, 50); // môžeš upraviť rýchlosť
+  },
   components: { LoginRegisterForm }
 }
 
 </script>
 
 <style scoped>
-
 .rules {
   display: flex;
   flex-direction: column;
@@ -87,8 +68,7 @@ export default {
 .rules-area p {
   margin-bottom: 1rem;
   line-height: 1.6;
-  text-align: justify;
-  /* voliteľné pre krajšie zalomenie */
+  /* text-align: justify; */
 }
 
 .rules-area::-webkit-scrollbar {
