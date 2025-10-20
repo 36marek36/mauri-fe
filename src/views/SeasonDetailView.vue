@@ -81,6 +81,7 @@ import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
 import CircularProgress from '@/components/CircularProgress.vue';
+import { inflection } from '@/utils/inflection';
 
 
 export default {
@@ -187,21 +188,8 @@ export default {
             this.leagueToDelete = null;
         },
 
-        inflection(league) {
-            const count = league.leagueType === 'SINGLES'
-                ? league.players?.length
-                : league.teams?.length
+        inflection,
 
-            if (league.leagueType === 'SINGLES') {
-                if (count === 1) return '1 hráč';
-                if (count >= 2 && count <= 4) return `${count} hráči`;
-                return `${count} hráčov`;
-            } else {
-                if (count === 1) return '1 tím';
-                if (count >= 2 && count <= 4) return `${count} tímy`;
-                return `${count} tímov`;
-            }
-        },
         async performSeasonAction() {
             if (!this.seasonToAction || !this.seasonModalType) return;
 

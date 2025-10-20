@@ -1,9 +1,5 @@
 <template>
-
     <div v-if="loading">... loading ...</div>
-
-
-
     <div v-else class="main-layout">
         <div class="left-side">
         </div>
@@ -45,7 +41,7 @@
             </ul>
 
             <!-- Pravý stĺpec – tabuľka zápasov -->
-            <div v-if="player.active" class="matches-table">
+            <div class="matches-table">
                 <h3 class="matches-title">Všetky zápasy aktuálnej sezóny</h3>
                 <table>
                     <thead>

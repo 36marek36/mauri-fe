@@ -160,7 +160,8 @@
     <AppModal :visible="showDeleteModal"
         :message="`Naozaj chcete odstrániť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy?`"
         @confirm="() => removeParticipantFromLeague(participant?.id)" @cancel="cancelDelete" />
-    <AppModal :visible="showDropModal" :message="`Naozaj chcete odhlásiť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy? 
+    <AppModal :visible="showDropModal"
+        :message="`Naozaj chcete odhlásiť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy? 
         Všetky zapasy ${participant?.type === 'players' ? 'hráča' : 'tímu'} budú zrušené. Táto akcia sa nebude dať vrátiť.`"
         @confirm="() => dropParticipantFromLeague(participant?.id)" @cancel="cancelDrop" />
     <AppModal :visible="showConfirmModal" :message="modalMessage" @confirm="onModalConfirm" @cancel="onModalCancel" />
@@ -633,7 +634,7 @@ export default {
                 SINGLES: 'DVOJHRA',
                 DOUBLES: 'ŠTVORHRA',
             };
-        },
+        }
     },
     components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppModal }
 }

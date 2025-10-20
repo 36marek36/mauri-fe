@@ -19,7 +19,7 @@
                 @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
                 <td>{{ league.leagueName }}</td>
                 <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
-                <td>{{ league.players.length }} hráčov</td>
+                <td>{{ inflection(league) }}</td>
                 <td>
                   <CircularProgress :progress="league.leagueProgress" />
                 </td>
@@ -41,6 +41,7 @@ import LoginRegisterForm from '@/components/LoginRegisterForm.vue';
 import { useHeaderStore } from '@/stores/header';
 import api from '@/axios-interceptor';
 import CircularProgress from '@/components/CircularProgress.vue';
+import { inflection } from '@/utils/inflection';
 
 export default {
   name: 'Home Page',
@@ -70,7 +71,8 @@ export default {
       } finally {
         this.loading = false;
       }
-    }
+    },
+    inflection
   },
 
   computed: {

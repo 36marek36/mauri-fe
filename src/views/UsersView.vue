@@ -46,28 +46,14 @@
                         </tr>
                     </tbody>
                 </table>
-
-            </div>
-
-            <div class="ip-wrapper">
-                <div class="inactive-participants">
-                    <ParticipantList :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
-                        @view-detail="(id) => goToDetail('players', id)" :showProgress="false"
-                        :remove="(id) => confirmDeleteParticipant('players', id)" />
-                </div>
-                <div class="inactive-participants">
-                    <ParticipantList :title="'Neaktívne (vymazané) tími'" :participants="inactiveTeams"
-                        @view-detail="(id) => goToDetail('teams', id)" :showProgress="false"
-                        :remove="(id) => confirmDeleteParticipant('teams', id)" />
-                </div>
             </div>
         </div>
     </div>
 
     <div v-else>Načítavam používateľov...</div>
 
-    <AppModal :visible="showDeleteModal" :message="deleteModalMessage" @confirm="handleDeleteConfirm"
-        @cancel="cancelDelete" />
+    <AppModal :visible="showDeleteModal" :message="deleteMessage"
+        @confirm="deleteUser" @cancel="cancelDelete" />
 </template>
 
 <script>
@@ -85,9 +71,6 @@ export default {
             users: [],
             unassignedPlayers: [],
             selectedPlayers: {},
-            inactivePlayers: [],
-            inactiveTeams: [],
-            participant: null,
             showDeleteModal: false,
             user: null,
             loading: true
@@ -102,7 +85,6 @@ export default {
             try {
                 await this.fetchUsers();
                 await this.fetchUnassignedPlayers();
-                await this.fetchAllInactiveParticipants();
             } catch (error) {
                 console.error('Chyba pri načítaní údajov:', error);
             } finally {
@@ -134,36 +116,17 @@ export default {
                 this.loading = false;
             }
         },
-        async fetchAllInactiveParticipants() {
-            this.loading = true;
-            try {
-                const [playersRes, teamsRes] = await Promise.all([
-                    api.get('/players/inactive'),
-                    api.get('/teams/inactive')
-                ]);
-                this.inactivePlayers = playersRes.data;
-                this.inactiveTeams = teamsRes.data;
-            } catch (error) {
-                console.error('Chyba pri načítaní hráčov alebo tímov:', error);
-            } finally {
-                this.loading = false;
-            }
-        },
         async assignPlayerToUser(user) {
             const playerId = this.selectedPlayers[user.id]
-
             if (!playerId) {
                 this.flash.showMessage('Najprv vyber hráča!', 'error')
                 return
             }
-
             try {
                 const res = await api.patch(`/players/assignToUser/${user.id}`, {
                     playerId: playerId
                 })
                 this.flash.showMessage(res.data, 'success')
-
-                // Obnov zoznamy
                 await this.fetchUsers()
                 await this.fetchUnassignedPlayers()
             } catch (error) {
@@ -183,76 +146,20 @@ export default {
                 this.cancelDelete();
             }
         },
-        async deleteParticipant() {
-            try {
-                const response = await api.delete('/' + this.participant.type + '/' + this.participant.id);
-                const status = response.data.status;
-                const type = this.participant.type === 'players' ? 'Hráč' : 'Tím';
-
-                if (status === 'deleted') {
-                    this.flash.showMessage(`${type} ${this.participant.name} bol úspešne vymazaný.`, 'success');
-                } else if (status === 'deactivated') {
-                    this.flash.showMessage(`${type} ${this.participant.name} ostáva deaktivovaný, pretože je stále súčasťou líg a zápasov. `, 'warning');
-                } else if (status === 'deactivated_player_in_team') {
-                    this.flash.showMessage(`${type} ${this.participant.name} nie je možné vymazať, pretože je stále súčasťou tímu.`, 'warning');
-                } else {
-                    this.flash.showMessage(`Nastala chyba pri mazaní ${type.toLowerCase()}.`, 'error');
-                }
-
-                await this.fetchAllInactiveParticipants();
-
-            } catch (err) {
-                console.error(`Chyba pri mazaní ${this.participant.type.slice(0, -1)}a:`, err);
-                this.flash.showMessage(`Nepodarilo sa vymazať ${this.participant.name}.`, 'error');
-            } finally {
-                this.cancelDelete();
-            }
-        },
-        handleDeleteConfirm() {
-            if (this.user) {
-                this.deleteUser();
-            } else if (this.participant) {
-                this.deleteParticipant();
-            }
-        },
         confirmDeleteUser(user) {
             this.user = user;
             this.showDeleteModal = true;
         },
-        confirmDeleteParticipant(type, id) {
-            let name = '';
-
-            if (type === 'players') {
-                const player = this.inactivePlayers.find(p => p.id === id);
-                name = player ? player.name : '';
-            } else if (type === 'teams') {
-                const team = this.inactiveTeams.find(t => t.id === id);
-                name = team ? team.name : '';
-            }
-
-            this.participant = { id, type, name };
-            this.showDeleteModal = true;
-        },
         cancelDelete() {
             this.user = null;
-            this.participant = null;
             this.showDeleteModal = false;
-        },
-        goToDetail(type, id) {
-            this.$router.push(`/${type}/${id}`);
         }
     }, computed: {
         flash() {
             return useFlashMessageStore();
         },
-        deleteModalMessage() {
-            if (this.user) {
-                return `Naozaj chcete zmazať používateľa: ${this.user.username}?`;
-            } else if (this.participant) {
-                const type = this.participant.type === 'players' ? 'hráča' : 'tím';
-                return `Naozaj chcete zmazať ${type}: ${this.participant.name}?`;
-            }
-            return '';
+        deleteMessage() {
+            return `Naozaj chcete zmazať používatela ${this.user?.username}?`;
         }
     },
     components: { AppButton, AppModal, ParticipantList }
@@ -278,33 +185,5 @@ export default {
     font-size: 1.2rem;
     padding: 8px;
     text-align: left;
-}
-
-.ip-wrapper {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.inactive-participants {
-    width: 400px;
-    height: auto;
-    max-height: 300px;
-    overflow-y: auto;
-    padding: 10px;
-}
-
-@media (max-width: 768px) {
-
-    .ip-wrapper {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .inactive-participants {
-        width: 90%;
-        max-height: 200px;
-    }
 }
 </style>
