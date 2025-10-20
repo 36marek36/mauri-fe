@@ -276,7 +276,6 @@ export default {
 }
 
 .league-table td {
-    border-bottom: 1px solid #eee;
     padding: 0.5rem;
     text-align: left;
     white-space: nowrap;

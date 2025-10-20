@@ -27,6 +27,22 @@ body,
   font-family: 'Segoe UI', sans-serif;
 }
 
+h1,
+h2 {
+  font-family: 'Merriweather', serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-size: 2.8rem;
+  text-align: center;
+  color: #FFCC00;
+  /* text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.85); */
+  text-shadow:
+    -0.5px -0.5px 0 #ff0000,
+    0.5px -0.5px 0 #ff0000,
+    -0.5px 0.5px 0 #ff0000,
+    0.5px 0.5px 0 #ff0000;
+
+}
 
 h3,
 h4,
@@ -34,6 +50,7 @@ h5,
 h6,
 th {
   font-variant-caps: petite-caps;
+  font-size: 1.8rem;
   color: whitesmoke;
   text-shadow:
     -0.5px -0.5px 0 #ff0000,
@@ -43,27 +60,19 @@ th {
 
 }
 
-h1,
-h2 {
-  font-family: 'Merriweather', serif;
-  font-weight: 600;
-  letter-spacing: 1px;
-  font-size: 2.5rem;
-  text-align: center;
-  color: #FFCC00;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.85);
-}
-
 h3 {
   text-align: center;
   color: #FFD700;
+}
 
+h4 {
+  font-size: 1.2rem;
 }
 
 /* 📦 Vizuálny štýl obsahových blokov */
 ul,
 table {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(0, 0, 0, 0.3);
   /* skoro neviditeľné pozadie */
   backdrop-filter: blur(12px);
   /* silné rozmazanie za tabuľkou */
@@ -71,10 +80,17 @@ table {
   /* pre Safari */
   border: none;
   color: #FFD700;
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 1rem;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
 
+table td {
+  border-bottom: 1px solid #eee;
+}
+
+table tr:last-child td {
+  border-bottom: none;
 }
 
 a {
@@ -82,6 +98,10 @@ a {
   color: #FFD700;
   transition: 0.4s;
   padding: 3px
+}
+
+input {
+  margin-bottom: 2px;
 }
 
 .main-layout {

@@ -39,7 +39,8 @@
                             <td>{{ match.homeTeam.name }}</td>
                             <td>{{ match.awayTeam.name }}</td>
                             <td>
-                                <span v-if="match.status === 'FINISHED' && match.result">
+                                <span
+                                    v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
                                     {{ match.result.score1 }} : {{ match.result.score2 }}
                                 </span>
                                 <span v-else>-</span>
@@ -49,10 +50,18 @@
                                 <span :class="{
                                     'badge-finished': match.status === 'FINISHED',
                                     'badge-cancelled': match.status === 'CANCELLED',
-                                    'badge-pending': match.status !== 'FINISHED' && match.status !== 'CANCELLED'
+                                    'badge-scratched': match.status === 'SCRATCHED',
+                                    'badge-pending': !['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status)
                                 }">
-                                    {{ match.status === 'FINISHED' ? 'Odohratý' : (match.status === 'CANCELLED' ?
-                                        'Zrušený' : 'Neodohratý') }}
+                                    {{
+                                        match.status === 'FINISHED'
+                                            ? 'Odohratý'
+                                            : match.status === 'CANCELLED'
+                                                ? 'Zrušený'
+                                                : match.status === 'SCRATCHED'
+                                                    ? 'Skrečovaný'
+                                                    : 'Neodohratý'
+                                    }}
                                 </span>
                             </td>
                         </tr>
@@ -63,68 +72,6 @@
 
         <h3>{{ 'Založenie tímu: ' + team.registrationDate }}</h3>
     </div>
-
-    <!-- <ul v-else>
-
-        <div>
-            <ul>
-                <li>
-                    <span>Hráč 1:</span>
-                    <span>{{ team.player1.name }}</span>
-                </li>
-            </ul>
-
-        </div>
-
-        <div>
-            <h3>Všetky zápasy aktuálnej sezóny</h3>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Domáci</th>
-                            <th>Hostia</th>
-                            <th>Výsledok</th>
-                            <th>Kolo</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="match in allMatches" :key="match.id">
-                            <td>{{ match.homeTeam.name }}</td>
-                            <td>{{ match.awayTeam.name }}</td>
-
-                            <td>
-                                <span v-if="match.status === 'FINISHED' && match.result">
-                                    {{ match.result.score1 }} : {{ match.result.score2 }}
-                                </span>
-                                <span v-else>-</span>
-                            </td>
-
-                            <td>{{ match.roundNumber }}</td>
-
-                            <td>
-                                <span :class="{
-                                    'badge-finished': match.status === 'FINISHED',
-                                    'badge-cancelled': match.status === 'CANCELLED',
-                                    'badge-pending': match.status !== 'FINISHED' && match.status !== 'CANCELLED'
-                                }">
-                                    {{ match.status === 'FINISHED' ? 'Odohratý' : (match.status === 'CANCELLED' ?
-                                        'Zrušený'
-                                        : 'Neodohratý') }}
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-            </div>
-
-        </div>
-
-        <h3>{{ 'Založenie tímu: ' + team.registrationDate }}</h3>
-    </ul> -->
-
 </template>
 
 <script>
@@ -139,6 +86,7 @@ export default {
             createdMatches: [],
             finishedMatches: [],
             cancelledMatches: [],
+            scratchedMatches: [],
             loading: true,
             header: useHeaderStore()
         }
@@ -166,15 +114,17 @@ export default {
 
         async fetchTeamMatches() {
             try {
-                const [createdRes, finishedRes, cancelledRes] = await Promise.all([
+                const [createdRes, finishedRes, cancelledRes, scratchedRes] = await Promise.all([
                     api.get(`/matches/team/${this.teamId}/status/CREATED`),
                     api.get(`/matches/team/${this.teamId}/status/FINISHED`),
-                    api.get(`/matches/team/${this.teamId}/status/CANCELLED`)
+                    api.get(`/matches/team/${this.teamId}/status/CANCELLED`),
+                    api.get(`/matches/team/${this.teamId}/status/SCRATCHED`)
                 ]);
 
                 this.createdMatches = createdRes.data;
                 this.finishedMatches = finishedRes.data;
                 this.cancelledMatches = cancelledRes.data;
+                this.scratchedMatches = scratchedRes.data;
 
             } catch (error) {
                 console.error('Chyba pri načítavaní zápasov:', error);
@@ -183,7 +133,7 @@ export default {
     },
     computed: {
         allMatches() {
-            return [...this.createdMatches, ...this.finishedMatches, ...this.cancelledMatches];
+            return [...this.createdMatches, ...this.finishedMatches, ...this.cancelledMatches, ...this.scratchedMatches];
         },
         teamId() {
             return this.$route.params.id
@@ -239,17 +189,23 @@ table td {
 }
 
 .badge-finished {
-    color: green;
-    font-weight: bold;
+    color: #ADFF2F;
+    /* font-weight: normal; */
 }
 
 .badge-cancelled {
-    color: red;
-    font-weight: bold;
+    color: #FF4C4C;
+    /* font-weight: bold; */
+}
+
+.badge-scratched {
+    color: #FFC107;
+    /* font-weight: bold; */
 }
 
 .badge-pending {
-    color: gray;
+    color: #f5f5f5;
     font-style: italic;
+
 }
 </style>

@@ -10,46 +10,37 @@
         <div class="right-side">
             <!-- Ľavý stĺpec – údaje o hráčovi -->
             <ul class="player-info">
+
                 <li>
-                    <h3 class="label">Meno: </h3>
-                    <span class="value">{{ player.firstName }}</span>
+                    <h3 class="value">{{ player.email || 'email nezadaný' }}</h3>
                 </li>
                 <li>
-                    <h3 class="label">Priezvisko: </h3>
-                    <span class="value">{{ player.lastName }}</span>
+                    <h3 class="value">{{ player.phone || 'telefón nezadaný' }}</h3>
                 </li>
-                <li>
-                    <h3 class="label">Email: </h3>
-                    <span class="value">{{ player.email || 'nezadaný' }}</span>
-                </li>
-                <li>
-                    <h3 class="label">Telefón: </h3>
-                    <span class="value">{{ player.phone || 'nezadaný' }}</span>
-                </li>
+                <br>
                 <li>
                     <h3 class="label">Dátum registrácie: </h3>
-                    <span class="value">{{ player.registrationDate }}</span>
-                </li>
-                <li>
-                    <h3 class="label">Moje tímy:</h3>
-                    <span>
-                        <div class="value" v-for="team in player.teams" :key="team.id">
-                            {{ team.name }}
-                        </div>
-                    </span>
-
+                    <h3 class="value">{{ player.registrationDate }}</h3>
                 </li>
                 <li v-if="player.deletedDate">
                     <h3 class="label">Dátum zmazania: </h3>
-                    <span class="value">{{ player.deletedDate }}</span>
+                    <h3 class="value">{{ player.deletedDate }}</h3>
                 </li>
                 <li>
-                    <h3 class="label">Zoznam líg:</h3>
-                    <span>
+                    <h3 class="label">Moje tímy:</h3>
+                    <h3>
+                        <div class="value" v-for="team in player.teams" :key="team.id">
+                            {{ team.name }}
+                        </div>
+                    </h3>
+                </li>
+                <li>
+                    <h3 class="label">Moje ligy:</h3>
+                    <h3>
                         <div class="value" v-for="league in player.leagues" :key="league.leagueId">
                             {{ league.leagueName }} ({{ league.seasonYear }})
                         </div>
-                    </span>
+                    </h3>
                 </li>
             </ul>
 
@@ -70,26 +61,35 @@
                         <tr v-for="match in allMatches" :key="match.id">
                             <td>{{ match.homePlayer.name }}</td>
                             <td>{{ match.awayPlayer.name }}</td>
+
+                            <!-- Výsledok -->
                             <td>
                                 <span
-                                    v-if="match.status === 'FINISHED' || match.status === 'CANCELLED' && match.result">
+                                    v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
                                     {{ match.result.score1 }} : {{ match.result.score2 }}
                                 </span>
                                 <span v-else>-</span>
                             </td>
+
+                            <!-- Kolo -->
                             <td>{{ match.roundNumber }}</td>
+
+                            <!-- Status badge -->
                             <td>
                                 <span :class="{
                                     'badge-finished': match.status === 'FINISHED',
                                     'badge-cancelled': match.status === 'CANCELLED',
-                                    'badge-pending': match.status !== 'FINISHED' && match.status !== 'CANCELLED'
+                                    'badge-scratched': match.status === 'SCRATCHED',
+                                    'badge-pending': !['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status)
                                 }">
                                     {{
                                         match.status === 'FINISHED'
                                             ? 'Odohratý'
                                             : match.status === 'CANCELLED'
                                                 ? 'Zrušený'
-                                                : 'Neodohratý'
+                                                : match.status === 'SCRATCHED'
+                                                    ? 'Skrečovaný'
+                                                    : 'Neodohratý'
                                     }}
                                 </span>
                             </td>
@@ -114,6 +114,7 @@ export default {
             createdMatches: [],
             finishedMatches: [],
             cancelledMatches: [],
+            scratchedMatches: [],
             loading: true,
             header: useHeaderStore()
         }
@@ -131,7 +132,7 @@ export default {
             try {
                 const response = await api.get('/players/' + this.playerId);
                 this.player = response.data;
-                this.header.setTitle('Detail hráča', this.player.name);
+                this.header.setTitle(this.player.firstName, this.player.lastName);
             } catch (error) {
                 console.error('Chyba pri načítavaní hráča:', error);
             } finally {
@@ -141,15 +142,17 @@ export default {
 
         async fetchPlayerMatches() {
             try {
-                const [createdRes, finishedRes, cancelledRes] = await Promise.all([
+                const [createdRes, finishedRes, cancelledRes, scratchedRes] = await Promise.all([
                     api.get(`/matches/player/${this.playerId}/status/CREATED`),
                     api.get(`/matches/player/${this.playerId}/status/FINISHED`),
-                    api.get(`/matches/player/${this.playerId}/status/CANCELLED`)
+                    api.get(`/matches/player/${this.playerId}/status/CANCELLED`),
+                    api.get(`/matches/player/${this.playerId}/status/SCRATCHED`)
                 ]);
 
                 this.createdMatches = createdRes.data;
                 this.finishedMatches = finishedRes.data;
                 this.cancelledMatches = cancelledRes.data;
+                this.scratchedMatches = scratchedRes.data;
 
             } catch (error) {
                 console.error('Chyba pri načítavaní zápasov:', error);
@@ -158,7 +161,7 @@ export default {
     },
     computed: {
         allMatches() {
-            return [...this.createdMatches, ...this.finishedMatches, ...this.cancelledMatches];
+            return [...this.createdMatches, ...this.finishedMatches, ...this.cancelledMatches, ...this.scratchedMatches];
         },
         playerId() {
             return this.$route.params.id
@@ -179,7 +182,7 @@ export default {
 
 .player-info li {
     display: grid;
-    grid-template-columns: 150px 1fr;
+    /* grid-template-columns: 150px 1fr; */
     /* 1. stĺpec pevný pre label, 2. pre hodnotu */
     gap: 0.5rem;
     margin-bottom: 0.3rem;
@@ -188,11 +191,11 @@ export default {
 }
 
 .label {
-    text-align: left;
+    text-align: center;
+    font-size: 1.6rem;
 }
 
 .value {
-    /* font-weight: bold; */
     color: whitesmoke;
 }
 
@@ -220,17 +223,22 @@ export default {
 }
 
 .badge-finished {
-    color: greenyellow;
+    color: #ADFF2F;
     /* font-weight: normal; */
 }
 
 .badge-cancelled {
-    color: red;
-    font-weight: bold;
+    color: #FF4C4C;
+    /* font-weight: bold; */
+}
+
+.badge-scratched {
+    color: #FFC107;
+    /* font-weight: bold; */
 }
 
 .badge-pending {
-    color: whitesmoke;
+    color: #f5f5f5;
     font-style: italic;
 
 }

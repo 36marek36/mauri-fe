@@ -81,7 +81,8 @@
                                     </div>
 
                                     <!-- Výsledok zápasu -->
-                                    <div v-else-if="match.status === 'FINISHED' || match.status === 'CANCELLED'" class="match-result-wrapper">
+                                    <div v-else-if="match.status === 'FINISHED' || match.status === 'CANCELLED' || match.status === 'SCRATCHED'"
+                                        class="match-result-wrapper">
                                         <div class="match-result-text">
                                             <strong>Výsledok:</strong>
                                             {{ match.result?.score1 }} : {{ match.result?.score2 }}
@@ -140,7 +141,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(entry, index) in standings" :key="entry.id">
+                            <tr v-for="(entry, index) in standings" :key="entry.id"
+                                :class="{ dropped: entry.droppedFromLeague }">
                                 <td>{{ index + 1 }}.</td>
                                 <td colspan="2">{{ isSingles ? entry.playerName : entry.teamName }}</td>
                                 <td>{{ entry.matches }}</td>
@@ -151,8 +153,6 @@
                             </tr>
                         </tbody>
                     </table>
-
-                    <!-- <h3 v-else>{{ noParticipantsMessage }}</h3> -->
                 </div>
             </aside>
         </main>
@@ -161,7 +161,7 @@
         :message="`Naozaj chcete odstrániť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy?`"
         @confirm="() => removeParticipantFromLeague(participant?.id)" @cancel="cancelDelete" />
     <AppModal :visible="showDropModal" :message="`Naozaj chcete odhlásiť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy? 
-        Všetky jeho zapasy budú kontumačne prehraté 0:6, 0:6. Táto akcia sa nebude dať vrátiť.`"
+        Všetky zapasy ${participant?.type === 'players' ? 'hráča' : 'tímu'} budú zrušené. Táto akcia sa nebude dať vrátiť.`"
         @confirm="() => dropParticipantFromLeague(participant?.id)" @cancel="cancelDrop" />
     <AppModal :visible="showConfirmModal" :message="modalMessage" @confirm="onModalConfirm" @cancel="onModalCancel" />
     <AppModal :visible="showActionModal" :title="actionType === 'edit' ? 'Úprava výsledku' : 'Zrušenie výsledku'"
@@ -231,7 +231,7 @@ export default {
         async fetchLeague() {
             const res = await api.get('/leagues/' + this.leagueId);
             this.league = res.data;
-            this.header.setTitle(this.league.leagueName, this.league.leagueType)
+            this.header.setTitle(this.league.leagueName, this.leagueTypeLabels[this.league.leagueType])
         },
         async fetchFreeParticipants() {
             if (!this.isAdmin) {
@@ -627,7 +627,13 @@ export default {
             return this.confirmationAction === 'generate'
                 ? 'Naozaj chcete spustiť ligu a vygenerovať zápasy?'
                 : 'Naozaj chcete ukončiť túto ligu? Táto akcia je nezvratná.';
-        }
+        },
+        leagueTypeLabels() {
+            return {
+                SINGLES: 'DVOJHRA',
+                DOUBLES: 'ŠTVORHRA',
+            };
+        },
     },
     components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppModal }
 }
@@ -705,7 +711,7 @@ export default {
     align-items: center;
     gap: 0.75rem;
     margin-top: 1rem;
-    background-color: #6f4e37;
+    background-color: #705846;
     padding: 1rem 1.25rem;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
@@ -736,13 +742,18 @@ export default {
 .table-scroll {
     overflow-x: auto;
     width: 100%;
+
+}
+
+.standings-table {
+    width: 100%;
 }
 
 .standings-table th,
 .standings-table td {
     padding: 0.5rem;
     text-align: center;
-    border-bottom: 1px solid #eee;
+    /* border-bottom: 1px solid #eee; */
     text-shadow: 0 0 1px brown, 0 0 2px brown
 }
 
@@ -751,6 +762,11 @@ export default {
     font-size: 0.85rem;
     color: whitesmoke;
     line-height: 1.2;
+}
+
+.standings-table tr.dropped {
+    color: #999;
+    font-style: italic;
 }
 
 .admin-buttons {

@@ -9,10 +9,10 @@
                 <table class="users-table">
                     <thead>
                         <tr>
-                            <th>Meno používateľa</th>
+                            <th>Používateľ</th>
                             <th>Rola</th>
                             <th>Hráč</th>
-                            <th>Posledne prihlasenie</th>
+                            <th>Prihlásený</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -275,6 +275,7 @@ export default {
 
 .users-table th,
 .users-table td {
+    font-size: 1.2rem;
     padding: 8px;
     text-align: left;
 }
