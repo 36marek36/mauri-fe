@@ -37,7 +37,7 @@
                     </div>
 
                     <!-- Neaktívni hráči -->
-                    <div class="inactive-participants">
+                    <div v-if="isAdmin" class="inactive-participants">
                         <ParticipantList :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
                             @view-detail="(id) => goToDetail('players', id)" :showProgress="false"
                             :remove="(id) => confirmDeleteParticipant('players', id)" />
@@ -102,7 +102,7 @@
                     </div>
 
                     <!-- Neaktívne tímy -->
-                    <div class="inactive-participants">
+                    <div v-if="isAdmin" class="inactive-participants">
                         <ParticipantList :title="'Neaktívne (vymazané) tímy'" :participants="inactiveTeams"
                             @view-detail="(id) => goToDetail('teams', id)" :showProgress="false"
                             :remove="(id) => confirmDeleteParticipant('teams', id)" />
@@ -151,48 +151,45 @@ export default {
     },
     created() {
         this.header.setTitle('Zoznam hráčov a tímov', '')
-        this.fetchPlayers();
-        this.fetchTeams();
-        this.fetchAllInactiveParticipants();
+        this.fetchAllData()
     },
     methods: {
+        async fetchAllData() {
+            this.loadingPlayers = true
+            this.loadingTeams = true
+            this.loading = true
 
-        async fetchPlayers() {
-            this.loadingPlayers = true;
-            try {
-                const response = await api.get('/players/')
-                this.players = response.data
-            } catch (error) {
-                console.error('Chyba pri načítaní hráčov:', error)
-            } finally {
-                this.loadingPlayers = false
-            }
-        },
-        async fetchTeams() {
-            this.loadingTeams = true;
-            try {
-                const response = await api.get('/teams/')
-                this.teams = response.data
-            }
-            catch (error) {
-                console.error('Chyba pri načítaní tímov:', error);
-            } finally {
-                this.loadingTeams = false;
-            }
-        },
-        async fetchAllInactiveParticipants() {
-            this.loading = true;
             try {
                 const [playersRes, teamsRes] = await Promise.all([
+                    api.get('/players/'),
+                    api.get('/teams/')
+                ])
+                this.players = playersRes.data
+                this.teams = teamsRes.data
+
+                // 👉 Ak je admin, načítaj aj neaktívnych
+                if (this.isAdmin) {
+                    await this.fetchAllInactiveParticipants()
+                }
+            } catch (error) {
+                console.error('Chyba pri načítaní hráčov alebo tímov:', error)
+            } finally {
+                this.loadingPlayers = false
+                this.loadingTeams = false
+                this.loading = false
+            }
+        },
+
+        async fetchAllInactiveParticipants() {
+            try {
+                const [inactivePlayersRes, inactiveTeamsRes] = await Promise.all([
                     api.get('/players/inactive'),
                     api.get('/teams/inactive')
-                ]);
-                this.inactivePlayers = playersRes.data;
-                this.inactiveTeams = teamsRes.data;
+                ])
+                this.inactivePlayers = inactivePlayersRes.data
+                this.inactiveTeams = inactiveTeamsRes.data
             } catch (error) {
-                console.error('Chyba pri načítaní hráčov alebo tímov:', error);
-            } finally {
-                this.loading = false;
+                console.error('Chyba pri načítaní neaktívnych hráčov alebo tímov:', error)
             }
         },
         goToDetail(type, id) {

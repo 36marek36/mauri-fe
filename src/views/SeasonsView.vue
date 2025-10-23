@@ -17,7 +17,7 @@
         <div class="left-side">
         </div>
         <div class="right-side">
-            <div v-if="seasons.length === 0">
+            <div class="list-or-nothing" v-if="seasons.length === 0">
                 <p>Žiadne sezóny nie sú k dispozícii.</p>
             </div>
 
@@ -203,14 +203,6 @@ export default {
     display: flex;
     justify-content: center;
     margin-bottom: 1rem;
-}
-
-.create-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
 }
 
 @media (max-width: 768px) {

@@ -6,7 +6,7 @@
       <div class="currentSeason">
         <h3>Aktuálna sezóna:</h3>
 
-        <div class="currentSeason-area ">
+        <div class="list-or-nothing ">
           <!-- Loading stav -->
           <p v-if="loading">Načítavam aktuálnu sezónu...</p>
 
@@ -31,7 +31,7 @@
           <p v-else>Sezóna neobsahuje žiadne ligy.</p>
         </div>
       </div>
-      <LoginRegisterForm />
+      <LoginRegisterForm v-if="!isLoggedIn" />
     </div>
   </div>
 </template>
@@ -39,6 +39,7 @@
 <script>
 import LoginRegisterForm from '@/components/LoginRegisterForm.vue';
 import { useHeaderStore } from '@/stores/header';
+import { useUserStore } from '@/stores/user';
 import api from '@/axios-interceptor';
 import CircularProgress from '@/components/CircularProgress.vue';
 import { inflection } from '@/utils/inflection';
@@ -59,6 +60,7 @@ export default {
   },
   methods: {
     async fetchCurrentSeason() {
+      this.loading = true
       try {
         const response = await api.get('/seasons/current');
         this.currentSeason = response.data;
@@ -76,6 +78,9 @@ export default {
   },
 
   computed: {
+    userStore() {
+      return useUserStore()
+    },
     hasLeagues() {
       return this.currentSeason.leagues.length > 0;
     },
@@ -84,6 +89,9 @@ export default {
         SINGLES: '2-HRA',
         DOUBLES: '4-HRA',
       };
+    },
+    isLoggedIn() {
+      return this.userStore.isLoggedIn
     }
   },
   components: { LoginRegisterForm, CircularProgress }
@@ -106,7 +114,7 @@ export default {
 }
 
 .league-table td {
-  
+
   padding: 0.5rem;
   text-align: left;
   white-space: nowrap;
@@ -117,30 +125,16 @@ export default {
   background-color: #363537;
 }
 
-.currentSeason-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-y: auto;
-  font-family: 'Roboto', sans-serif;
-  font-size: 1.1rem;
-  color: #FFD700;
-  border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 0.5rem;
-  /* border: 2px solid #ffffff40; */
-  box-shadow: 0 0 15px #FFD700;
-  margin-top: 1rem;
-}
-
-.currentSeason-area::-webkit-scrollbar {
+.list-or-nothing::-webkit-scrollbar {
   display: none;
 }
 
+.list-or-nothing {
+  overflow-y: auto;
+}
+
 @media (max-width: 768px) {
-  .currentSeason-area {
+  .list-or-nothing {
     font-size: 1.2rem;
   }
 }

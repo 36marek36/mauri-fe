@@ -33,34 +33,36 @@
         <div class="left-side">
         </div>
         <div class="right-side">
-            <table v-if="hasLeagues" class="league-table">
-                <tbody>
-                    <tr v-for="league in season.leagues" :key="league.id"
-                        @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
-                        <td>{{ league.leagueName }}</td>
-                        <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
-                        <td v-if="season.status === 'ACTIVE'">
-                            <CircularProgress :progress="league.leagueProgress" />
-                        </td>
-                        <td>
-                            {{ inflection(league) }}
-                        </td>
+            <div class="list-or-nothing">
+                <table v-if="hasLeagues" class="league-table">
+                    <tbody>
+                        <tr v-for="league in season.leagues" :key="league.id"
+                            @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
+                            <td>{{ league.leagueName }}</td>
+                            <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
+                            <td v-if="season.status === 'ACTIVE'">
+                                <CircularProgress :progress="league.leagueProgress" />
+                            </td>
+                            <td>
+                                {{ inflection(league) }}
+                            </td>
 
-                        <td v-if="season.status === 'FINISHED'">
-                            <span v-if="league.leagueStatus === 'FINISHED' && league.winner">
-                                🏆 {{ league.winner }}
-                            </span>
-                        </td>
+                            <td v-if="season.status === 'FINISHED'">
+                                <span v-if="league.leagueStatus === 'FINISHED' && league.winner">
+                                    🏆 {{ league.winner }}
+                                </span>
+                            </td>
 
-                        <td v-if="isAdmin">
-                            <AppButton v-if="isAdmin" icon="🗑️" type="delete" htmlType="button"
-                                :preventPropagation="true" @clicked="() => confirmDeleteLeague(league)" />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <td v-if="isAdmin">
+                                <AppButton v-if="isAdmin" icon="🗑️" type="delete" htmlType="button"
+                                    :preventPropagation="true" @clicked="() => confirmDeleteLeague(league)" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p v-else>Sezóna neobsahuje žiadne ligy.</p>
+            </div>
 
-            <p v-else>Sezóna neobsahuje žiadne ligy.</p>
         </div>
     </div>
 
@@ -283,14 +285,6 @@ export default {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 2rem;
-}
-
-.create-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
     margin-bottom: 2rem;
 }
 

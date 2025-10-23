@@ -125,6 +125,29 @@ input {
   box-sizing: border-box;
 }
 
+.list-or-nothing {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.1rem;
+  color: #FFD700;
+  box-shadow: 0 0 15px #FFD700;
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
 @media (max-width: 768px) {
   #app {
     background-size: cover;
