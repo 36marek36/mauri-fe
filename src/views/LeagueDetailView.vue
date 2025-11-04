@@ -245,7 +245,7 @@ export default {
             try {
                 const [playersRes, teamsRes] = await Promise.all([
                     api.get('/players/not-in-any-active-league'),
-                    api.get('/teams/not-in-any-active-league')
+                    api.get('/teams/not-in-league/' + this.leagueId)
                 ]);
 
                 this.freePlayers = playersRes.data;

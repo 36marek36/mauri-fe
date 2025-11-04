@@ -25,7 +25,7 @@
                 <li>
                     <h3 class="label">Moje tímy:</h3>
                     <h3>
-                        <div class="value" v-for="team in player.teams" :key="team.id">
+                        <div class="teams" v-for="team in player.teams" :key="team.id">
                             {{ team.name }}
                         </div>
                     </h3>
@@ -194,6 +194,14 @@ export default {
 .value {
     color: whitesmoke;
 }
+
+.teams {
+    color: whitesmoke;
+    border-bottom: 1px solid wheat;
+    font-size: 1.5rem;
+}
+
+
 
 .matches-table {
     flex: 2;

@@ -115,7 +115,7 @@ li:not(:last-child) {
 
 .inactive {
     color: #aaa;
-    /* text-decoration: line-through; */
+    text-decoration: line-through;
     font-style: italic;
 }
 

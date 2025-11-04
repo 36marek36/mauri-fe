@@ -221,7 +221,7 @@ export default {
                 this.newTeam = { player1Id: '', player2Id: '' }
 
                 // Načítanie aktualizovaného zoznamu tímov
-                this.fetchTeams();
+                this.fetchAllData();
 
                 // ⬇️ Zatvorenie formulára
                 this.toggleCreateForm();
@@ -263,13 +263,10 @@ export default {
                 // Refresh dát podľa typu
                 if (this.participant.type === 'teams') {
                     this.currentPageTeams = 1;
-                    await this.fetchTeams();
-                    await this.fetchAllInactiveParticipants()
                 } else if (this.participant.type === 'players') {
                     this.currentPagePlayers = 1;
-                    await this.fetchPlayers();
-                    await this.fetchAllInactiveParticipants();
                 }
+                await this.fetchAllData();
 
             } catch (err) {
                 console.error(`Chyba pri mazaní ${this.participant.type.slice(0, -1)}a:`, err);
