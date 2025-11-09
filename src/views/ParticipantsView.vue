@@ -387,6 +387,10 @@ export default {
 }
 
 @media (max-width: 768px) {
+    .participants-columns {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
 
     .pagination :deep(.app-button) {
         padding: 0.5rem 0.8rem;

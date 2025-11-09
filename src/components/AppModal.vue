@@ -45,7 +45,7 @@ export default {
 }
 
 .modal {
-    margin-top: 50px;
+    margin-top: 100px;
     background-color: rgba(255, 255, 255, 0.4);
     padding: 20px;
     border: 1px solid red;

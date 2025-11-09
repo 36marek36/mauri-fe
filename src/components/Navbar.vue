@@ -22,7 +22,7 @@
           <AppButton v-if="playerId" label="Upraviť profil hráča" type="edit" @clicked="goToEditPlayer" />
           <AppButton label="Zmeniť prihlasovacie meno" type="edit" @clicked="goToChangeUsername" />
           <AppButton label="Zmeniť heslo" type="edit" @clicked="goToChangePassword" />
-          <AppButton label="Odhlásiť sa" type="delete" @clicked="logout" />
+          <AppButton label="Odhlásiť sa" type="delete" @clicked="showLogout = true" />
         </div>
       </li>
 
@@ -30,18 +30,21 @@
         <RouterLink to="/login">Prihlásenie</RouterLink>
       </li>
     </ul>
+    <LogoutModal :visible="showLogout" @confirm="logout" @cancel="cancelLogout" />
   </nav>
 </template>
 
 <script>
 import { useUserStore } from '@/stores/user'
 import AppButton from './AppButton.vue'
+import LogoutModal from './LogoutModal.vue';
 
 export default {
   name: 'Navbar',
   data() {
     return {
-      showDropdown: false
+      showDropdown: false,
+      showLogout: false
     }
 
   },
@@ -80,8 +83,13 @@ export default {
     },
     logout() {
       this.closeDropdown()
+      this.showLogout = false
       this.userStore.logout()
-      this.$router.push({ path: '/login', query: { message: 'logout' } })
+      this.$router.push({ path: '/', query: { message: 'logout' } })
+    },
+    cancelLogout() {
+      this.showLogout = false;
+      this.showDropdown = false;
     },
     goToChangeUsername() {
       this.closeDropdown();
@@ -92,7 +100,7 @@ export default {
       this.$router.push('/change-password')
     }
   },
-  components: { AppButton }
+  components: { AppButton, LogoutModal }
 }
 </script>
 

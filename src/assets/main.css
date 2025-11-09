@@ -5,15 +5,16 @@
   flex-direction: column;
   min-height: 100vh;
   font-weight: normal;
+  color: #FFD700;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 /* 🌌 Hlavné pozadie celej stránky */
-html,
-body,
-#app {
-  height: 100%;
+body {
+  /* height: 100%; */
   margin: 0;
   padding: 0;
+  background-color: #000;
   background-image: url('/images/background.jpg');
   /* uprav cestu podľa projektu */
   background-size: 100% 100%;
@@ -23,8 +24,8 @@ body,
   background-repeat: no-repeat;
   background-attachment: fixed;
   /* pozadie sa neposúva pri scrollovaní */
-  color: #FFD700;
-  font-family: 'Segoe UI', sans-serif;
+  transition: background-position 0.3s ease, background-size 0.3s ease;
+  /* jemný prechod pri resize */
 }
 
 h1,
@@ -83,6 +84,11 @@ table {
   border-radius: 16px;
   padding: 1rem;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+
+table th {
+  font-size: 1.5rem;
 }
 
 table td {
@@ -149,7 +155,7 @@ input {
 }
 
 @media (max-width: 768px) {
-  #app {
+  body {
     background-size: cover;
     background-position: 30% top;
   }
@@ -157,6 +163,10 @@ input {
   h1,
   h2 {
     font-size: 1.8rem;
+  }
+
+  table th {
+    font-size: 1.2rem;
   }
 
   .main-layout {

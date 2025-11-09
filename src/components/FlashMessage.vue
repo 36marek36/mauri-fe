@@ -1,9 +1,7 @@
 <template>
-  <transition name="flash">
-    <div v-if="flash.message" :class="['flash-message', flash.messageType]">
-      {{ flash.message }}
-    </div>
-  </transition>
+  <div v-if="flash.message" :class="['flash-message', flash.messageType]">
+    {{ flash.message }}
+  </div>
 </template>
 
 <script>
@@ -54,36 +52,5 @@ export default {
   background-color: #e0f2fe;
   color: #0369a1;
   border-color: #38bdf8;
-}
-
-/* === Animácie === */
-.flash-enter-active {
-  animation: fadeInSlideUp 0.8s ease-out forwards;
-}
-
-.flash-leave-active {
-  animation: fadeOutSlideDown 0.8s ease-in forwards;
-}
-
-@keyframes fadeInSlideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeOutSlideDown {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(20px);
-    opacity: 0;
-  }
 }
 </style>

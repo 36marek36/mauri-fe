@@ -201,12 +201,11 @@ export default {
     font-size: 1.5rem;
 }
 
-
-
 .matches-table {
     flex: 2;
     margin-bottom: 1rem;
     overflow-x: auto;
+    width: 100%;
 }
 
 .matches-table table {
