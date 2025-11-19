@@ -17,27 +17,31 @@
         <div class="left-side">
         </div>
         <div class="right-side">
-            <div class="list-or-nothing" v-if="seasons.length === 0">
-                <p>Žiadne sezóny nie sú k dispozícii.</p>
-            </div>
+            <div class="seasons">
+                <div class="list-or-nothing" v-if="seasons.length === 0">
+                    <p>Žiadne sezóny nie sú k dispozícii.</p>
+                </div>
 
-            <div v-else class="seasons-grid">
-                <div v-for="season in seasons" :key="season.id" class="season-card"
-                    @click="$router.push('/seasons/' + season.id)" role="button" tabindex="0">
-                    <h3 class="season-year">{{ season.year }}</h3>
+                <div v-else class="seasons-grid">
+                    <div v-for="season in seasons" :key="season.id" class="season-card"
+                        @click="$router.push('/seasons/' + season.id)" role="button" tabindex="0">
+                        <h3 class="season-year">{{ season.year }}</h3>
 
-                    <div class="season-info">
-                        <p><strong>Ligy:</strong> {{ season.leagues.length }}</p>
-                        <p><strong>Hráči:</strong> {{ season.totalPlayers }}</p>
-                        <p><strong>Tímy:</strong> {{ season.totalTeams }}</p>
-                    </div>
+                        <div class="season-info">
+                            <h4>{{ season.startDate }}</h4>
+                            <p><strong>Ligy:</strong> {{ season.leagues.length }}</p>
+                            <p><strong>Hráči:</strong> {{ season.totalPlayers }}</p>
+                            <p><strong>Tímy:</strong> {{ season.totalTeams }}</p>
+                        </div>
 
-                    <div v-if="isAdmin" class="season-actions">
-                        <AppButton icon="🗑️" type="delete" htmlType="button" :preventPropagation="true"
-                            @clicked="confirmDeleteSeason(season)" title="Vymazať sezónu" />
+                        <div v-if="isAdmin" class="season-actions">
+                            <AppButton icon="🗑️" type="delete" htmlType="button" :preventPropagation="true"
+                                @clicked="confirmDeleteSeason(season)" title="Vymazať sezónu" />
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
     <AppModal :visible="showDeleteModal" :message="`Naozaj chcete zmazať sezónu: ${season?.year}?`"
@@ -148,6 +152,10 @@ export default {
 </script>
 
 <style scoped>
+.seasons {
+    width: 100%;
+}
+
 .seasons-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -162,6 +170,7 @@ export default {
     cursor: pointer;
     padding: 16px;
     display: flex;
+    text-align: center;
     flex-direction: column;
     justify-content: space-between;
 }
@@ -172,17 +181,32 @@ export default {
     outline: 2px solid #FFD700;
 }
 
+.season-card h3 {
+    transition: transform 0.8s ease;
+}
+
+.season-card:hover h3,
+.season-card:focus h3 {
+    transform: scale(1.5);
+}
+
 .season-year {
     margin: 0 0 12px 0;
     font-size: 2rem;
     font-weight: bold;
-    text-align: center;
 }
 
-.season-info p {
-    /* display: flex;
-    justify-content: center; */
-    margin: 6px 0;
+.season-card .season-info {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.8s ease;
+}
+
+.season-card:hover .season-info,
+.season-card:focus .season-info {
+    opacity: 1;
+    max-height: 220px;
 }
 
 .season-actions {

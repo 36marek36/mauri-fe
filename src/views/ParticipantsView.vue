@@ -6,106 +6,100 @@
             <div class="participants-columns">
                 <!-- 🧍 Hráči -->
                 <div class="column">
+
+                    <AppButton v-if="isAdmin" label="Vytvoriť hráča" icon="➕" type="create" htmlType="button"
+                        @clicked="addPlayer" />
+
+                    <div v-if="loadingPlayers">
+                        ... loading players...
+                    </div>
+
+                    <div v-else-if="players.length === 0">
+                        <p>Žiadni hráči nie sú k dispozícii.</p>
+                    </div>
+
                     <!-- Aktívni hráči -->
-                    <div class="active-participants">
-                        <h2>Zoznam hráčov:</h2>
-
-                        <AppButton v-if="isAdmin" label="Vytvoriť hráča" icon="➕" type="create" htmlType="button"
-                            @clicked="addPlayer" />
-
-                        <div v-if="loadingPlayers">
-                            ... loading players...
-                        </div>
-
-                        <div v-else-if="players.length === 0">
-                            <p>Žiadni hráči nie sú k dispozícii.</p>
-                        </div>
-
-                        <div v-else>
-                            <ParticipantList :participants="paginatedPlayers"
-                                :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
-                                :showProgress="false" @view-detail="(id) => goToDetail('players', id)" />
-                            <div v-if="totalPagesPlayers > 1" class="pagination">
-                                <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
-                                    @clicked="currentPagePlayers--" :disabled="currentPagePlayers === 1" />
-                                <span>{{ currentPagePlayers }} / {{ totalPagesPlayers }}</span>
-                                <AppButton label="Ďalšia" icon="→" type="default" htmlType="button"
-                                    @clicked="currentPagePlayers++"
-                                    :disabled="currentPagePlayers === totalPagesPlayers" />
-                            </div>
+                    <div v-else class="list-or-nothing">
+                        <ParticipantList class="participants" :title="'Zoznam hráčov'" :participants="paginatedPlayers"
+                            :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
+                            :showProgress="false" @view-detail="(id) => goToDetail('players', id)" />
+                        <div v-if="totalPagesPlayers > 1" class="pagination">
+                            <AppButton label="Predošlá" icon="←" type="edit" htmlType="button"
+                                @clicked="currentPagePlayers--" :disabled="currentPagePlayers === 1" />
+                            <span>{{ currentPagePlayers }} / {{ totalPagesPlayers }}</span>
+                            <AppButton label="Ďalšia" icon="→" type="edit" htmlType="button"
+                                @clicked="currentPagePlayers++" :disabled="currentPagePlayers === totalPagesPlayers" />
                         </div>
                     </div>
 
                     <!-- Neaktívni hráči -->
-                    <div v-if="isAdmin" class="inactive-participants">
-                        <ParticipantList :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
-                            @view-detail="(id) => goToDetail('players', id)" :showProgress="false"
-                            :remove="(id) => confirmDeleteParticipant('players', id)" />
+                    <div v-if="isAdmin" class="list-or-nothing">
+                        <ParticipantList class="participants" :title="'Neaktívni (vymazaní) hráči'"
+                            :participants="inactivePlayers" @view-detail="(id) => goToDetail('players', id)"
+                            :showProgress="false" :remove="(id) => confirmDeleteParticipant('players', id)" />
                     </div>
                 </div>
 
                 <!-- 🧑‍🤝‍🧑 Tímy -->
                 <div class="column">
-                    <!-- Aktívne tímy -->
-                    <div class="active-participants">
-                        <h2>Zoznam tímov:</h2>
 
-                        <div v-if="loadingTeams">
-                            ... loading teams...
+                    <AppButton v-if="isAdmin" :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'"
+                        icon="➕" :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button"
+                        @clicked="toggleCreateForm" />
+
+                    <!-- Formulár na vytvorenie tímu -->
+                    <div v-if="showCreateTeamForm" class="list-or-nothing">
+                        <div class="create-team-form">
+                            <label for="player1">Hráč 1:</label>
+                            <select id="player1" v-model="newTeam.player1Id">
+                                <option value="">-- Vyber hráča --</option>
+                                <option v-for="player in players" :key="player.id" :value="player.id">
+                                    {{ player.firstName }} {{ player.lastName }}
+                                </option>
+                            </select>
+                            <label for="player2">Hráč 2:</label>
+                            <select id="player2" v-model="newTeam.player2Id">
+                                <option value="">-- Vyber hráča --</option>
+                                <option v-for="player in players" :key="player.id" :value="player.id">
+                                    {{ player.firstName }} {{ player.lastName }}
+                                </option>
+                            </select>
+
+                            <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button"
+                                @clicked="createTeam" />
                         </div>
 
-                        <div v-else>
-                            <AppButton v-if="isAdmin"
-                                :label="showCreateTeamForm ? 'Zavrieť formulár' : 'Vytvoriť nový tím'" icon="➕"
-                                :type="showCreateTeamForm ? 'delete' : 'create'" htmlType="button"
-                                @clicked="toggleCreateForm" />
+                    </div>
 
-                            <div v-if="showCreateTeamForm">
-                                <label for="player1">Hráč 1:</label>
-                                <select id="player1" v-model="newTeam.player1Id">
-                                    <option disabled value="">-- Vyber hráča --</option>
-                                    <option v-for="player in players" :key="player.id" :value="player.id">
-                                        {{ player.firstName }} {{ player.lastName }}
-                                    </option>
-                                </select>
+                    <!-- Načítavanie -->
+                    <div v-if="loadingTeams">
+                        ... loading teams...
+                    </div>
 
-                                <label for="player2">Hráč 2:</label>
-                                <select id="player2" v-model="newTeam.player2Id">
-                                    <option disabled value="">-- Vyber hráča --</option>
-                                    <option v-for="player in players" :key="player.id" :value="player.id">
-                                        {{ player.firstName }} {{ player.lastName }}
-                                    </option>
-                                </select>
+                    <!-- Ak žiadne tímy -->
+                    <div v-else-if="teams.length === 0">
+                        <p>Žiadne tímy neboli zatiaľ vytvorené.</p>
+                    </div>
 
-                                <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button"
-                                    @clicked="createTeam" />
-                            </div>
-
-                            <div v-if="teams.length === 0">
-                                <p>Žiadne tímy neboli zatiaľ vytvorené.</p>
-                            </div>
-
-                            <div v-else>
-                                <ParticipantList :participants="paginatedTeams"
-                                    :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
-                                    :showProgress="false" @view-detail="(id) => goToDetail('teams', id)" />
-                                <div v-if="totalPagesTeams > 1" class="pagination">
-                                    <AppButton label="Predošlá" icon="←" type="default" htmlType="button"
-                                        @clicked="currentPageTeams--" :disabled="currentPageTeams === 1" />
-                                    <span>Strana {{ currentPageTeams }} z {{ totalPagesTeams }}</span>
-                                    <AppButton label="Ďalšia" icon="→" type="default" htmlType="button"
-                                        @clicked="currentPageTeams++"
-                                        :disabled="currentPageTeams === totalPagesTeams" />
-                                </div>
-                            </div>
+                    <!-- Aktívne tímy -->
+                    <div v-else class="list-or-nothing">
+                        <ParticipantList class="participants" :title="'Zoznam tímov'" :participants="paginatedTeams"
+                            :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
+                            :showProgress="false" @view-detail="(id) => goToDetail('teams', id)" />
+                        <div v-if="totalPagesTeams > 1" class="pagination">
+                            <AppButton label="Predošlá" icon="←" type="edit" htmlType="button"
+                                @clicked="currentPageTeams--" :disabled="currentPageTeams === 1" />
+                            <span>{{ currentPageTeams }} / {{ totalPagesTeams }}</span>
+                            <AppButton label="Ďalšia" icon="→" type="edit" htmlType="button"
+                                @clicked="currentPageTeams++" :disabled="currentPageTeams === totalPagesTeams" />
                         </div>
                     </div>
 
                     <!-- Neaktívne tímy -->
-                    <div v-if="isAdmin" class="inactive-participants">
-                        <ParticipantList :title="'Neaktívne (vymazané) tímy'" :participants="inactiveTeams"
-                            @view-detail="(id) => goToDetail('teams', id)" :showProgress="false"
-                            :remove="(id) => confirmDeleteParticipant('teams', id)" />
+                    <div v-if="isAdmin" class="list-or-nothing">
+                        <ParticipantList class="participants" :title="'Neaktívne (vymazané) tímy'"
+                            :participants="inactiveTeams" @view-detail="(id) => goToDetail('teams', id)"
+                            :showProgress="false" :remove="(id) => confirmDeleteParticipant('teams', id)" />
                     </div>
                 </div>
             </div>
@@ -344,42 +338,32 @@ export default {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 1rem;
     min-height: 100%;
 }
 
-.active-participants {
+.participants {
+    width: 100%;
+    padding-top: 1rem;
     flex-grow: 1;
 }
 
-.inactive-participants {
-    margin-top: 2rem;
-    border-top: 1px solid #ccc;
-    padding-top: 1rem;
-    color: #888;
+.create-team-form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 0.5rem;
 }
+
 
 .pagination {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
     gap: 1rem;
-    margin-top: 2rem;
-    font-family: Arial, sans-serif;
-}
-
-.pagination button {
-    background-color: #3498db;
-    border: none;
-    color: white;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    transition: background-color 0.3s ease;
-}
-
-.pagination button:disabled {
-    background-color: #bdc3c7;
-    cursor: not-allowed;
+    margin-bottom: 1rem;
 }
 
 .pagination span {

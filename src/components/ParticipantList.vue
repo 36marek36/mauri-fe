@@ -60,9 +60,11 @@ export default {
 <style scoped>
 ul {
     list-style-type: none;
+  
 }
 
 li {
+    
     padding: .3em .6em;
     cursor: pointer;
 }

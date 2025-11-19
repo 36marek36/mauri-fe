@@ -5,8 +5,7 @@
     <div class="right-side">
       <div class="currentSeason">
         <h3>Aktuálna sezóna:</h3>
-
-        <div class="list-or-nothing ">
+        <div class="list-or-nothing">
           <!-- Loading stav -->
           <p v-if="loading">Načítavam aktuálnu sezónu...</p>
 
@@ -19,7 +18,6 @@
                 @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
                 <td>{{ league.leagueName }}</td>
                 <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
-                <td>{{ inflection(league) }}</td>
                 <td>
                   <CircularProgress :progress="league.leagueProgress" />
                 </td>
@@ -73,8 +71,7 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
-    inflection
+    }
   },
 
   computed: {
@@ -125,11 +122,10 @@ export default {
   background-color: #363537;
 }
 
-.list-or-nothing::-webkit-scrollbar {
-  display: none;
-}
+
 
 .list-or-nothing {
+  margin-top: 2rem;
   overflow-y: auto;
 }
 

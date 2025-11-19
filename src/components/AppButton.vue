@@ -52,6 +52,8 @@ export default {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: white;
+  font-size: 1rem;
   gap: 0.5rem;
   padding: 0.4rem 1rem;
   margin: 0.2rem;
@@ -67,7 +69,11 @@ export default {
   filter: brightness(0.95);
 }
 
-/* Ikony, ak ich používaš */
+.app-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* Ikony */
 .app-button .icon {
   font-weight: bold;
 }
@@ -75,33 +81,31 @@ export default {
 /* CREATE button – zelený */
 .app-button--create {
   background-color: #4CAF50;
-  color: white;
+  
 }
 
 .app-button--create:hover {
-  background-color: #45a049;
+  color: #4CAF50;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
 }
 
 /* DELETE button – červený */
 .app-button--delete {
   background-color: #f44336;
-  color: white;
 }
 
 .app-button--delete:hover {
-  background-color: #d32f2f;
+  color: #f44336;
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.3);
 }
 
 /* EDIT button – modrý */
 .app-button--edit {
   background-color: #2196F3;
-  color: white;
 }
 
 .app-button--edit:hover {
-  background-color: #1976D2;
+  color: #2196F3;
   box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
 }
 
@@ -113,12 +117,11 @@ export default {
 
 .app-button--default:hover {
   background-color: #ffecb3;
-  /* jemná žltá */
-  color: #000;
   box-shadow: 0 0 0 3px rgba(255, 204, 128, 0.4);
 }
 
 .app-button:disabled {
+  background-color: #bdc3c7;
   opacity: 0.5;
   cursor: not-allowed;
 }

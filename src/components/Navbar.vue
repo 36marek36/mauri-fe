@@ -112,11 +112,14 @@ export default {
   z-index: 1000;
   padding: 1rem;
   text-align: center;
+  
 }
 
 .navbar ul {
   background: transparent;
+  backdrop-filter: blur(12px);
   border: 2px solid rgba(255, 255, 255, 0.863);
+  border-radius: 10px;
   padding: 0.5rem 1rem;
   width: fit-content;
   margin: auto;

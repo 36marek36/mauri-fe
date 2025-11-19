@@ -1,7 +1,7 @@
-<template>
+<!-- <template>
   <div class="header">
     <div class="top-row">
-      <div class="left-side"></div>
+      <div class="left"></div>
 
       <div class="headings">
         <h1>{{ title }}</h1>
@@ -9,21 +9,47 @@
       </div>
     </div>
 
-    <div class="right-side">
+    <div class="right">
       <FlashMessage v-if="hasFlashMessage" />
       <div v-else class="logo"></div>
     </div>
   </div>
+</template> -->
+<template>
+  <div class="header">
+    <Navbar />
+    <div class="left-side">
+    </div>
+    <div class="right-side">
+      <div class="header-wrapper">
+
+        <div class="headings">
+          <h1>{{ title }}</h1>
+          <h2 v-if="subtitle">{{ subtitle }}</h2>
+        </div>
+
+        <div class="message">
+          <FlashMessage v-if="hasFlashMessage" />
+        </div>
+
+
+      </div>
+
+    </div>
+  </div>
+
 </template>
+
 
 <script>
 import { useHeaderStore } from '@/stores/header'
 import { useFlashMessageStore } from '@/stores/flashMessage'
 import FlashMessage from './FlashMessage.vue'
+import Navbar from './Navbar.vue'
 
 export default {
   name: 'AppHeader',
-  components: { FlashMessage },
+  components: { FlashMessage, Navbar },
   computed: {
     title() {
       return useHeaderStore().title
@@ -42,80 +68,27 @@ export default {
 <style scoped>
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: stretch;
-  padding: 0 2rem;
+  height: 250px;
 }
 
-.top-row {
+.header-wrapper {
   display: flex;
-  width: 75%;
-  /* align-items: flex-start; */
-}
-
-.left-side {
-  width: 25%;
-  /* 25% z top-row → 18.75% z header */
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
 }
 
 .headings {
-  width: 75%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  text-align: center;
-  min-width: 200px;
-  padding: 100px 0 0 0;
+  width: 60%;
+  padding-top: 80px;
 }
 
-.right-side {
-  width: 25%;
-  height: 300px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  position: relative;
+.message {
+  width: 40%;
 }
 
-.logo {
-  max-width: 250px;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-image: url('/images/logo.png');
-}
 
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: stretch;
-    /* alebo center, podla potreby */
-  }
-
-  .top-row {
-    flex-direction: row;
-    width: 100%;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .left-side,
-  .headings {
-    width: 50%;
-    justify-content: center;
-    text-align: center;
-    padding: 70px 0 0 0;
-  }
-
-  .right-side {
-    width: 100%;
-    margin-top: 0.5rem;
-  }
-}
+@media (max-width: 768px) {}
 </style>
 
 <!-- <template>

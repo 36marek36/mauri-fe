@@ -5,55 +5,64 @@
         <div class="left-side">
         </div>
         <div class="right-side">
-            <div class="table-wrapper">
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>Používateľ</th>
-                            <th>Rola</th>
-                            <th>Hráč</th>
-                            <th>Prihlásený</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="user in users" :key="user.id">
-                            <td>{{ user.username }}</td>
-                            <td>{{ user.role }}</td>
-                            <td>
-                                <RouterLink v-if="user.playerId" :to="`/players/${user.playerId}`">
-                                    {{ user.playerName }}
-                                </RouterLink>
-                                <div v-else-if="user.role === 'USER'">
-                                    <select v-model="selectedPlayers[user.id]">
-                                        <option disabled value="">-- Vyber hráča --</option>
-                                        <option v-for="player in unassignedPlayers" :key="player.id" :value="player.id">
-                                            {{ player.name }}
-                                        </option>
+            <div class="users-section">
+                <div class="list-or-nothing">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>Používateľ</th>
+                                <th>Rola</th>
+                                <th>Hráč</th>
+                                <th>Prihlásený</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="user in users" :key="user.id">
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    <select v-model="user.selectedRole" @focus="storePreviousRole(user)"
+                                        @change="handleRoleChange(user)">
+                                        <option value="USER">USER</option>
+                                        <option value="ADMIN">ADMIN</option>
                                     </select>
-                                    <AppButton type="submit" label="Priradiť"
-                                        @clicked="() => assignPlayerToUser(user)" />
-                                </div>
-                                <span v-else>Bez možnosti priradiť hráča</span>
-                            </td>
-                            <td>
-                                <span v-if="user.lastLogin"> {{ user.lastLogin }} </span>
-                                <span v-else>Zatial žiadne prihlásenie</span>
-                            </td>
-                            <td>
-                                <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete" htmltype="button"
-                                    @clicked="() => confirmDeleteUser(user)" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                </td>
+                                <td>
+                                    <RouterLink v-if="user.playerId" :to="`/players/${user.playerId}`">
+                                        {{ user.playerName }}
+                                    </RouterLink>
+                                    <div v-else>
+                                        <select v-model="selectedPlayers[user.id]">
+                                            <option value=""></option>
+                                            <option v-for="player in unassignedPlayers" :key="player.id"
+                                                :value="player.id">
+                                                {{ player.name }}
+                                            </option>
+                                        </select>
+                                        <AppButton html-type="submit" label="Priradiť"
+                                            :disabled="!selectedPlayers[user.id]"
+                                            @clicked="() => assignPlayerToUser(user)" />
+                                    </div>
+                                </td>
+                                <td>
+                                    <span v-if="user.lastLogin"> {{ user.lastLogin }} </span>
+                                    <span v-else>Zatial žiadne prihlásenie</span>
+                                </td>
+                                <td>
+                                    <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete" htmltype="button"
+                                        @clicked="() => confirmDeleteUser(user)" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-
     <div v-else>Načítavam používateľov...</div>
 
-    <AppModal :visible="showDeleteModal" :message="deleteMessage"
-        @confirm="deleteUser" @cancel="cancelDelete" />
+    <AppModal :visible="showDeleteModal" :message="deleteMessage" @confirm="deleteUser" @cancel="cancelDelete" />
+    <AppModal :visible="showChangeRoleModal" :message="changeRoleMessage" @confirm="confirmChange"
+        @cancel="cancelChange" />
 </template>
 
 <script>
@@ -72,6 +81,8 @@ export default {
             unassignedPlayers: [],
             selectedPlayers: {},
             showDeleteModal: false,
+            previousRole: null,
+            showChangeRoleModal: false,
             user: null,
             loading: true
         }
@@ -97,7 +108,10 @@ export default {
             const header = useHeaderStore();
             try {
                 const response = await api.get('/users/');
-                this.users = response.data;
+                this.users = response.data.map(user => ({
+                    ...user,
+                    selectedRole: user.role // predvolená hodnota v selecte
+                }));
                 header.setTitle('Zoznam používateľov', '');
             } catch (error) {
                 console.error('Chyba pri načítaní používateľov:', error);
@@ -134,6 +148,45 @@ export default {
                 alert('Nepodarilo sa priradiť hráča.')
             }
         },
+        storePreviousRole(user) {
+            // toto sa zavolá ešte pred zmenou
+            this.user = user
+            this.previousRole = user.selectedRole
+        },
+        handleRoleChange(user) {
+            // otvoríme modal, role už máme uloženú
+            this.showChangeRoleModal = true
+        },
+        confirmChange() {
+            this.updateUserRole(this.user)
+            this.resetModal()
+        },
+        cancelChange() {
+            if (this.user) {
+                this.user.selectedRole = this.previousRole
+            }
+            this.resetModal()
+        },
+        resetModal() {
+            this.showChangeRoleModal = false
+            this.user = null
+            this.previousRole = null
+        },
+        async updateUserRole(user) {
+            try {
+                const response = await api.patch('/users/updateRole', {
+                    userId: user.id,
+                    updateUserRole: user.selectedRole
+                })
+                // Tu sa vypíše správa z backendu
+                this.flash.showMessage(response.data, 'success')
+            } catch (error) {
+                console.error(error)
+                // Backend môže posielať message aj pri chybe
+                const msg = error.response?.data?.message || 'Chyba pri zmene role.'
+                alert(msg)
+            }
+        },
         async deleteUser() {
             try {
                 await api.delete('/users/' + this.user?.id);
@@ -160,6 +213,9 @@ export default {
         },
         deleteMessage() {
             return `Naozaj chcete zmazať používatela ${this.user?.username}?`;
+        },
+        changeRoleMessage() {
+            return 'Naozaj chcete zmenit rolu používatela ' + this.user?.username + ' na ' + this.user?.selectedRole + ' ?';
         }
     },
     components: { AppButton, AppModal, ParticipantList }
@@ -168,16 +224,14 @@ export default {
 </script>
 
 <style scoped>
-.table-wrapper {
-    overflow-x: auto;
+.users-section {
     width: 100%;
 }
 
 .users-table {
-    width: 100%;
     min-width: 600px;
+    width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
 }
 
 .users-table th,

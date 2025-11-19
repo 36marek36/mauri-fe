@@ -6,7 +6,10 @@
 
             <input v-if="!isLogin" v-model="confirmPassword" type="password" placeholder="Potvrď heslo" required />
 
-            <AppButton :label="isLogin ? 'Prihlásiť' : 'Registrovať'" htmlType="submit" type="primary" />
+            <div class="log-button">
+                <AppButton :label="isLogin ? 'Prihlásiť' : 'Registrovať'" htmlType="submit" type="edit" />
+            </div>
+
         </form>
 
         <p class="toggle-link">
@@ -101,9 +104,16 @@ export default {
     flex-direction: column;
     gap: 1rem;
 }
+.log-button{
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem;
+    width: 100%;
+}
 
 input {
     padding: 0.5rem;
+    margin: 0.2rem;
     font-size: 1rem;
     border-radius: 4px;
     border: 1px solid #ccc;
