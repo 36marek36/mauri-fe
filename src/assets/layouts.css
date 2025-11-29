@@ -33,7 +33,12 @@
     box-shadow: 0 0 5px #FFD700;
     border-radius: 16px;
     overflow-x: auto;
-    background-color: rgba(0, 0, 0, 0.3);
+    background: linear-gradient(to right,
+            rgba(0, 0, 0, 1),
+            /* viac čierna zľava */
+            rgba(0, 0, 0, 0.05)
+            /* takmer priehľadné napravo */
+        );
     /* skoro neviditeľné pozadie */
     backdrop-filter: blur(12px);
     /* silné rozmazanie za tabuľkou */

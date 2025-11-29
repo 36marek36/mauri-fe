@@ -1,6 +1,6 @@
 <template>
   <div class="login-page">
-    <LoginRegisterForm />
+    <LoginRegisterForm @mode-changed="updateHeaderTitle" />
   </div>
 </template>
 
@@ -16,7 +16,16 @@ export default {
     }
   },
   created() {
-    this.header.setTitle('Prihlásenie','');
+    this.updateHeaderTitle(true);
+  },
+  methods: {  
+    updateHeaderTitle(isLogin) {
+        if (isLogin) {
+            this.header.setTitle('Prihlásenie', '')
+        } else {
+            this.header.setTitle('Registrácia', '')
+        }
+    },
   },
   components: {
     LoginRegisterForm

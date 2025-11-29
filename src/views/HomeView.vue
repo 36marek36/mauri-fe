@@ -15,12 +15,9 @@
           <table v-else-if="hasLeagues" class="league-table">
             <tbody>
               <tr v-for="league in currentSeason.leagues" :key="league.leagueId"
-                @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
+                @click="$router.push('/leagues/' + league.leagueId)"
+                :class="['league-row', league.leagueType.toLowerCase()]">
                 <td>{{ league.leagueName }}</td>
-                <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
-                <td>
-                  <CircularProgress :progress="league.leagueProgress" />
-                </td>
               </tr>
             </tbody>
           </table>
@@ -28,6 +25,10 @@
           <!-- Ak sezóna existuje, ale ligy nemá -->
           <p v-else>Sezóna neobsahuje žiadne ligy.</p>
         </div>
+      </div>
+
+      <div class="second">
+        <!-- druhy div vedla aktualnej sezony -->
       </div>
       <LoginRegisterForm v-if="!isLoggedIn" />
     </div>
@@ -40,7 +41,6 @@ import { useHeaderStore } from '@/stores/header';
 import { useUserStore } from '@/stores/user';
 import api from '@/axios-interceptor';
 import CircularProgress from '@/components/CircularProgress.vue';
-import { inflection } from '@/utils/inflection';
 
 export default {
   name: 'Home Page',
@@ -53,7 +53,7 @@ export default {
     }
   },
   created() {
-    this.header.setTitle('Vitajte', '')
+    this.initHeader();
     this.fetchCurrentSeason();
   },
   methods: {
@@ -71,6 +71,15 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    async initHeader() {
+      await this.userStore.fetchCurrentUser()
+
+      if (this.isLoggedIn) {
+        this.header.setTitle(`Vitaj ${this.userStore.user.username}`, '')
+      } else {
+        this.header.setTitle('Vitajte', '')
+      }
     }
   },
 
@@ -81,12 +90,7 @@ export default {
     hasLeagues() {
       return this.currentSeason.leagues.length > 0;
     },
-    leagueTypeLabels() {
-      return {
-        SINGLES: '2-HRA',
-        DOUBLES: '4-HRA',
-      };
-    },
+
     isLoggedIn() {
       return this.userStore.isLoggedIn
     }
@@ -100,9 +104,13 @@ export default {
 .currentSeason {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: 50%;
   font-size: 30px;
   max-height: 500px;
+}
+
+.second {
+  width: 50%;
 }
 
 .league-table {
@@ -110,12 +118,29 @@ export default {
   border-collapse: collapse;
 }
 
+tr.league-row {
+  font-size: x-large;
+  height: 60px;
+  background-size: contain;
+  background-position: left;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+tr.singles {
+  background-image: url('/images/singles-bg.png');
+}
+
+tr.doubles {
+  background-image: url('/images/doubles-bg.png');
+}
+
+
 .league-table td {
-
-  padding: 0.5rem;
-  text-align: left;
+  padding-right: 2rem;
+  text-align: right;
+  vertical-align: bottom;
   white-space: nowrap;
-
 }
 
 .league-table tbody tr:hover {
@@ -127,6 +152,13 @@ export default {
 .list-or-nothing {
   margin-top: 2rem;
   overflow-y: auto;
+  align-items: center;
+}
+
+.icon-ball {
+  width: 25px;
+  height: 40px;
+  margin-right: 4px;
 }
 
 @media (max-width: 768px) {

@@ -761,14 +761,12 @@ export default {
 .standings-table td {
     padding: 0.5rem;
     text-align: center;
-    /* border-bottom: 1px solid #eee; */
-    text-shadow: 0 0 1px brown, 0 0 2px brown
 }
 
 .standings-table th {
     text-transform: uppercase;
-    font-size: 0.85rem;
-    color: whitesmoke;
+    font-size: 1rem;
+    color: #ffd700;
     line-height: 1.2;
 }
 

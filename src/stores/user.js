@@ -1,9 +1,12 @@
 import { defineStore } from "pinia";
 import api from "@/axios-interceptor";
+import router from "@/router";
+import { useFlashMessageStore } from "./flashMessage";
 
 export const useUserStore = defineStore('user', {
     state: () => ({
         user: null,
+        token: localStorage.getItem('jwt') || null,
         isLoading: false,
         error: null
     }),
@@ -14,8 +17,8 @@ export const useUserStore = defineStore('user', {
     },
     actions: {
         async fetchCurrentUser() {
-            const token = localStorage.getItem('jwt')
-            if (!token) {
+
+            if (!this.token) {
                 this.user = null
                 return
             }
@@ -23,10 +26,10 @@ export const useUserStore = defineStore('user', {
             this.isLoading = true
 
             try {
+                api.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
                 const response = await api.get('/users/me')
                 this.user = response.data
                 this.error = null
-                // console.log('User fetched:', this.user)
             } catch (err) {
                 this.user = null
                 this.error = err.response?.data?.message || 'Chyba pri načítaní používateľa'
@@ -34,11 +37,34 @@ export const useUserStore = defineStore('user', {
                 this.isLoading = false
             }
         },
+        async login(username, password) {
+            const res = await api.post('/auth/login', { username, password })
+            this.token = res.data.token
+            localStorage.setItem('jwt', this.token)
+            api.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+            await this.fetchCurrentUser()
+            if (window.location.pathname === '/') {
+                window.location.reload();
+            } else {
+                router.push('/')
+            }
+        },
+
+        async register(username, password) {
+            await api.post('/auth/register', { username, password })
+        },
+
         logout() {
             localStorage.removeItem('jwt')  // odstráni token zo storage
             delete api.defaults.headers.common['Authorization']    // odstráni token z hlavičiek pre ďalšie požiadavky
             this.user = null    // resetuje používateľa
+            this.token = null
             console.log('Uzivatel odhlaseny')
+
+            const flashMessage = useFlashMessageStore();
+            flashMessage.showMessage('Bol si úspešne odhlásený',)
+
+            router.push('/')
         }
     }
 })

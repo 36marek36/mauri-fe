@@ -15,7 +15,7 @@
       </li>
 
       <li v-if="isLoggedIn" class="user-dropdown">
-        <span class="username" @click="toggleDropdown">{{ userStore.user.username }}</span>
+        <a class="username" @click="toggleDropdown">{{ userStore.user.username }}</a>
         <div v-if="showDropdown" class="dropdown-menu">
           <AppButton v-if="playerId" label="Detail hráča" type="create" @clicked="goToPlayerDetail" htmlType="button" />
           <AppButton v-else label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" />
@@ -112,7 +112,20 @@ export default {
   z-index: 1000;
   padding: 1rem;
   text-align: center;
-  
+
+}
+
+.navbar li {
+  transition: transform 0.8s ease;
+}
+
+.navbar li:hover {
+  transform: scale(1.2);
+}
+
+.navbar li:hover a {
+  color: whitesmoke;
+  text-shadow: 5px 5px 3px rgba(0, 0, 0, 0.85);
 }
 
 .navbar ul {
@@ -138,8 +151,18 @@ export default {
 }
 
 .username {
-  font-weight: bold;
+  color: #ffffff;
+    text-shadow:
+    -0.5px -0.5px 0 #ff0000,
+    0.5px -0.5px 0 #ff0000,
+    -0.5px 0.5px 0 #ff0000,
+    0.5px 0.5px 0 #ff0000;
 }
+
+.navbar a.username:hover {
+  color: #ffd700;
+}
+
 
 .dropdown-menu {
   position: absolute;

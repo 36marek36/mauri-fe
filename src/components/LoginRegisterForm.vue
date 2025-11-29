@@ -22,7 +22,6 @@
 
 <script>
 import AppButton from '@/components/AppButton.vue'
-import api from '@/axios-interceptor'
 import { useUserStore } from '@/stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage'
 
@@ -47,40 +46,35 @@ export default {
             this.username = ''
             this.password = ''
             this.confirmPassword = ''
+            this.$emit('mode-changed', this.isLogin)
         },
         async handleSubmit() {
+
+            const userStore = useUserStore()
+
             if (!this.isLogin && this.password !== this.confirmPassword) {
                 this.flash.showMessage('Heslá sa nezhodujú', 'error')
                 return
             }
 
-            const userStore = useUserStore()
-
             try {
                 if (this.isLogin) {
-                    const res = await api.post('/auth/login', {
-                        username: this.username,
-                        password: this.password
-                    })
-                    const token = res.data.token
-                    localStorage.setItem('jwt', token)
+                    await userStore.login(this.username,this.password)
                     this.flash.showMessage('Prihlásenie úspešné', 'success')
-
-                    await userStore.fetchCurrentUser()
-
-                    this.username = ''
-                    this.password = ''
-                    this.confirmPassword = ''
-
-                    this.$router.push('/')
-                } else {
-                    await api.post('/auth/register', {
-                        username: this.username,
-                        password: this.password
-                    })
+                    if (this.$route.path === '/login'){
+                        this.$router.push('/')
+                    }
+                } 
+                else {
+                   await userStore.register(this.username,this.password)
                     this.toggleMode()
                     this.flash.showMessage('Účet bol vytvorený. Teraz sa môžete prihlásiť.', 'success')
                 }
+
+                this.username=''
+                this.password=''
+                this.confirmPassword=''
+
             } catch (err) {
                 this.flash.showMessage(
                     err.response?.data?.message || 'Nastala chyba.',
@@ -104,7 +98,8 @@ export default {
     flex-direction: column;
     gap: 1rem;
 }
-.log-button{
+
+.log-button {
     display: flex;
     justify-content: flex-end;
     padding: 0.5rem;
