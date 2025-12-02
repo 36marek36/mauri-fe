@@ -21,7 +21,6 @@
 //     return Promise.reject(error)
 //   }
 // )
-
 import axios from 'axios'
 import { useUserStore } from './stores/user'
 import { useFlashMessageStore } from '@/stores/flashMessage'
@@ -39,20 +38,29 @@ api.interceptors.request.use(config => {
   return config
 })
 
-// Response interceptor – rieši 401 chybu
+// Response interceptor – rieši chyby
 api.interceptors.response.use(
   response => response,
   error => {
-    if (error.response?.status === 401 && localStorage.getItem('jwt')) {
-      const userStore = useUserStore()
-      const flash = useFlashMessageStore()
+    const flash = useFlashMessageStore()
+    const userStore = useUserStore()
+    const status = error.response?.status
+    const message = error.response?.data?.message || 'Neznáma chyba.'
 
+    if (status === 401 && localStorage.getItem('jwt')) {
+      // neplatný alebo expirovaný token
       userStore.logout()
       flash.showMessage('Boli ste odhlásený. Presmerujem na prihlásenie.', 'error')
-
       setTimeout(() => {
         window.location.href = '/login'
       }, 2000)
+
+    } else if ([403, 404, 400].includes(status)) {
+      // zobrazíme hlášku zo servera
+      flash.showMessage(message, 'error')
+    } else {
+      // všetky ostatné chyby
+      flash.showMessage(message, 'error')
     }
 
     return Promise.reject(error)
