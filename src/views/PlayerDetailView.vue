@@ -5,44 +5,43 @@
         </div>
         <div class="right-side">
             <!-- Ľavý stĺpec – údaje o hráčovi -->
-            <ul class="player-info">
-
-                <li>
+            <div class="player-info">
+                <div>
                     <h3 class="value">{{ player.email || 'email nezadaný' }}</h3>
-                </li>
-                <li>
                     <h3 class="value">{{ player.phone || 'telefón nezadaný' }}</h3>
-                </li>
-                <br>
-                <li>
+                </div>
+                <div>
                     <h3 class="label">Dátum registrácie: </h3>
                     <h3 class="value">{{ player.registrationDate }}</h3>
-                </li>
-                <li v-if="player.deletedDate">
+                </div>
+                <div v-if="player.deletedDate">
                     <h3 class="label">Dátum zmazania: </h3>
                     <h3 class="value">{{ player.deletedDate }}</h3>
-                </li>
-                <li>
+                </div>
+                <div>
                     <h3 class="label">Moje tímy:</h3>
                     <h3>
                         <div class="teams" v-for="team in player.teams" :key="team.id">
                             {{ team.name }}
                         </div>
                     </h3>
-                </li>
-                <li>
+                </div>
+                <div>
                     <h3 class="label">Moje ligy:</h3>
                     <h3>
                         <div class="value" v-for="league in player.leagues" :key="league.leagueId">
                             {{ league.leagueName }} ({{ league.seasonYear }})
                         </div>
                     </h3>
-                </li>
-            </ul>
+                </div>
+
+
+
+            </div>
 
             <!-- Pravý stĺpec – tabuľka zápasov -->
-            <div class="matches-table">
-                <h3 class="matches-title">Všetky zápasy aktuálnej sezóny</h3>
+            <div v-if="leagueId" class="matches-table">
+                <h3>{{ activeLeague.leagueName }}</h3>
                 <table>
                     <thead>
                         <tr>
@@ -107,6 +106,7 @@ export default {
     data() {
         return {
             player: null,
+            stats: null,
             createdMatches: [],
             finishedMatches: [],
             cancelledMatches: [],
@@ -120,19 +120,27 @@ export default {
     },
     methods: {
         async fetchAll() {
-            await this.fetchPlayer();
-            await this.fetchPlayerMatches();
+            this.loading = true;
+            try {
+                await this.fetchPlayer();
+
+                // Paralelne načítaj zápasy a štatistiky (ak existuje liga)
+                const promises = [this.fetchPlayerMatches()];
+                if (this.leagueId) promises.push(this.fetchPlayerStats(this.leagueId));
+
+                await Promise.all(promises);
+
+            } finally {
+                this.loading = false;
+            }
         },
         async fetchPlayer() {
-            this.loading = true;
             try {
                 const response = await api.get('/players/' + this.playerId);
                 this.player = response.data;
                 this.header.setTitle(this.player.firstName, this.player.lastName);
             } catch (error) {
                 console.error('Chyba pri načítavaní hráča:', error);
-            } finally {
-                this.loading = false;
             }
         },
 
@@ -153,6 +161,17 @@ export default {
             } catch (error) {
                 console.error('Chyba pri načítavaní zápasov:', error);
             }
+        },
+        async fetchPlayerStats() {
+
+            if (!this.leagueId) return;
+
+            try {
+                const response = await api.get(`/leagues/${this.leagueId}/players/${this.playerId}/stats`);
+                this.stats = response.data;
+            } catch (error) {
+                console.error('Chyba pri načítavaní štatistík hráča:', error);
+            }
         }
     },
     computed: {
@@ -161,6 +180,12 @@ export default {
         },
         playerId() {
             return this.$route.params.id
+        },
+        activeLeague() {
+            return this.player?.leagues?.find(l => l.leagueStatus === 'ACTIVE') || null;
+        },
+        leagueId() {
+            return this.activeLeague?.leagueId || null;
         }
     }
 }
@@ -174,16 +199,6 @@ export default {
     margin: 0;
     flex: 1;
     max-width: 400px;
-}
-
-.player-info li {
-    display: grid;
-    /* grid-template-columns: 150px 1fr; */
-    /* 1. stĺpec pevný pre label, 2. pre hodnotu */
-    gap: 0.5rem;
-    margin-bottom: 0.3rem;
-    word-break: break-word;
-    align-items: start;
 }
 
 .label {
@@ -212,17 +227,12 @@ export default {
     border-collapse: collapse;
 }
 
-.matches-table th,
+
 .matches-table td {
     padding: 0.5rem;
     border: 1px solid #ccc;
     text-align: center;
     white-space: nowrap;
-}
-
-.matches-title {
-    text-align: left;
-    margin-bottom: 1rem;
 }
 
 .badge-finished {

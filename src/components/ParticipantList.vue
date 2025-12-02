@@ -60,11 +60,11 @@ export default {
 <style scoped>
 ul {
     list-style-type: none;
-  
+
 }
 
 li {
-    
+
     padding: .3em .6em;
     cursor: pointer;
 }
@@ -115,11 +115,17 @@ li:not(:last-child) {
     /* každý potomok (napr. AppButton) bude rovnako široký */
 }
 
-.inactive {
+li.inactive .info span {
     color: #aaa;
+    /* šedá farba */
     text-decoration: line-through;
+    /* preškrtnutie */
     font-style: italic;
+    /* kurzíva */
 }
+
+
+
 
 @media (max-width: 768px) {
     .participant-content {

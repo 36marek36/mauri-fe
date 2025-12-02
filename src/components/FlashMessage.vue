@@ -19,7 +19,7 @@ export default {
 
 <style scoped>
 .flash-message {
-  padding: 12px 16px;
+  padding: 12px 48px;
   border-radius: 5px;
   font-weight: 500;
   margin: 1rem auto;
@@ -28,7 +28,38 @@ export default {
   width: fit-content;
   text-align: center;
   display: block;
+  position: relative;
 }
+
+/* Ikona pred textom */
+.flash-message::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  background-image: url('/images/icon-ball.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* Ikona za textom */
+.flash-message::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  background-image: url('/images/icon-ball.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
 
 .flash-message.success {
   background-color: #d1fae5;

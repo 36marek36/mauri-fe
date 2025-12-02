@@ -1,32 +1,51 @@
 <template>
+  <div class="main-layout">
+    <div class="left-side">
+    </div>
+    <div class="right-side">
+      <div class="list-or-nothing">
+        <form @submit.prevent="submitForm">
+          <div class="form-group">
+            <label>Meno</label>
+            <input v-model="player.firstName" type="text" />
+          </div>
 
-  <div class="create-player">
+          <div class="form-group">
+            <label>Priezvisko</label>
+            <input v-model="player.lastName" type="text" />
+          </div>
 
-    <form @submit.prevent="submitForm">
-      <label>Meno:
-        <input v-model="player.firstName" type="text" />
-      </label>
+          <div class="form-group">
+            <label>Email</label>
+            <input v-model="player.email" type="email" />
+          </div>
 
-      <label>Priezvisko:
-        <input v-model="player.lastName" type="text" />
-      </label>
+          <div class="form-group">
+            <label>Telefón</label>
+            <input v-model="player.phone" type="text" />
+          </div>
 
-      <label>Email:
-        <input v-model="player.email" type="text" />
-      </label>
+          <div class="form-actions">
+            <AppButton :label="isEdit ? 'Upraviť' : 'Vytvoriť'" :type="isEdit ? 'edit' : 'create'" htmlType="submit" />
 
-      <label>Telefón:
-        <input v-model="player.phone" type="text" />
-      </label>
+            <AppButton v-if="isEdit" label="Vymazať" type="delete" @clicked="confirmDeletePlayer" />
+          </div>
 
-      <AppButton :label="isEdit ? 'Upraviť' : 'Vytvoriť'" :type="isEdit ? 'edit' : 'create'" htmlType="submit" />
-      <AppButton v-if="isEdit" label="Vymazat" type="delete" @clicked="confirmDeletePlayer" />
+        </form>
+      </div>
+      <div class="second" v-if="!isEdit">
+        <div class="list-or-nothing">
+          <p class="text" ref="text"></p>
+        </div>
+      </div>
 
-    </form>
+      <AppModal :visible="showDeleteModal" :message="'Naozaj si chceš vymazať hráča?'" @confirm="deletePlayer"
+        @cancel="cancelDelete" />
+    </div>
 
   </div>
-  <AppModal :visible="showDeleteModal" :message="'Naozaj si chceš vymazať hráča?'" @confirm="deletePlayer"
-    @cancel="cancelDelete" />
+
+
 </template>
 
 <script>
@@ -36,6 +55,8 @@ import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
 import AppButton from '@/components/AppButton.vue';
 import AppModal from '@/components/AppModal.vue';
+import { typeText } from '@/utils/typingEffect';
+import { newPlayerText } from '@/assets/newPlayerText';
 
 export default {
   name: 'CreatePlayer',
@@ -49,7 +70,8 @@ export default {
       },
       isEdit: false,
       playerId: null,
-      showDeleteModal: false
+      showDeleteModal: false,
+      newPlayerText
     }
   },
   created() {
@@ -64,6 +86,12 @@ export default {
     } else {
       header.setTitle('Vytvorenie nového hráča', '');
     }
+  },
+  mounted() {
+    if (!this.isEdit) {
+      typeText(newPlayerText, this.$refs.text, 40); // môžeš upraviť rýchlosť
+    }
+
   },
   computed: {
     userStore() {
@@ -156,17 +184,80 @@ export default {
 
 
 <style scoped>
+.list-or-nothing {
+  padding: 1.2rem;
+  flex: 0 0 40%;
+}
+
+.second {
+  flex: 0 0 60%;
+}
+
+.text {
+  width: 100%;
+  margin: 0.5rem;
+}
+
 form {
   display: flex;
   flex-direction: column;
-  max-width: 300px;
+  width: 100%;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2rem;
 }
 
 label {
-  margin-bottom: 10px;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
 }
 
-button {
-  margin-top: 10px;
+input {
+  padding: 0.6rem 0.8rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background: #3c3c3d;
+  color: white;
+  transition: 0.2s ease;
+}
+
+input:focus {
+  border-color: #8ac6ff;
+  background: #454547;
+  outline: none;
+  box-shadow: 0px 0px 0px 2px rgba(138, 198, 255, 0.3);
+}
+
+.form-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+::v-deep ul {
+  list-style: decimal;
+  padding-left: 2rem;
+  margin: 0;
+  text-align: left;
+}
+
+::v-deep li {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+:deep(p) {
+  text-align: center;
+}
+
+
+:deep(strong) {
+  font-weight: 600;
+  color: whitesmoke;
+  font-size: 1.5rem;
 }
 </style>

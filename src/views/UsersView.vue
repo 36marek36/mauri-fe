@@ -12,6 +12,7 @@
                             <tr>
                                 <th>Používateľ</th>
                                 <th>Rola</th>
+                                <th>📝</th>
                                 <th>Hráč</th>
                                 <th>Prihlásený</th>
                             </tr>
@@ -21,15 +22,25 @@
                                 <td>{{ user.username }}</td>
                                 <td>
                                     <select v-model="user.selectedRole" @focus="storePreviousRole(user)"
-                                        @change="handleRoleChange(user)">
+                                        @change="handleRoleChange()">
                                         <option value="USER">USER</option>
                                         <option value="ADMIN">ADMIN</option>
                                     </select>
                                 </td>
                                 <td>
-                                    <RouterLink v-if="user.playerId" :to="`/players/${user.playerId}`">
+                                    <!-- <input type="checkbox" v-model="user.showDetails"
+                                        @change="updateShowDetails(user)" /> -->
+                                    <label class="switch">
+                                        <input type="checkbox" v-model="user.showDetails"
+                                            @change="updateShowDetails(user)">
+                                        <span class="slider"></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <span v-if="user.playerId" class="player-link"
+                                        @click="goToDetail('players', user.playerId)">
                                         {{ user.playerName }}
-                                    </RouterLink>
+                                    </span>
                                     <div v-else>
                                         <select v-model="selectedPlayers[user.id]">
                                             <option value=""></option>
@@ -110,13 +121,21 @@ export default {
                 const response = await api.get('/users/');
                 this.users = response.data.map(user => ({
                     ...user,
-                    selectedRole: user.role // predvolená hodnota v selecte
+                    selectedRole: user.role, // predvolená hodnota v selecte
+                    showDetails: user.showDetails
                 }));
                 header.setTitle('Zoznam používateľov', '');
             } catch (error) {
                 console.error('Chyba pri načítaní používateľov:', error);
             } finally {
                 this.loading = false;
+            }
+        },
+        async goToDetail(type, id) {
+            try {
+                await api.get(`/players/${id}`);
+                this.$router.push(`/${type}/${id}`);
+            } catch (error) {
             }
         },
         async fetchUnassignedPlayers() {
@@ -153,7 +172,7 @@ export default {
             this.user = user
             this.previousRole = user.selectedRole
         },
-        handleRoleChange(user) {
+        handleRoleChange() {
             // otvoríme modal, role už máme uloženú
             this.showChangeRoleModal = true
         },
@@ -180,6 +199,7 @@ export default {
                 })
                 // Tu sa vypíše správa z backendu
                 this.flash.showMessage(response.data, 'success')
+                this.fetchUsers()
             } catch (error) {
                 console.error(error)
                 // Backend môže posielať message aj pri chybe
@@ -206,6 +226,21 @@ export default {
         cancelDelete() {
             this.user = null;
             this.showDeleteModal = false;
+        },
+        async updateShowDetails(user) {
+            try {
+                const response = await api.patch('/users/showPlayerDetails', {
+                    userId: user.id,
+                    showDetails: user.showDetails
+                })
+                this.flash.showMessage(response.data, "success")
+            } catch (error) {
+                console.error(error)
+                this.flash.showMessage("Nastala chyba pri ukladaní", "error")
+
+                // vrátime hodnotu späť ak nastala chyba
+                user.showDetails = !user.showDetails
+            }
         }
     }, computed: {
         flash() {
@@ -239,5 +274,57 @@ export default {
     font-size: 1.2rem;
     padding: 8px;
     text-align: left;
+}
+
+.player-link {
+    cursor: pointer;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #d1d5db;
+    /* sivé pozadie */
+    transition: .3s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+/* toggle ON */
+.switch input:checked+.slider {
+    background-color: #4ade80;
+    /* pekná zelená */
+}
+
+.switch input:checked+.slider:before {
+    transform: translateX(24px);
 }
 </style>
