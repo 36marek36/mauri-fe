@@ -67,7 +67,8 @@ export default {
             },
             showDeleteModal: false,
             season: null,
-            loading: true
+            loading: true,
+            userStore: useUserStore()
         }
     },
     created() {
@@ -137,9 +138,6 @@ export default {
         }
     },
     computed: {
-        userStore() {
-            return useUserStore()
-        },
         flash() {
             return useFlashMessageStore();
         },

@@ -71,7 +71,8 @@ export default {
       isEdit: false,
       playerId: null,
       showDeleteModal: false,
-      newPlayerText
+      newPlayerText,
+      userStore: useUserStore()
     }
   },
   created() {
@@ -94,9 +95,6 @@ export default {
 
   },
   computed: {
-    userStore() {
-      return useUserStore()
-    },
     flash() {
       return useFlashMessageStore();
     },

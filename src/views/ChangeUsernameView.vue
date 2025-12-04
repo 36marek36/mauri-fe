@@ -26,16 +26,15 @@ export default {
     data() {
         return {
             newUsername: '',
-            header: useHeaderStore()
+            header: useHeaderStore(),
+            userStore: useUserStore()
         }
     },
     created() {
         this.header.setTitle('Zmena prihlasovacieho mena', '')
     },
     computed: {
-        userStore() {
-            return useUserStore()
-        },
+     
         flash() {
             return useFlashMessageStore()
         }

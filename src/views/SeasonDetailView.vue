@@ -103,7 +103,8 @@ export default {
             seasonToAction: null,
             seasonModalType: null,
             loading: true,
-            header: useHeaderStore()
+            header: useHeaderStore(),
+            userStore: useUserStore()
         }
     },
     created() {
@@ -235,9 +236,6 @@ export default {
         }
     },
     computed: {
-        userStore() {
-            return useUserStore()
-        },
         flash() {
             return useFlashMessageStore();
         },
@@ -260,9 +258,10 @@ export default {
 </script>
 
 <style scoped>
-.leagues{
+.leagues {
     width: 100%;
 }
+
 .league-table {
     width: 100%;
     border-collapse: collapse;
