@@ -4,7 +4,7 @@
     </div>
     <div class="right-side">
       <div class="currentSeason">
-        <h3>Aktuálna sezóna:</h3>
+        <h3>Sezóna {{ currentSeason.year }}</h3>
         <div class="list-or-nothing">
           <!-- Loading stav -->
           <p v-if="loading">Načítavam aktuálnu sezónu...</p>
@@ -15,9 +15,12 @@
           <table v-else-if="hasLeagues" class="league-table">
             <tbody>
               <tr v-for="league in currentSeason.leagues" :key="league.leagueId"
-                @click="$router.push('/leagues/' + league.leagueId)"
-                :class="['league-row', league.leagueType.toLowerCase()]">
+                @click="$router.push('/leagues/' + league.leagueId)" class="league-row">
                 <td>{{ league.leagueName }}</td>
+                <td>
+                  <img v-for="n in leagueTypeLabels[league.leagueType].count" :key="n" src="/images/icon-racket.png"
+                    class="icon" />
+                </td>
               </tr>
             </tbody>
           </table>
@@ -30,6 +33,7 @@
       <div class="second">
         <!-- druhy div vedla aktualnej sezony -->
       </div>
+
       <LoginRegisterForm v-if="!isLoggedIn" />
     </div>
   </div>
@@ -49,7 +53,8 @@ export default {
       currentSeason: {},
       loading: true,
       errorMessage: '',
-      header: useHeaderStore()
+      header: useHeaderStore(),
+      userStore: useUserStore()
     }
   },
   created() {
@@ -84,15 +89,18 @@ export default {
   },
 
   computed: {
-    userStore() {
-      return useUserStore()
-    },
     hasLeagues() {
-      return this.currentSeason.leagues.length > 0;
+      return this.currentSeason?.leagues?.length > 0;
     },
 
     isLoggedIn() {
       return this.userStore.isLoggedIn
+    },
+    leagueTypeLabels() {
+      return {
+        SINGLES: { count: 2 },
+        DOUBLES: { count: 4 },
+      };
     }
   },
   components: { LoginRegisterForm, CircularProgress }
@@ -118,29 +126,23 @@ export default {
   border-collapse: collapse;
 }
 
-tr.league-row {
+.icon {
+  height: 1.7em;
+  width: auto;
+  vertical-align: middle;
+}
+
+.league-row {
   font-size: x-large;
   height: 60px;
-  background-size: contain;
-  background-position: left;
-  background-repeat: no-repeat;
   cursor: pointer;
 }
 
-tr.singles {
-  background-image: url('/images/singles-bg.png');
-}
-
-tr.doubles {
-  background-image: url('/images/doubles-bg.png');
-}
-
-
 .league-table td {
-  padding-right: 2rem;
-  text-align: right;
-  vertical-align: bottom;
+  padding-left: 2rem;
+  text-align: left;
   white-space: nowrap;
+  text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700;
 }
 
 .league-table tbody tr:hover {
@@ -148,11 +150,11 @@ tr.doubles {
 }
 
 
-
 .list-or-nothing {
   margin-top: 2rem;
   overflow-y: auto;
   align-items: center;
+  font-size: 1.5rem;
 }
 
 .icon-ball {
@@ -162,8 +164,8 @@ tr.doubles {
 }
 
 @media (max-width: 768px) {
-  .list-or-nothing {
-    font-size: 1.2rem;
+  .currentSeason {
+    width: 100%;
   }
 }
 </style>

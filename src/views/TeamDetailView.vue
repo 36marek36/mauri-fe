@@ -2,75 +2,78 @@
 
     <div v-if="loading">... loading ...</div>
 
-    <div v-else>
-        <!-- Hráči vedľa seba -->
-        <div class="players-container">
-            <!-- Hráč 1 -->
-            <div class="player-card">
-                <h3>Hráč 1:</h3>
-                <p><span>Meno:</span> <span>{{ team.player1.name }}</span></p>
-                <p><span>Email:</span> <span>{{ team.player1.email || 'nezadaný' }}</span></p>
+    <div v-else class="main-layout">
+        <div class="left-side">
+        </div>
+        <div class="right-side">
+            <div class="players-container">
+                <!-- Hráč 1 -->
+                <div class="player-card">
+                    <h3 @click="goToDetail(team.player1.id)">{{ team.player1.name }}</h3>
+                </div>
+
+                <!-- Hráč 2 -->
+                <div class="player-card">
+                    <h3 @click="goToDetail(team.player2.id)">{{ team.player2.name }}</h3>
+                </div>
+
+                <h3>{{ 'Založenie tímu: ' + team.registrationDate }}</h3>
             </div>
 
-            <!-- Hráč 2 -->
-            <div class="player-card">
-                <h3>Hráč 2:</h3>
-                <p><span>Meno:</span> <span>{{ team.player2.name }}</span></p>
-                <p><span>Email:</span> <span>{{ team.player2.email || 'nezadaný' }}</span></p>
+            <!-- Zápasy -->
+            <div class="list-or-nothing">
+                <h3>Všetky zápasy aktuálnej sezóny</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Domáci</th>
+                                <th>Hostia</th>
+                                <th>Výsledok</th>
+                                <th>Kolo</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="match in allMatches" :key="match.id">
+                                <td>{{ match.homeTeam.name }}</td>
+                                <td>{{ match.awayTeam.name }}</td>
+                                <td>
+                                    <span
+                                        v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
+                                        {{ match.result.score1 }} : {{ match.result.score2 }}
+                                    </span>
+                                    <span v-else>-</span>
+                                </td>
+                                <td>{{ match.roundNumber }}</td>
+                                <td>
+                                    <span :class="{
+                                        'badge-finished': match.status === 'FINISHED',
+                                        'badge-cancelled': match.status === 'CANCELLED',
+                                        'badge-scratched': match.status === 'SCRATCHED',
+                                        'badge-pending': !['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status)
+                                    }">
+                                        {{
+                                            match.status === 'FINISHED'
+                                                ? 'Odohratý'
+                                                : match.status === 'CANCELLED'
+                                                    ? 'Zrušený'
+                                                    : match.status === 'SCRATCHED'
+                                                        ? 'Skrečovaný'
+                                                        : 'Neodohratý'
+                                        }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+
         </div>
 
-        <!-- Zápasy -->
-        <div>
-            <h3>Všetky zápasy aktuálnej sezóny</h3>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Domáci</th>
-                            <th>Hostia</th>
-                            <th>Výsledok</th>
-                            <th>Kolo</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="match in allMatches" :key="match.id">
-                            <td>{{ match.homeTeam.name }}</td>
-                            <td>{{ match.awayTeam.name }}</td>
-                            <td>
-                                <span
-                                    v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
-                                    {{ match.result.score1 }} : {{ match.result.score2 }}
-                                </span>
-                                <span v-else>-</span>
-                            </td>
-                            <td>{{ match.roundNumber }}</td>
-                            <td>
-                                <span :class="{
-                                    'badge-finished': match.status === 'FINISHED',
-                                    'badge-cancelled': match.status === 'CANCELLED',
-                                    'badge-scratched': match.status === 'SCRATCHED',
-                                    'badge-pending': !['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status)
-                                }">
-                                    {{
-                                        match.status === 'FINISHED'
-                                            ? 'Odohratý'
-                                            : match.status === 'CANCELLED'
-                                                ? 'Zrušený'
-                                                : match.status === 'SCRATCHED'
-                                                    ? 'Skrečovaný'
-                                                    : 'Neodohratý'
-                                    }}
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        <h3>{{ 'Založenie tímu: ' + team.registrationDate }}</h3>
     </div>
 </template>
 
@@ -105,7 +108,7 @@ export default {
             try {
                 const response = await api.get('/teams/' + this.teamId);
                 this.team = response.data;
-                this.header.setTitle('Detail tímu', this.team.name);
+                this.header.setTitle('Detail tímu', '');
                 this.loading = false
             } catch (error) {
                 console.error('Chyba pri načítavaní tímu:', error);
@@ -129,7 +132,14 @@ export default {
             } catch (error) {
                 console.error('Chyba pri načítavaní zápasov:', error);
             }
-        }
+        },
+        async goToDetail(id) {
+            try {
+                await api.get(`/players/${id}`);
+                this.$router.push(`/players/${id}`);
+            } catch (error) {
+            }
+        },
     },
     computed: {
         allMatches() {
@@ -146,46 +156,45 @@ export default {
 <style scoped>
 .players-container {
     display: flex;
-    justify-content: space-between;
-    width: 60%;
+    flex-direction: column;
+    width: 40%;
     gap: 2rem;
-    margin-bottom: 2rem;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .player-card {
-    flex: 1;
     border: 1px solid #ccc;
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 8px;
+    background: linear-gradient(to left,
+            rgba(0, 0, 0, 1),
+        
+            rgba(0, 0, 0, 0.05)
+            /* takmer priehľadné napravo */
+        );
 }
 
-.player-card p {
-    display: flex;
-    justify-content: space-between;
-    margin: 0.3rem 0;
-    /* Trochu medzery medzi riadkami */
+.player-card:hover {
+    cursor: pointer;
 }
 
-.player-card p span:first-child {
-    font-weight: 600;
+.list-or-nothing {
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .table-wrapper {
     display: flex;
     justify-content: center;
     margin-top: 1rem;
+    width: 100%;
 }
 
 table {
     border-collapse: collapse;
 }
 
-table th,
-table td {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
+table th {
+    font-weight: 100;
 }
 
 .badge-finished {

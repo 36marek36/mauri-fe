@@ -33,5 +33,6 @@ export default {
   aspect-ratio: 1 / 1;
   background-size: contain;
   background-repeat: no-repeat;
+  filter: drop-shadow(0 4px 20px rgba(238, 128, 3, 0.922));
 }
 </style>

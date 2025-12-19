@@ -262,6 +262,11 @@ export default {
     width: 100%;
 }
 
+.list-or-nothing {
+    align-items: center;
+    font-size: 1.5rem;
+}
+
 .league-table {
     width: 100%;
     border-collapse: collapse;

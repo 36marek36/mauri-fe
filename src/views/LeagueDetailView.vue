@@ -214,7 +214,8 @@ export default {
             actionType: null, // 'edit' alebo 'cancel'
             targetMatchId: null,
             participant: null,
-            header: useHeaderStore()
+            header: useHeaderStore(),
+            userStore: useUserStore()
 
         }
     },
@@ -339,12 +340,12 @@ export default {
                 this.cancelDrop()
             }
         },
-        goToDetail(type, id) {
-            if (!this.isLoggedIn) {
-                this.flash.showMessage('Musíte sa prihlásiť', 'warning');
-                return;
+        async goToDetail(type, id) {
+            try {
+                await api.get(`/${type}/${id}`);
+                this.$router.push(`/${type}/${id}`);
+            } catch (error) {
             }
-            this.$router.push(`/${type}/${id}`);
         },
         async fetchMatches() {
             const leagueId = this.leagueId
@@ -618,9 +619,6 @@ export default {
         leagueStatus() {
             return this.league.leagueStatus;
         },
-        userStore() {
-            return useUserStore();
-        },
         flash() {
             return useFlashMessageStore();
         },
@@ -747,12 +745,6 @@ export default {
     padding: 1rem;
 }
 
-.table-scroll {
-    overflow-x: auto;
-    width: 100%;
-
-}
-
 .standings-table {
     width: 100%;
 }
@@ -770,8 +762,9 @@ export default {
     line-height: 1.2;
 }
 
-.standings-table tr.dropped {
+.standings-table tr.dropped td {
     color: #999;
+    text-shadow: none;
     font-style: italic;
 }
 

@@ -14,7 +14,7 @@
                         ... loading players...
                     </div>
 
-                    <div v-else-if="players.length === 0">
+                    <div v-else-if="players.length === 0" class="list-or-nothing">
                         <p>Žiadni hráči nie sú k dispozícii.</p>
                     </div>
 
@@ -34,9 +34,13 @@
 
                     <!-- Neaktívni hráči -->
                     <div v-if="isAdmin" class="list-or-nothing">
-                        <ParticipantList class="participants" :title="'Neaktívni (vymazaní) hráči'"
-                            :participants="inactivePlayers" @view-detail="(id) => goToDetail('players', id)"
-                            :showProgress="false" :remove="(id) => confirmDeleteParticipant('players', id)" />
+                        <ParticipantList v-if="inactivePlayers.length > 0" class="participants"
+                            :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
+                            @view-detail="(id) => goToDetail('players', id)" :showProgress="false"
+                            :remove="(id) => confirmDeleteParticipant('players', id)" />
+
+                        <p v-else>Žiadni neaktívni hráči nie sú k dispozícii.</p>
+
                     </div>
                 </div>
 
@@ -77,7 +81,7 @@
                     </div>
 
                     <!-- Ak žiadne tímy -->
-                    <div v-else-if="teams.length === 0">
+                    <div class="list-or-nothing" v-else-if="teams.length === 0">
                         <p>Žiadne tímy neboli zatiaľ vytvorené.</p>
                     </div>
 
@@ -97,9 +101,11 @@
 
                     <!-- Neaktívne tímy -->
                     <div v-if="isAdmin" class="list-or-nothing">
-                        <ParticipantList class="participants" :title="'Neaktívne (vymazané) tímy'"
-                            :participants="inactiveTeams" @view-detail="(id) => goToDetail('teams', id)"
-                            :showProgress="false" :remove="(id) => confirmDeleteParticipant('teams', id)" />
+                        <ParticipantList v-if="inactiveTeams.length > 0" class="participants"
+                            :title="'Neaktívne (vymazané) tímy'" :participants="inactiveTeams"
+                            @view-detail="(id) => goToDetail('teams', id)" :showProgress="false"
+                            :remove="(id) => confirmDeleteParticipant('teams', id)" />
+                        <p v-else>Žiadne neaktívne tími nie sú k dispozícii.</p>
                     </div>
                 </div>
             </div>
@@ -139,7 +145,8 @@ export default {
             participantsPerPage: 5,
             currentPagePlayers: 1,
             currentPageTeams: 1,
-            header: useHeaderStore()
+            header: useHeaderStore(),
+            userStore: useUserStore()
         }
 
     },
@@ -166,7 +173,7 @@ export default {
                     await this.fetchAllInactiveParticipants()
                 }
             } catch (error) {
-                console.error('Chyba pri načítaní hráčov alebo tímov:', error)
+                // console.error('Chyba pri načítaní hráčov alebo tímov:', error)
             } finally {
                 this.loadingPlayers = false
                 this.loadingTeams = false
@@ -183,15 +190,18 @@ export default {
                 this.inactivePlayers = inactivePlayersRes.data
                 this.inactiveTeams = inactiveTeamsRes.data
             } catch (error) {
-                console.error('Chyba pri načítaní neaktívnych hráčov alebo tímov:', error)
+                // console.error('Chyba pri načítaní neaktívnych hráčov alebo tímov:', error)
             }
         },
-        goToDetail(type, id) {
-            if (!this.isLoggedIn) {
-                this.flash.showMessage('Musíte sa prihlásiť.', 'warning');
-                return;
+        async goToDetail(type, id) {
+            try {
+                // Skúsi načítať detail hráča – backend overí prihlásenie a práva
+                await api.get(`/${type}/${id}`);
+                // Ak request prešiel, presmerujeme na detail
+                this.$router.push(`/${type}/${id}`);
+            } catch (error) {
+                // Chyby sa riešia automaticky v axios interceptore
             }
-            this.$router.push(`/${type}/${id}`);
         },
         addPlayer() {
             this.$router.push('/players/create')
@@ -209,7 +219,6 @@ export default {
                 const res = await api.post('/teams/create', payload);
 
                 this.flash.showMessage('Tim bol úspešne vytvoreny.', 'success')
-                console.log('Tim: ' + res.data.id + ' bol úspešne vytvoreny.')
 
                 // Resetovanie výberu hráčov
                 this.newTeam = { player1Id: '', player2Id: '' }
@@ -220,18 +229,6 @@ export default {
                 // ⬇️ Zatvorenie formulára
                 this.toggleCreateForm();
             } catch (err) {
-                if (err.response && err.response.status === 400) {
-                    const data = err.response.data;
-                    if (data.message) {
-                        this.flash.showMessage(data.message, 'warning');
-                    } else {
-                        this.flash.showMessage('Chyba: neplatné dáta.', 'warning');
-                    }
-                } else {
-                    // 👉 Iná ako 400 chyba (500, sieťová chyba atď.)
-                    this.flash.showMessage('Neznáma chyba pri vytváraní tímu.', 'error');
-                    console.error('Chyba pri vytváraní tímu:', err);
-                }
             }
         },
         async deleteParticipant() {
@@ -289,9 +286,6 @@ export default {
         }
     },
     computed: {
-        userStore() {
-            return useUserStore()
-        },
         flash() {
             return useFlashMessageStore();
         },
@@ -342,13 +336,18 @@ export default {
     min-height: 100%;
 }
 
+.list-or-nothing {
+    align-items: center;
+    font-size: 1.5rem;
+}
+
 .participants {
     width: 100%;
     padding-top: 1rem;
     flex-grow: 1;
 }
 
-.create-team-form{
+.create-team-form {
     display: flex;
     flex-direction: column;
     align-items: center;

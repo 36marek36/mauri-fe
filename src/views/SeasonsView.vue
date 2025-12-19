@@ -143,7 +143,7 @@ export default {
         },
         isAdmin() {
             return this.userStore.isAdmin
-        }
+        },
     },
     components: { AppButton, AppModal }
 }
@@ -152,6 +152,11 @@ export default {
 <style scoped>
 .seasons {
     width: 100%;
+}
+
+.list-or-nothing {
+    align-items: center;
+    font-size: 1.5rem;
 }
 
 .seasons-grid {
