@@ -18,7 +18,8 @@ const router = createRouter({
     {
       path: '/participants',
       name: 'participants',
-      component: () => import('../views/ParticipantsView.vue')
+      component: () => import('../views/ParticipantsView.vue'),
+      meta: { hideHeader: true }
     },
     {
       path: '/players/:id',

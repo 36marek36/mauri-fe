@@ -17,19 +17,18 @@
 </template> -->
 <template>
   <div class="header">
-    <Navbar />
     <div class="left-side">
     </div>
     <div class="right-side">
       <div class="header-wrapper">
 
         <div class="headings">
-          <h1>{{ title }}</h1>
+          <h1 class="test">{{ title }}</h1>
           <h2 v-if="subtitle">{{ subtitle }}</h2>
         </div>
 
-        <div class="message">
-          <FlashMessage v-if="hasFlashMessage" />
+        <div class="second">
+        
         </div>
 
 
@@ -43,23 +42,15 @@
 
 <script>
 import { useHeaderStore } from '@/stores/header'
-import { useFlashMessageStore } from '@/stores/flashMessage'
-import FlashMessage from './FlashMessage.vue'
-import Navbar from './Navbar.vue'
 
 export default {
   name: 'AppHeader',
-  components: { FlashMessage, Navbar },
   computed: {
     title() {
       return useHeaderStore().title
     },
     subtitle() {
       return useHeaderStore().subtitle
-    },
-    hasFlashMessage() {
-      const flashStore = useFlashMessageStore()
-      return flashStore.message.trim() !== ''
     }
   }
 }
@@ -80,10 +71,16 @@ export default {
 
 .headings {
   width: 60%;
-  padding-top: 80px;
+  /* padding-top: 80px; */
 }
+/* .test{
+  background: linear-gradient(90deg,#ffd700,red);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+} */
 
-.message {
+.second {
   width: 40%;
 }
 

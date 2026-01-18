@@ -86,7 +86,6 @@ li:not(:last-child) {
 .info {
     display: flex;
     justify-content: space-between;
-    /* meno vľavo, progress vpravo */
     align-items: center;
     gap: 10px;
     width: 75%;
@@ -94,7 +93,7 @@ li:not(:last-child) {
 
 .info span {
     /* meno úplne vľavo */
-    flex-grow: 1;
+    /* flex-grow: 1; */
     /* zaberie celý dostupný priestor */
 }
 
