@@ -31,7 +31,8 @@
                         <div class="my-teams">
                             <h3 class="label">Moje tímy:</h3>
                             <h3>
-                                <div class="value" v-for="team in player.teams" :key="team.id">
+                                <div class="value" v-for="team in player.teams" :key="team.id"
+                                    @click="$router.push('/teams/' + team.id)" style="cursor: pointer;">
                                     {{ team.name }}
                                 </div>
                             </h3>

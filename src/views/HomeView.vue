@@ -167,5 +167,8 @@ export default {
   .currentSeason {
     width: 100%;
   }
+  .league-table td{
+    font-size: 1.1rem;
+  }
 }
 </style>

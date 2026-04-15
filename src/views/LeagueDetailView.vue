@@ -25,29 +25,6 @@
         <!-- 🧱 Hlavné rozloženie -->
         <main v-else class="main-flex-layout">
 
-            <!-- 🎽 Účastníci -->
-            <aside class="participants">
-                <!-- Aktívni hráči/tímy -->
-                <div class="list-or-nothing">
-                    <div class="leagueParticipants">
-                        <ParticipantList v-if="activeParticipants.length"
-                            :title="isSingles ? 'Hráči v lige' : 'Tímy v lige'" :participants="activeParticipants"
-                            :remove="isAdmin ? (id => confirmDeleteParticipant(isSingles ? 'players' : 'teams', id)) : null"
-                            :drop="isAdmin && league.leagueStatus === 'ACTIVE' ? (id => confirmDropParticipant(isSingles ? 'players' : 'teams', id)) : null"
-                            @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
-                        <!-- Neaktívni hráči/tímy -->
-                        <ParticipantList v-if="inactiveParticipants.length"
-                            :title="isSingles ? 'Neaktívni hráči v lige' : 'Neaktívne tímy v lige'"
-                            :participants="inactiveParticipants"
-                            :remove="isAdmin ? (id => confirmDeleteParticipant(isSingles ? 'players' : 'teams', id)) : null"
-                            :drop="isAdmin && league.leagueStatus === 'ACTIVE' ? (id => confirmDropParticipant(isSingles ? 'players' : 'teams', id)) : null"
-                            :showProgress="false"
-                            @view-detail="(participantId) => isSingles ? goToDetail('players', participantId) : goToDetail('teams', participantId)" />
-                        <h3 v-if="!hasParticipants">{{ noParticipantsMessage }}</h3>
-                    </div>
-                </div>
-            </aside>
-
             <!-- 🏓 Zápasy -->
             <section class="matches">
                 <h3 v-if="hasMatches">Zápasy ligy</h3>
@@ -131,7 +108,7 @@
 
             <!-- 📊 Tabuľka -->
             <aside class="standings" v-if="standings.length > 0">
-                <h3 v-if="hasParticipants">Tabuľka</h3>
+                <!-- <h3 v-if="hasParticipants">Tabuľka</h3> -->
 
                 <div class="list-or-nothing">
                     <table class="standings-table" v-if="hasParticipants">
@@ -139,23 +116,38 @@
                             <tr>
                                 <th>#</th>
                                 <th colspan="2">{{ isSingles ? 'Hráč' : 'Tím' }}</th>
+                                <th>Progres</th>
+                                <th>Body</th>
                                 <th>Zápasy</th>
                                 <th>Výhry</th>
                                 <th>Prehry</th>
-                                <th>Prehraté<br>sety</th>
                                 <th>Vyhraté<br>sety</th>
+                                <th v-if="isAdmin">Admin</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(entry, index) in standings" :key="entry.id"
+                            <tr v-for="(entry, index) in standings" :key="entry.id" @click="goToDetail(isSingles ? 'players' : 'teams',
+                                isSingles ? entry.playerId : entry.teamId)" style="cursor: pointer;"
                                 :class="{ dropped: entry.droppedFromLeague }">
                                 <td>{{ index + 1 }}.</td>
-                                <td colspan="2">{{ isSingles ? entry.playerName : entry.teamName }}</td>
+                                <td colspan="2">
+                                    {{ isSingles ? entry.playerName : entry.teamName }}
+                                </td>
+                                <td>
+                                    <CircularProgress :progress="entry.leagueProgress" />
+                                </td>
+                                <td>{{ entry.setsWon }}</td>
                                 <td>{{ entry.matches }}</td>
                                 <td>{{ entry.wins }}</td>
                                 <td>{{ entry.losses }}</td>
                                 <td>{{ entry.setsLost }}</td>
-                                <td>{{ entry.setsWon }}</td>
+
+                                <td v-if="isAdmin">
+                                    <AppButton label="" icon="🔓" type="edit" htmlType="button" title="Odhlásiť hráča z ligy"
+                                        @click.stop="confirmDropParticipant(isSingles ? 'players' : 'teams', isSingles ? entry.playerId : entry.teamId)" />
+                                    <AppButton label="" icon="🗑️" type="delete" htmlType="button" title="Vymazať hráča z ligy"
+                                        @click.stop="confirmDeleteParticipant(isSingles ? 'players' : 'teams', isSingles ? entry.playerId : entry.teamId)" />
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -189,6 +181,8 @@ import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
+
+import CircularProgress from '@/components/CircularProgress.vue';
 
 
 export default {
@@ -251,7 +245,7 @@ export default {
 
             try {
                 const [playersRes, teamsRes] = await Promise.all([
-                    api.get('/players/not-in-any-active-league'),
+                    api.get('/players/not-in-league/'+this.leagueId),
                     api.get('/teams/not-in-league/' + this.leagueId)
                 ]);
 
@@ -640,7 +634,7 @@ export default {
             };
         }
     },
-    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppModal }
+    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppModal, CircularProgress }
 }
 
 </script>
@@ -661,17 +655,6 @@ export default {
     gap: 1.5rem;
     align-items: flex-start;
     flex-wrap: wrap;
-}
-
-/* 🧍‍♂️ Účastníci */
-.participants {
-    flex: 2 1 0;
-    /* flex-grow:2, flex-shrink:1, flex-basis:0 */
-    padding: 1rem;
-}
-
-.leagueParticipants {
-    width: 100%;
 }
 
 /* 🎾 Zápasy */
@@ -747,6 +730,7 @@ export default {
 
 .standings-table {
     width: 100%;
+    border-collapse: collapse;
 }
 
 .standings-table th,
@@ -762,11 +746,16 @@ export default {
     line-height: 1.2;
 }
 
+.standings-table tbody tr:hover {
+    background-color: #363537;
+}
+
 .standings-table tr.dropped td {
     color: #999;
     text-shadow: none;
     font-style: italic;
 }
+
 
 .admin-buttons {
     display: flex;
@@ -780,21 +769,16 @@ export default {
         flex-direction: column;
     }
 
-    .participants,
     .matches,
     .standings {
         width: 100%;
         min-width: unset;
-
     }
 
     /* Voliteľne uprav poradie */
-    .participants {
-        order: 1;
-    }
 
     .standings {
-        order: 2;
+        order: 1;
     }
 
     .matches {
@@ -806,10 +790,10 @@ export default {
         font-size: 1rem;
     }
 
-
     .standings-table th,
     .standings-table td {
         padding: 0.3rem 0.5rem;
+        font-size: 0.9rem;
     }
 
     /* Minimalna sirka tabuľky na mobil aby nebola natiahnuta */

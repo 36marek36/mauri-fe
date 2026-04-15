@@ -23,12 +23,12 @@
       <div class="header-wrapper">
 
         <div class="headings">
-          <h1 class="test">{{ title }}</h1>
-          <h2 v-if="subtitle">{{ subtitle }}</h2>
+          <h1 class="text">{{ title }}</h1>
+          <h2 class="text" v-if="subtitle">{{ subtitle }}</h2>
         </div>
 
         <div class="second">
-        
+
         </div>
 
 
@@ -59,13 +59,12 @@ export default {
 <style scoped>
 .header {
   display: flex;
-  height: 250px;
+  /* height: 250px; */
 }
 
 .header-wrapper {
   display: flex;
   align-items: flex-start;
-  justify-content: center;
   width: 100%;
 }
 
@@ -73,7 +72,8 @@ export default {
   width: 60%;
   /* padding-top: 80px; */
 }
-/* .test{
+
+/* .text {
   background: linear-gradient(90deg,#ffd700,red);
   -webkit-background-clip: text;
   background-clip: text;
@@ -85,7 +85,18 @@ export default {
 }
 
 
-@media (max-width: 768px) {}
+@media (max-width: 768px) {
+  .headings{
+    width: 100%;
+  }
+  .text {
+    text-align: right;
+    padding-right: 2rem;
+  }
+  .second{
+    display: none;
+  }
+}
 </style>
 
 <!-- <template>

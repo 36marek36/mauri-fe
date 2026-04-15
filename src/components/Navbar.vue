@@ -7,18 +7,26 @@
         <FlashMessage v-if="hasFlashMessage" />
       </div>
       <nav class="navbar">
-        <ul>
+        <!-- HAMBURGER -->
+        <button class="hamburger" @click="toggleMobileMenu">
+          <span class="line"></span>
+          <span class="line"></span>
+          <span class="line"></span>
+          <span class="label">Menu</span>
+        </button>
+
+        <ul :class="{ open: showMobileMenu }">
           <li>
-            <RouterLink to="/">Domov</RouterLink>
+            <RouterLink to="/" @click="closeMobileMenu">Domov</RouterLink>
           </li>
           <li v-if="isAdmin">
-            <RouterLink to="/users">Users</RouterLink>
+            <RouterLink to="/users" @click="closeMobileMenu">Users</RouterLink>
           </li>
           <li>
-            <RouterLink to="/participants">Hráči/Tímy</RouterLink>
+            <RouterLink to="/participants" @click="closeMobileMenu">Hráči/Tímy</RouterLink>
           </li>
           <li>
-            <RouterLink to="/seasons">Sezóny</RouterLink>
+            <RouterLink to="/seasons" @click="closeMobileMenu">Sezóny</RouterLink>
           </li>
 
           <li v-if="isLoggedIn" class="user-dropdown">
@@ -35,7 +43,7 @@
           </li>
 
           <li v-else>
-            <RouterLink to="/login">Prihlásenie</RouterLink>
+            <RouterLink to="/login" @click="closeMobileMenu">Prihlásenie</RouterLink>
           </li>
         </ul>
         <LogoutModal :visible="showLogout" @confirm="logout" @cancel="cancelLogout" />
@@ -57,7 +65,8 @@ export default {
   data() {
     return {
       showDropdown: false,
-      showLogout: false
+      showLogout: false,
+      showMobileMenu: false
     }
 
   },
@@ -86,20 +95,30 @@ export default {
     closeDropdown() {
       this.showDropdown = false
     },
+    toggleMobileMenu() {
+      this.showMobileMenu = !this.showMobileMenu
+    },
+    closeMobileMenu() {
+      this.showMobileMenu = false
+    },
     goToCreatePlayer() {
       this.closeDropdown()
+      this.closeMobileMenu()
       this.$router.push('/players/create')
     },
     goToEditPlayer() {
       this.closeDropdown()
+      this.closeMobileMenu()
       this.$router.push(`/players/edit/${this.playerId}`);
     },
     goToPlayerDetail() {
       this.closeDropdown()
+      this.closeMobileMenu()
       this.$router.push(`/players/${this.playerId}`)
     },
     logout() {
       this.closeDropdown()
+      this.closeMobileMenu()
       this.showLogout = false
       this.userStore.logout()
       this.$router.push({ path: '/', query: { message: 'logout' } })
@@ -110,10 +129,12 @@ export default {
     },
     goToChangeUsername() {
       this.closeDropdown();
+      this.closeMobileMenu()
       this.$router.push('/change-username');
     },
     goToChangePassword() {
       this.closeDropdown()
+      this.closeMobileMenu()
       this.$router.push('/change-password')
     }
   },
@@ -129,7 +150,7 @@ export default {
 }
 
 .navbar {
-  width: 50%;
+  width: 100%;
 }
 
 .navbar li {
@@ -197,14 +218,62 @@ export default {
   left: auto;
 }
 
+.hamburger {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-size: 1rem;
+}
+
+.hamburger .line {
+  width: 26px;
+  height: 3px;
+  background: white;
+  border-radius: 2px;
+  display: block;
+}
+
+.hamburger .label {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
 
 @media (max-width: 768px) {
-  .navbar ul {
+  .hamburger {
+    display: flex;
+  }
+
+  .message {
     width: 100%;
   }
 
   .navbar {
-    padding: 0.5rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .navbar ul {
+    position: absolute;
+    top: 60px;
+    right: 10px;
+    flex-direction: column;
+    width: 220px;
+    display: none;
+    padding: 1rem;
+  }
+
+  .navbar ul.open {
+    display: flex;
+  }
+
+  .navbar li {
+    text-align: center;
   }
 }
 </style>

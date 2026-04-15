@@ -151,6 +151,12 @@ export default {
 
 .percentage {
     fill: white;
-    font-size: 0.6em;
+    font-size: 0.4em;
+}
+
+@media (max-width: 768px) {
+    .percentage{
+        font-size: 0.6rem;
+    }
 }
 </style>

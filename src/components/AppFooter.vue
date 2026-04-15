@@ -35,4 +35,10 @@ export default {
   background-repeat: no-repeat;
   filter: drop-shadow(0 4px 20px rgba(238, 128, 3, 0.922));
 }
+@media (max-width: 768px){
+  .logo{
+    max-width: 200px;
+  }
+}
+
 </style>
