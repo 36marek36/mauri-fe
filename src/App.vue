@@ -48,4 +48,10 @@ import AppFooter from './components/AppFooter.vue';
     display: flex;
     flex-direction: column;
 }
+
+@media (max-width: 768px) {
+    .header {
+        height: 100px;
+    }
+}
 </style>
