@@ -6,25 +6,22 @@
         <div class="right-side">
             <div class="details-section">
                 <!--  údaje o hráčovi -->
-                <div class="player-info">
-                    <div>
-                        <h3>{{ player.email || 'email nezadaný' }}</h3>
-                        <h3>{{ player.phone || 'telefón nezadaný' }}</h3>
+                <div class="list-or-nothing">
+                    <div class="player-info">
+                        <div>
+                            <h3 class="value">{{ player.email || 'email nezadaný' }}</h3>
+                            <h3 class="value">{{ player.phone || 'telefón nezadaný' }}</h3>
+                        </div>
+                        <div>
+                            <h3 class="label">Dátum registrácie: </h3>
+                            <h3 class="value">{{ player.registrationDate }}</h3>
+                        </div>
+                        <div v-if="player.deletedDate">
+                            <h3 class="label">Dátum zmazania: </h3>
+                            <h3 class="value">{{ player.deletedDate }}</h3>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="label">Dátum registrácie: </h3>
-                        <h3 class="value">{{ player.registrationDate }}</h3>
-                    </div>
-                    <div v-if="player.deletedDate">
-                        <h3 class="label">Dátum zmazania: </h3>
-                        <h3 class="value">{{ player.deletedDate }}</h3>
-                    </div>
-
-
-
-
                 </div>
-
                 <div class="second">
                     <div class="list-or-nothing">
 
@@ -36,7 +33,6 @@
                                     {{ team.name }}
                                 </div>
                             </h3>
-
                         </div>
 
                         <div class="my-leagues">
@@ -49,22 +45,20 @@
                             </h3>
                         </div>
                     </div>
-
-
                 </div>
-
             </div>
 
             <!-- tabuľka zápasov -->
             <div v-if="leagueId" class="list-or-nothing">
                 <div class="matches-selection">
                     <div class="matches-table">
-                        <h3>{{ activeLeague.leagueName }}</h3>
+                        <h3 class="value">Moje zápasy sezóny</h3>
                         <table>
                             <thead>
                                 <tr>
                                     <th>Domáci</th>
                                     <th>Hosť</th>
+                                    <th>Liga</th>
                                     <th>Výsledok</th>
                                     <th>Kolo</th>
                                     <th>Status</th>
@@ -74,6 +68,7 @@
                                 <tr v-for="match in allMatches" :key="match.id">
                                     <td>{{ match.homePlayer.name }}</td>
                                     <td>{{ match.awayPlayer.name }}</td>
+                                    <td>{{ getLeagueName(match.leagueId) }}</td>
 
                                     <!-- Výsledok -->
                                     <td>
@@ -118,14 +113,9 @@
                         <AddMatchResult v-if="activeMatch" :match="activeMatch" :leagueType="activeLeague.leagueType"
                             @result-submitted="fetchMatchesAndClose" />
                     </div>
-
                 </div>
-
-
             </div>
-
         </div>
-
     </div>
 </template>
 
@@ -215,6 +205,10 @@ export default {
                 console.error('Chyba pri načítavaní štatistík hráča:', error);
             }
         },
+        getLeagueName(leagueId) {
+            const league = this.player.leagues.find(l => l.leagueId === leagueId);
+            return league ? league.leagueName : '';
+        },
         toggleForm(matchId) {
             this.activeMatchId = this.activeMatchId === matchId ? null : matchId;
         },
@@ -283,10 +277,10 @@ export default {
 }
 
 .player-info {
-    list-style: none;
+    /* list-style: none; */
     padding: 0.5rem;
     margin: 0;
-    width: 40%;
+    /* width: 40%; */
 }
 
 .second {
@@ -294,12 +288,13 @@ export default {
     padding: 0.5rem;
 }
 
-.matches-selection {
-    width: 100%;
+.list-or-nothing {
+    align-items: center;
+    justify-content: flex-start;
 }
 
-.list-or-nothing {
-    align-items: flex-start;
+.matches-selection {
+    width: 100%;
 }
 
 .my-teams {
@@ -312,11 +307,11 @@ export default {
 
 .label {
     color: #ffd700;
+    font-size: 1.3rem;
 }
 
 .value {
-    /* border-bottom: 1px solid wheat; */
-    font-size: 1.5rem;
+    font-size: 1.4rem;
 }
 
 .matches-table {
@@ -330,8 +325,7 @@ export default {
 
 .matches-table th,
 .matches-table td {
-    padding: 0.5rem;
-    text-align: center;
+    padding: 0.2rem;
 }
 
 .matches-table th {
@@ -368,15 +362,18 @@ export default {
 }
 
 @media (max-width: 768px) {
+    .label{
+        font-size: 1.5rem;
+    }
 
     .matches-section {
-        order: 1;
+        /* order: 1; */
         width: 100%;
     }
 
     .details-section {
         flex-direction: column;
-        order: 2;
+        /* order: 2; */
     }
 
     .player-info {
