@@ -4,29 +4,46 @@
     </div>
     <div class="right-side">
       <div class="currentSeason">
-        <h3>Sezóna {{ currentSeason.year }}</h3>
+        <h3>Aktuálna sezóna {{ currentSeason.year }}</h3>
+
         <div class="list-or-nothing">
-          <!-- Loading stav -->
+          <!-- Loading -->
           <p v-if="loading">Načítavam aktuálnu sezónu...</p>
 
+          <!-- Error -->
           <p v-else-if="errorMessage">{{ errorMessage }}</p>
 
-          <!-- Ak existujú ligy -->
-          <table v-else-if="hasLeagues" class="league-table">
-            <tbody>
-              <tr v-for="league in currentSeason.leagues" :key="league.leagueId"
-                @click="$router.push('/leagues/' + league.leagueId)" class="league-row">
-                <td>{{ league.leagueName }}</td>
-                <td>
-                  <img v-for="n in leagueTypeLabels[league.leagueType].count" :key="n" src="/images/icon-racket.png"
-                    class="icon" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Content -->
+          <div v-else>
 
-          <!-- Ak sezóna existuje, ale ligy nemá -->
-          <p v-else>Sezóna neobsahuje žiadne ligy.</p>
+            <!-- SINGLES -->
+            <h3 v-if="currentSingleLeagues.length">Dvojhry</h3>
+            <table v-if="currentSingleLeagues.length" class="league-table">
+              <tbody>
+                <tr v-for="league in currentSingleLeagues" :key="league.leagueId"
+                  @click="$router.push('/leagues/' + league.leagueId)" class="league-row">
+                  <td>{{ league.leagueName }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- DOUBLES -->
+            <h3 v-if="currentDoubleLeagues.length">Štvorhry</h3>
+            <table v-if="currentDoubleLeagues.length" class="league-table">
+              <tbody>
+                <tr v-for="league in currentDoubleLeagues" :key="league.leagueId"
+                  @click="$router.push('/leagues/' + league.leagueId)" class="league-row">
+                  <td>{{ league.leagueName }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Empty -->
+            <p v-if="!currentSingleLeagues.length && !currentDoubleLeagues.length">
+              Sezóna neobsahuje žiadne ligy.
+            </p>
+
+          </div>
         </div>
       </div>
 
@@ -96,11 +113,11 @@ export default {
     isLoggedIn() {
       return this.userStore.isLoggedIn
     },
-    leagueTypeLabels() {
-      return {
-        SINGLES: { count: 2 },
-        DOUBLES: { count: 4 },
-      };
+    currentSingleLeagues() {
+      return this.currentSeason.leagues?.filter(l => l.leagueType === 'SINGLES') || []
+    },
+    currentDoubleLeagues() {
+      return this.currentSeason.leagues?.filter(l => l.leagueType === 'DOUBLES') || []
     }
   },
   components: { LoginRegisterForm, CircularProgress }
@@ -114,7 +131,7 @@ export default {
   flex-direction: column;
   width: 50%;
   font-size: 30px;
-  max-height: 500px;
+  max-height: 70vh;
 }
 
 .second {
@@ -124,13 +141,9 @@ export default {
 .league-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
-.icon {
-  height: 1.7em;
-  width: auto;
-  vertical-align: middle;
-}
 
 .league-row {
   font-size: x-large;
@@ -157,17 +170,15 @@ export default {
   font-size: 1.5rem;
 }
 
-.icon-ball {
-  width: 25px;
-  height: 40px;
-  margin-right: 4px;
-}
 
 @media (max-width: 768px) {
   .currentSeason {
     width: 100%;
+    max-height: none;
   }
-  .league-table td{
+  
+
+  .league-table td {
     font-size: 1.1rem;
   }
 }

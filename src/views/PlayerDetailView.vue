@@ -76,7 +76,6 @@
                                             v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
                                             {{ match.result.score1 }} : {{ match.result.score2 }}
                                         </span>
-                                        <!-- <span v-else>-</span> -->
                                         <span v-else-if="(isAdmin || isUserPlayerInMatch(match))">
                                             <AppButton label="Zadať" type="edit" html-type="button"
                                                 @clicked="toggleForm(match.id)"></AppButton>
@@ -233,7 +232,7 @@ export default {
             }
 
             return false;
-        },
+        }
     },
     computed: {
         allMatches() {

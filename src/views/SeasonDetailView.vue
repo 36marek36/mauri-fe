@@ -35,12 +35,86 @@
         <div class="right-side">
             <div class="leagues">
                 <div class="list-or-nothing">
+
+                    <!-- SINGLES -->
+                    <h3>Dvojhry</h3>
+                    <table v-if="singleLeagues.length" class="league-table">
+                        <tbody>
+                            <tr v-for="league in singleLeagues" :key="league.id"
+                                @click="$router.push('/leagues/' + league.leagueId)" class="league-row">
+
+                                <td>{{ league.leagueName }}</td>
+
+                                <td>{{ inflection(league) }}</td>
+
+
+                                <td v-if="season.status === 'ACTIVE'">
+                                    <CircularProgress :progress="league.leagueProgress" />
+                                </td>
+
+
+                                <td v-if="season.status === 'FINISHED'">
+                                    <span v-if="league.leagueStatus === 'FINISHED' && league.winner">
+                                        🏆 {{ league.winner }}
+                                    </span>
+                                </td>
+
+                                <td v-if="isAdmin">
+                                    <AppButton icon="🗑️" type="delete" htmlType="button" :preventPropagation="true"
+                                        @clicked="() => confirmDeleteLeague(league)" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- DOUBLES -->
+                    <h3>Štvorhry</h3>
+                    <table v-if="doubleLeagues.length" class="league-table">
+                        <tbody>
+                            <tr v-for="league in doubleLeagues" :key="league.id"
+                                @click="$router.push('/leagues/' + league.leagueId)" class="league-row">
+
+                                <td>{{ league.leagueName }}</td>
+
+                                <td>{{ inflection(league) }}</td>
+
+
+                                <td v-if="season.status === 'ACTIVE'">
+                                    <CircularProgress :progress="league.leagueProgress" />
+                                </td>
+
+
+                                <td v-if="season.status === 'FINISHED'">
+                                    <span v-if="league.leagueStatus === 'FINISHED' && league.winner">
+                                        🏆 {{ league.winner }}
+                                    </span>
+                                </td>
+
+                                <td v-if="isAdmin">
+                                    <AppButton icon="🗑️" type="delete" htmlType="button" :preventPropagation="true"
+                                        @clicked="() => confirmDeleteLeague(league)" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p v-if="!singleLeagues.length && !doubleLeagues.length">
+                        Sezóna neobsahuje žiadne ligy.
+                    </p>
+
+                </div>
+            </div>
+            <!-- <div class="leagues">
+                <div class="list-or-nothing">
                     <table v-if="hasLeagues" class="league-table">
                         <tbody>
                             <tr v-for="league in season.leagues" :key="league.id"
-                                @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
+                                @click="$router.push('/leagues/' + league.leagueId)" class="league-row">
                                 <td>{{ league.leagueName }}</td>
-                                <td>{{ leagueTypeLabels[league.leagueType] || league.leagueType }}</td>
+                                <td>
+                                    <img v-for="n in leagueTypeLabels[league.leagueType].count" :key="n"
+                                        src="/images/icon-racket.png" class="icon" />
+                                </td>
                                 <td v-if="season.status === 'ACTIVE'">
                                     <CircularProgress :progress="league.leagueProgress" />
                                 </td>
@@ -63,7 +137,7 @@
                     </table>
                     <p v-else>Sezóna neobsahuje žiadne ligy.</p>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 
@@ -245,12 +319,12 @@ export default {
         hasLeagues() {
             return this.season.leagues.length > 0;
         },
-        leagueTypeLabels() {
-            return {
-                SINGLES: '2-HRA',
-                DOUBLES: '4-HRA',
-            };
+        singleLeagues() {
+            return this.season.leagues.filter(l => l.leagueType === 'SINGLES')
         },
+        doubleLeagues() {
+            return this.season.leagues.filter(l => l.leagueType === 'DOUBLES')
+        }
     },
     components: { AppButton, AppModal, CircularProgress }
 }
@@ -264,25 +338,25 @@ export default {
 
 .list-or-nothing {
     align-items: center;
-    font-size: 1.5rem;
 }
 
 .league-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
-
 }
 
 .league-table td {
-    padding: 0.5rem;
+    padding-left: 2rem;
     text-align: left;
-    white-space: nowrap;
-
+    white-space: normal;
 }
 
-/* .league-table td:nth-child(2) {
-    white-space: nowrap;
-} */
+.league-row {
+    font-size: x-large;
+    height: 60px;
+    cursor: pointer;
+}
 
 .league-table tbody tr:hover {
     background-color: #363537;

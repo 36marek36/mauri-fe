@@ -121,7 +121,7 @@
                                 <th>Zápasy</th>
                                 <th>Výhry</th>
                                 <th>Prehry</th>
-                                <th>Vyhraté<br>sety</th>
+                                <th>Prehraté<br>sety</th>
                                 <th v-if="isAdmin">Admin</th>
                             </tr>
                         </thead>
