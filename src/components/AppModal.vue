@@ -4,19 +4,16 @@
             <p>{{ message }}</p>
 
             <div class="buttons">
-                <button type="button" class="confirm" @click="confirm">
-                    🗑️ Áno
-                </button>
-
-                <button type="button" class="cancel" @click="cancel">
-                    ❌ Nie
-                </button>
+                <AppButton label="Áno" icon="🗑️" type="delete" htmlType="button" @clicked.stop="confirm" />
+                <AppButton label="Nie" icon="❌" type="default" htmlType="button" @clicked.stop="cancel" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import AppButton from './AppButton.vue';
+
 export default {
     props: {
         message: { type: String, default: 'Naozaj chcete pokračovať?' },
@@ -36,11 +33,12 @@ export default {
                 this.cancel();
             }
         }
-    }
+    },
+    components: { AppButton }
 }
 </script>
 
-<style scoped>
+<!-- <style scoped>
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -77,9 +75,9 @@ button {
     /* mobile fix */
     touch-action: manipulation;
 }
-</style>
+</style> -->
 
-<!-- <style scoped>
+<style scoped>
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -90,7 +88,6 @@ button {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    z-index: 1000;
 }
 
 .modal {
@@ -101,7 +98,6 @@ button {
     border-radius: 8px;
     min-width: 250px;
     animation: slideDown 0.3s ease-out;
-    z-index: 1001;
 }
 
 .buttons {
@@ -125,4 +121,4 @@ button {
         opacity: 1;
     }
 }
-</style> -->
+</style>

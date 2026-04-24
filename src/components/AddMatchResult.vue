@@ -1,7 +1,7 @@
-<!-- <template>
-    <form @submit.prevent="submitResult" v-if="match" class="match-form">
+<template>
+    <form @submit.prevent="submitResult" v-show="match" class="match-form">
 
-        Skreč
+        <!-- Skreč -->
 
         <div class="form-group">
             <label>{{ leagueType === 'SINGLES' ? 'Skrečovaný hráč:' : 'Skrečovaný tím:' }}</label>
@@ -28,7 +28,7 @@
             </select>
         </div>
 
-        Sety
+        <!-- Sety -->
 
         <div v-if="!formData.scratchedId">
             <fieldset v-for="(set, index) in formData.setScores" :key="index" class="set-fieldset">
@@ -54,7 +54,7 @@
             </div>
         </div>
 
-        Odoslanie
+        <!-- Odoslanie -->
 
         <div class="text-center submit-btn">
             <AppButton label="Odoslať výsledok" type="create" htmlType="submit" icon="✅" />
@@ -111,7 +111,7 @@ export default {
             this.showConfirmModal = true;
         },
 
-        volá sa pri potvrdení modalu
+        // volá sa pri potvrdení modalu
         async onModalConfirm() {
             this.showConfirmModal = false;
 
@@ -129,175 +129,10 @@ export default {
     },
     components: { AppButton, AppModal }
 };
-</script> -->
-
-<template>
-    <div v-if="match" class="match-wrapper">
-
-        <!-- FORM -->
-        <form @submit.prevent="submitResult" class="match-form">
-
-            <!-- Skreč -->
-            <div class="form-group">
-                <label>
-                    {{ leagueType === 'SINGLES' ? 'Skrečovaný hráč:' : 'Skrečovaný tím:' }}
-                </label>
-
-                <select v-model.number="formData.scratchedId">
-                    <option :value="null">-- vyberte --</option>
-
-                    <template v-if="leagueType === 'SINGLES'">
-                        <option :value="match.homePlayer?.id">
-                            {{ match.homePlayer?.name }}
-                        </option>
-                        <option :value="match.awayPlayer?.id">
-                            {{ match.awayPlayer?.name }}
-                        </option>
-                    </template>
-
-                    <template v-else>
-                        <option :value="match.homeTeam?.id">
-                            {{ match.homeTeam?.name }} (domáci)
-                        </option>
-                        <option :value="match.awayTeam?.id">
-                            {{ match.awayTeam?.name }} (hosť)
-                        </option>
-                    </template>
-                </select>
-            </div>
-
-            <!-- Sety -->
-            <div v-if="!formData.scratchedId">
-                <fieldset
-                    v-for="(set, index) in formData.setScores"
-                    :key="index"
-                    class="set-fieldset"
-                >
-                    <legend>Set {{ index + 1 }}</legend>
-
-                    <input type="number" v-model.number="set.score1" />
-                    <input type="number" v-model.number="set.score2" />
-
-                    <button type="button" @click="removeSet(index)">
-                        ❌ Odstrániť set
-                    </button>
-                </fieldset>
-
-                <button type="button" @click="addSet">
-                    ➕ Pridať set
-                </button>
-            </div>
-
-            <!-- Submit -->
-            <div class="submit-btn">
-                <button type="submit">
-                    ✅ Odoslať výsledok
-                </button>
-            </div>
-        </form>
-
-        <!-- 🔥 MODAL MIMO FORM LOGIKY -->
-        <AppModal
-            :visible="showConfirmModal"
-            message="Naozaj chcete odoslať výsledok tohto zápasu?"
-            @confirm="onModalConfirm"
-            @cancel="onModalCancel"
-        />
-    </div>
-</template>
-
-<script>
-import api from '@/axios-interceptor';
-import AppModal from './AppModal.vue';
-import { useFlashMessageStore } from '@/stores/flashMessage';
-
-export default {
-    props: {
-        match: Object,
-        leagueType: String
-    },
-    emits: ['result-submitted'],
-
-    data() {
-        return {
-            formData: {
-                scratchedId: null,
-                setScores: [{ score1: 0, score2: 0 }]
-            },
-            showConfirmModal: false
-        };
-    },
-
-    computed: {
-        flash() {
-            return useFlashMessageStore();
-        }
-    },
-
-    methods: {
-        addSet() {
-            this.formData.setScores.push({ score1: 0, score2: 0 });
-        },
-
-        removeSet(index) {
-            this.formData.setScores.splice(index, 1);
-        },
-
-        // 1. krok – otvorenie modalu
-        submitResult() {
-            this.showConfirmModal = true;
-        },
-
-        // 2. krok – potvrdenie
-        async onModalConfirm() {
-            this.showConfirmModal = false;
-
-            try {
-                await api.patch(
-                    `/matches/${this.match.id}/result`,
-                    this.formData
-                );
-
-                this.$emit('result-submitted', this.match.id);
-
-            } catch (err) {
-                const msg =
-                    err.response?.data?.message ||
-                    'Nepodarilo sa odoslať výsledok.';
-
-                this.flash.showMessage(msg, 'error');
-            }
-        },
-
-        // zrušenie
-        onModalCancel() {
-            this.showConfirmModal = false;
-        }
-    },
-
-    components: {
-        AppModal
-    }
-};
 </script>
 
+
 <style scoped>
-.match-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.set-fieldset {
-    margin-bottom: 10px;
-}
-
-.submit-btn {
-    text-align: center;
-}
-</style>
-
-<!-- <style scoped>
 .match-form {
     max-width: 600px;
     margin: 0 auto;
@@ -329,4 +164,4 @@ export default {
 .submit-btn {
     margin-top: 1rem;
 }
-</style> -->
+</style>
