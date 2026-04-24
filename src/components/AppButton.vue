@@ -1,5 +1,6 @@
 <template>
-  <button class="app-button" :class="buttonClass" @click="handleClick" :disabled="disabled" :type="htmlType">
+  <button class="app-button" :class="buttonClass" @click="handleClick" @touchend="handleClick" :disabled="disabled"
+    :type="htmlType">
     <span v-if="icon" class="icon">{{ icon }}</span>
     <span>{{ label }}</span>
   </button>
@@ -81,7 +82,7 @@ export default {
 /* CREATE button – zelený */
 .app-button--create {
   background-color: #4CAF50;
-  
+
 }
 
 .app-button--create:hover {

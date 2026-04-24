@@ -1,11 +1,11 @@
 <template>
-    <div v-if="visible" class="modal-overlay" @click="onOverlayClick">
+    <div v-if="visible" class="modal-overlay" @click.self="cancel">
         <div class="modal">
             <p>{{ message }}</p>
 
             <div class="buttons">
-                <AppButton label="Áno" icon="🗑️" type="delete" htmlType="button" @clicked.stop="confirm" />
-                <AppButton label="Nie" icon="❌" type="default" htmlType="button" @clicked.stop="cancel" />
+                <AppButton label="Áno" icon="🗑️" type="delete" htmlType="button" @clicked="confirm" />
+                <AppButton label="Nie" icon="❌" type="default" htmlType="button" @clicked="cancel" />
             </div>
         </div>
     </div>
@@ -26,12 +26,6 @@ export default {
         },
         cancel() {
             this.$emit('cancel');
-        },
-        onOverlayClick(event) {
-            // klik mimo modalu
-            if (!event.target.closest('.modal')) {
-                this.cancel();
-            }
         }
     },
     components: { AppButton }
