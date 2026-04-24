@@ -3,8 +3,8 @@
         <div class="modal">
             <p>{{ message }}</p>
             <div class="buttons">
-                <AppButton label="Áno" icon="🗑️" type="delete" htmltype="button" @clicked="confirm" />
-                <AppButton label="Nie" icon="❌" type="default" htmltype="button" @clicked="cancel" />
+                <AppButton label="Áno" icon="🗑️" type="delete" htmlType="button" @clicked.stop="confirm" />
+                <AppButton label="Nie" icon="❌" type="default" htmlType="button" @clicked.stop="cancel" />
             </div>
         </div>
     </div>
