@@ -28,6 +28,9 @@
           <li>
             <RouterLink to="/seasons" @click="closeMobileMenu">Sezóny</RouterLink>
           </li>
+          <li>
+            <RouterLink to="/aboutus" @click="closeMobileMenu">O nás</RouterLink>
+          </li>
 
           <li v-if="isLoggedIn" class="user-dropdown">
             <a class="username" @click="toggleDropdown">{{ userStore.user.username }}</a>

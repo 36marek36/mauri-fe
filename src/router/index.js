@@ -11,6 +11,12 @@ const router = createRouter({
       // meta: { hideHeader: true }
     },
     {
+      path: '/aboutus',
+      name: 'aboutus',
+      component: () => import('../views/AboutUs.vue'),
+      meta:{hideHeader:true}
+    },
+    {
       path: '/users',
       name: 'users',
       component: () => import('../views/UsersView.vue'),
