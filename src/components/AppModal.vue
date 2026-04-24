@@ -1,17 +1,20 @@
 <template>
-    <div v-if="visible" class="modal-overlay">
-        <div class="modal">
+    <div v-if="visible" class="modal-overlay" @click.self="cancel">
+        <div class="modal" @click.stop>
             <p>{{ message }}</p>
             <div class="buttons">
-                <AppButton label="Áno" icon="🗑️" type="delete" htmlType="button" @clicked.stop="confirm" />
-                <AppButton label="Nie" icon="❌" type="default" htmlType="button" @clicked.stop="cancel" />
+                <button type="button" class="confirm" @click="confirm">
+                    🗑️ Áno
+                </button>
+                <button type="button" class="cancel" @click="cancel">
+                    ❌ Nie
+                </button>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import AppButton from './AppButton.vue';
 
 export default {
     props: {
@@ -26,12 +29,11 @@ export default {
         cancel() {
             this.$emit('cancel');
         }
-    },
-    components: { AppButton }
+    }
 }
 </script>
 
-<style scoped>
+<!-- <style scoped>
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -42,6 +44,7 @@ export default {
     display: flex;
     align-items: flex-start;
     justify-content: center;
+    z-index: 1000;
 }
 
 .modal {
@@ -52,6 +55,7 @@ export default {
     border-radius: 8px;
     min-width: 250px;
     animation: slideDown 0.3s ease-out;
+    z-index: 1001;
 }
 
 .buttons {
@@ -74,5 +78,48 @@ button {
         transform: translateY(0);
         opacity: 1;
     }
+}
+</style> -->
+<style scoped>
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    z-index: 9999;
+
+    /* 🔴 kľúčové pre mobile */
+    pointer-events: auto;
+}
+
+.modal {
+    margin-top: 100px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+
+    z-index: 10000;
+
+    /* 🔴 fix pre iOS */
+    position: relative;
+}
+
+.buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+button {
+    padding: 10px 16px;
+    font-size: 16px;
+
+    /* 🔴 mobile fix */
+    touch-action: manipulation;
 }
 </style>
