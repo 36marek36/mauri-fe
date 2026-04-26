@@ -85,15 +85,16 @@ export default {
   text-decoration: none;
   color: inherit;
   font-size: 2rem;
+    filter: drop-shadow(0 4px 5px rgb(255, 0, 0));
 }
 
 .bottom-text {
   width: 100%;
   display: flex;
   justify-content: flex-end;
-
-  padding: 10px 20px;
   filter: drop-shadow(0 4px 5px rgb(255, 0, 0));
+  padding: 10px 20px;
+
 }
 
 .facebook-link {
@@ -107,6 +108,7 @@ export default {
   height: 40px;
   cursor: pointer;
   transition: transform 0.2s ease;
+  filter: drop-shadow(0 4px 5px rgb(0, 26, 255));
 }
 
 .facebook-link img:hover {

@@ -142,7 +142,7 @@ export default {
             },
             showDeleteModal: false,
             participant: null,
-            participantsPerPage: 5,
+            participantsPerPage: 10,
             currentPagePlayers: 1,
             currentPageTeams: 1,
             header: useHeaderStore(),
@@ -339,7 +339,7 @@ export default {
 
 .list-or-nothing {
     align-items: center;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
 }
 
 .participants {
@@ -371,6 +371,10 @@ export default {
 }
 
 @media (max-width: 768px) {
+    .list-or-nothing {
+        font-size: 0.9rem;
+    }
+
     .participants-columns {
         flex-direction: column;
         gap: 1.5rem;

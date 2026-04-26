@@ -48,45 +48,52 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="match in allMatches" :key="match.id">
-                                    <td>{{ match.homeTeam.name }}</td>
-                                    <td>{{ match.awayTeam.name }}</td>
-                                    <td>{{ getLeagueName(match.leagueId) }}</td>
-                                    <td>
-                                        <span
-                                            v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
-                                            {{ match.result.score1 }} : {{ match.result.score2 }}
-                                        </span>
-                                        <span v-else-if="(isAdmin || isUserPlayerInMatch(match))">
-                                            <AppButton label="Zadať" type="edit" html-type="button"
-                                                @clicked="toggleForm(match.id)"></AppButton>
-                                        </span>
-                                        <span v-else>-</span>
-                                    </td>
-                                    <td>{{ match.roundNumber }}</td>
-                                    <td>
-                                        <span :class="{
-                                            'badge-finished': match.status === 'FINISHED',
-                                            'badge-cancelled': match.status === 'CANCELLED',
-                                            'badge-scratched': match.status === 'SCRATCHED',
-                                            'badge-pending': !['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status)
-                                        }">
-                                            {{
-                                                match.status === 'FINISHED'
-                                                    ? 'Odohratý'
-                                                    : match.status === 'CANCELLED'
-                                                        ? 'Zrušený'
-                                                        : match.status === 'SCRATCHED'
-                                                            ? 'Skrečovaný'
-                                                            : 'Neodohratý'
-                                            }}
-                                        </span>
-                                    </td>
-                                </tr>
+                                <template v-for="match in allMatches" :key="match.id">
+                                    <tr>
+                                        <td>{{ match.homeTeam.name }}</td>
+                                        <td>{{ match.awayTeam.name }}</td>
+                                        <td>{{ getLeagueName(match.leagueId) }}</td>
+                                        <td>
+                                            <span
+                                                v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
+                                                {{ match.result.score1 }} : {{ match.result.score2 }}
+                                            </span>
+                                            <span v-else-if="(isAdmin || isUserPlayerInMatch(match))">
+                                                <AppButton label="Zadať" type="edit" html-type="button"
+                                                    @clicked="toggleForm(match.id)"></AppButton>
+                                            </span>
+                                            <span v-else>-</span>
+                                        </td>
+                                        <td>{{ match.roundNumber }}</td>
+                                        <td>
+                                            <span :class="{
+                                                'badge-finished': match.status === 'FINISHED',
+                                                'badge-cancelled': match.status === 'CANCELLED',
+                                                'badge-scratched': match.status === 'SCRATCHED',
+                                                'badge-pending': !['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status)
+                                            }">
+                                                {{
+                                                    match.status === 'FINISHED'
+                                                        ? 'Odohratý'
+                                                        : match.status === 'CANCELLED'
+                                                            ? 'Zrušený'
+                                                            : match.status === 'SCRATCHED'
+                                                                ? 'Skrečovaný'
+                                                                : 'Neodohratý'
+                                                }}
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                    <tr v-if="activeMatchId === match.id">
+                                        <td colspan="6" class="form-row">
+                                            <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
+                                                @result-submitted="fetchMatchesAndClose" />
+                                        </td>
+                                    </tr>
+                                </template>
                             </tbody>
                         </table>
-                        <AddMatchResult v-if="activeMatch" :match="activeMatch" :leagueType="activeLeague.leagueType"
-                            @result-submitted="fetchMatchesAndClose" />
                     </div>
                 </div>
             </div>
@@ -205,9 +212,9 @@ export default {
         leagueId() {
             return this.activeLeague?.leagueId || null;
         },
-        activeMatch() {
-            return this.allMatches.find(m => m.id === this.activeMatchId)
-        },
+        // activeMatch() {
+        //     return this.allMatches.find(m => m.id === this.activeMatchId)
+        // },
         isSingles() {
             return this.activeLeague.leagueType === 'SINGLES';
         },
@@ -286,6 +293,12 @@ export default {
     font-size: 1rem;
     color: #ffd700;
     line-height: 1.2;
+}
+
+
+
+.form-row>* {
+    width: 70vw;
 }
 
 .badge-finished {

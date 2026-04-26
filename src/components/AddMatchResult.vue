@@ -1,35 +1,8 @@
 <template>
+
     <form @submit.prevent="submitResult" v-show="match" class="match-form">
 
-        <!-- Skreč -->
-
-        <div class="form-group">
-            <label>{{ leagueType === 'SINGLES' ? 'Skrečovaný hráč:' : 'Skrečovaný tím:' }}</label>
-            <select v-model="formData.scratchedId">
-                <option value="">-- vyberte --</option>
-
-                <template v-if="leagueType === 'SINGLES'">
-                    <option :value="match.homePlayer?.id">
-                        {{ match.homePlayer?.name }}
-                    </option>
-                    <option :value="match.awayPlayer?.id">
-                        {{ match.awayPlayer?.name }}
-                    </option>
-                </template>
-
-                <template v-else>
-                    <option :value="match.homeTeam?.id">
-                        {{ match.homeTeam?.name }} (domáci tím)
-                    </option>
-                    <option :value="match.awayTeam?.id">
-                        {{ match.awayTeam?.name }} (hosťujúci tím)
-                    </option>
-                </template>
-            </select>
-        </div>
-
-        <!-- Sety -->
-
+        <!-- 🔹 SETY -->
         <div v-if="!formData.scratchedId">
             <fieldset v-for="(set, index) in formData.setScores" :key="index" class="set-fieldset">
                 <legend>Set {{ index + 1 }}</legend>
@@ -49,16 +22,64 @@
                         @clicked="removeSet(index)" />
                 </div>
             </fieldset>
-            <div class="text-center">
-                <AppButton label="Pridať set" type="default" htmlType="button" icon="➕" @clicked="addSet" />
-            </div>
         </div>
 
-        <!-- Odoslanie -->
+        <!-- 🔹 PRIDAŤ SET -->
+        <div v-if="!formData.scratchedId" class="text-center">
+            <AppButton label="Pridať set" type="default" htmlType="button" icon="➕" @clicked="addSet" />
+        </div>
 
+        <!-- 🔹 SKREČ -->
+        <div class="form-group">
+
+            <!-- TLAČIDLO -->
+            <div v-if="!showScratchSelect">
+                <AppButton label="Skreč zápasu" type="delete" htmlType="button" icon="⚠️"
+                    @clicked="showScratchSelect = true" />
+            </div>
+
+            <!-- SELECT sa zobrazí až po kliknutí -->
+            <div v-else>
+                <select v-model="formData.scratchedId">
+
+                    <option value="">-- vyberte --</option>
+
+                    <template v-if="leagueType === 'SINGLES'">
+                        <option :value="match.homePlayer?.id">
+                            {{ match.homePlayer?.name }}
+                        </option>
+                        <option :value="match.awayPlayer?.id">
+                            {{ match.awayPlayer?.name }}
+                        </option>
+                    </template>
+
+                    <template v-else>
+                        <option :value="match.homeTeam?.id">
+                            {{ match.homeTeam?.name }} (domáci tím)
+                        </option>
+                        <option :value="match.awayTeam?.id">
+                            {{ match.awayTeam?.name }} (hosťujúci tím)
+                        </option>
+                    </template>
+
+                </select>
+
+                <!-- Zrušiť -->
+                <div style="margin-top: 0.5rem;">
+                    <AppButton label="Zrušiť skreč" type="default" htmlType="button" @clicked="
+                        showScratchSelect = false;
+                    formData.scratchedId = null;
+                    " />
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 🔹 ODOSLANIE -->
         <div class="text-center submit-btn">
             <AppButton label="Odoslať výsledok" type="create" htmlType="submit" icon="✅" />
         </div>
+
     </form>
     <AppModal :visible="showConfirmModal" :message="'Naozaj chcete odoslať výsledok tohto zápasu?'"
         @confirm="onModalConfirm" @cancel="onModalCancel" />
@@ -82,7 +103,8 @@ export default {
                 scratchedId: null,
                 setScores: [{ score1: 0, score2: 0 }]
             },
-            showConfirmModal: false
+            showConfirmModal: false,
+            showScratchSelect: false
         };
     },
     computed: {
@@ -109,6 +131,16 @@ export default {
         // volá sa pri odoslaní formulára
         submitResult() {
             this.showConfirmModal = true;
+
+            this.$nextTick(() => {
+                const modal = document.querySelector('.modal')
+                if (modal) {
+                    modal.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    })
+                }
+            })
         },
 
         // volá sa pri potvrdení modalu

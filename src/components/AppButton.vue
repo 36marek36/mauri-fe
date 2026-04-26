@@ -1,4 +1,6 @@
 <template>
+  <!-- miesto @touchend vyskusat -->
+  <!-- @pointerup="handleClick" -->
   <button class="app-button" :class="buttonClass" @click="handleClick" @touchend="handleClick" :disabled="disabled"
     :type="htmlType">
     <span v-if="icon" class="icon">{{ icon }}</span>

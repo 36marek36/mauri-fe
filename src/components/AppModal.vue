@@ -4,8 +4,8 @@
             <p>{{ message }}</p>
 
             <div class="buttons">
-                <AppButton label="Áno" icon="🗑️" type="delete" htmlType="button" @clicked="confirm" />
-                <AppButton label="Nie" icon="❌" type="default" htmlType="button" @clicked="cancel" />
+                <AppButton label="Áno" icon="✅" type="create" htmlType="button" @clicked.stop="confirm" />
+                <AppButton label="Nie" icon="❌" type="delete" htmlType="button" @clicked.stop="cancel" />
             </div>
         </div>
     </div>
@@ -74,24 +74,27 @@ button {
 <style scoped>
 .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
 }
 
 .modal {
-    margin-top: 100px;
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(255, 255, 255, 0.5);
     padding: 20px;
     border: 1px solid red;
     border-radius: 8px;
     min-width: 250px;
     animation: slideDown 0.3s ease-out;
+    width: 400px;
+}
+
+.modal p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
 .buttons {
