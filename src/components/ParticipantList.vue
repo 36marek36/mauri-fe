@@ -13,6 +13,8 @@
                             @clicked="() => drop(participant.id)" />
                         <AppButton v-if="remove" label="" icon="🗑️" type="delete" htmlType="button"
                             @clicked="() => remove(participant.id)" />
+                        <AppButton v-if="edit" label="" icon="✏️" type="edit" htmlType="button"
+                            @clicked="() => edit(participant.id)" />
                     </div>
                 </div>
             </li>
@@ -45,6 +47,10 @@ export default {
         drop: {
             type: Function,
             default: null
+        },
+        edit: {
+            type: Function,
+            default: null
         }
     },
     methods: {
@@ -60,11 +66,9 @@ export default {
 <style scoped>
 ul {
     list-style-type: none;
-
 }
 
 li {
-
     padding: .3em .6em;
     cursor: pointer;
 }
@@ -91,20 +95,12 @@ li:not(:last-child) {
     width: 75%;
 }
 
-.info span {
-    /* meno úplne vľavo */
-    /* flex-grow: 1; */
-    /* zaberie celý dostupný priestor */
-}
-
-
-
 .actions {
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     /* tlačidlá pod sebou */
     gap: 0.5em;
-    width: 20%;
+    /* width: 20%; */
     align-items: flex-end;
     /* tlačidlá zarovná napravo */
 }

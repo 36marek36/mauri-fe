@@ -32,7 +32,7 @@
             </div>
 
             <!-- Zápasy -->
-            <div v-if="leagueId" class="list-or-nothing">
+            <div v-if="leagueId" class="list-or-nothing matches-list">
                 <div class="matches-selection">
                     <div class="matches-table">
                         <h3 class="value">Tímové zápasy sezóny</h3>
@@ -41,8 +41,8 @@
                                 <tr>
                                     <th>Domáci</th>
                                     <th>Hostia</th>
-                                    <th>Liga</th>
                                     <th>Výsledok</th>
+                                    <th>Liga</th>
                                     <th>Kolo</th>
                                     <th>Status</th>
                                 </tr>
@@ -50,22 +50,26 @@
                             <tbody>
                                 <template v-for="match in allMatches" :key="match.id">
                                     <tr>
-                                        <td>{{ match.homeTeam.name }}</td>
-                                        <td>{{ match.awayTeam.name }}</td>
-                                        <td>{{ getLeagueName(match.leagueId) }}</td>
-                                        <td>
+                                        <td data-label="Domáci">{{ match.homeTeam.name }}</td>
+                                        <td data-label="Hostia">{{ match.awayTeam.name }}</td>
+
+                                        <td data-label="Výsledok">
                                             <span
                                                 v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
                                                 {{ match.result.score1 }} : {{ match.result.score2 }}
                                             </span>
                                             <span v-else-if="(isAdmin || isUserPlayerInMatch(match))">
-                                                <AppButton label="Zadať" type="edit" html-type="button"
-                                                    @clicked="toggleForm(match.id)"></AppButton>
+                                                <!-- <AppButton label="Zadať" type="edit" html-type="button"
+                                                    @clicked="toggleForm(match.id)"></AppButton> -->
+                                                <AppButton :label="activeMatchId === match.id ? 'Zavrieť' : 'Zadať'"
+                                                    :type="activeMatchId === match.id ? 'delete' : 'edit'"
+                                                    html-type="button" @clicked="toggleForm(match.id)" />
                                             </span>
                                             <span v-else>-</span>
                                         </td>
-                                        <td>{{ match.roundNumber }}</td>
-                                        <td>
+                                        <td data-label="Liga">{{ getLeagueName(match.leagueId) }}</td>
+                                        <td data-label="Kolo">{{ match.roundNumber }}</td>
+                                        <td data-label="Status">
                                             <span :class="{
                                                 'badge-finished': match.status === 'FINISHED',
                                                 'badge-cancelled': match.status === 'CANCELLED',
@@ -84,11 +88,12 @@
                                             </span>
                                         </td>
                                     </tr>
-
                                     <tr v-if="activeMatchId === match.id">
-                                        <td colspan="6" class="form-row">
-                                            <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
-                                                @result-submitted="fetchMatchesAndClose" />
+                                        <td colspan="6">
+                                            <div>
+                                                <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
+                                                    @result-submitted="fetchMatchesAndClose" />
+                                            </div>
                                         </td>
                                     </tr>
                                 </template>
@@ -280,6 +285,7 @@ export default {
 .matches-table table {
     border-collapse: collapse;
     width: 100%;
+    /* table-layout: fixed; */
 }
 
 .matches-table th,
@@ -295,10 +301,9 @@ export default {
     line-height: 1.2;
 }
 
-
-
-.form-row>* {
+.matches-list .form-row>* {
     width: 70vw;
+    margin: 0;
 }
 
 .badge-finished {
@@ -333,13 +338,47 @@ export default {
         padding-right: 0.3rem;
     }
 
-    .matches-table th,
+    /* .matches-table th,
     .matches-table td {
         font-size: 0.9rem;
     }
 
     .matches-table table {
         min-width: 600px;
+    } */
+
+    .matches-table table,
+    .matches-table thead,
+    .matches-table tbody,
+    .matches-table th,
+    .matches-table td,
+    .matches-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .matches-table thead {
+        display: none;
+    }
+
+    .matches-table tr {
+        margin-bottom: 1rem;
+        background: #1e1e1e;
+        padding: 0.8rem;
+        border-radius: 8px;
+    }
+
+    .matches-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.3rem 0;
+        border: none;
+        font-size: 0.9rem;
+    }
+
+    .matches-table td::before {
+        content: attr(data-label);
+        color: #ffd700;
     }
 
 }

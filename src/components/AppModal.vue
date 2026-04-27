@@ -77,8 +77,9 @@ button {
     inset: 0;
     background: rgba(0, 0, 0, 0.9);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    padding-top: 50px;
 }
 
 .modal {

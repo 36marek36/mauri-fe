@@ -16,33 +16,67 @@
 <template>
   <div class="main-layout">
     <div class="left-side">
+
     </div>
     <div class="right-side">
-    </div>
-  </div>
-  <div class="bottom-text">
-    <div class="contact-info">
-      <p>
-        Nájdete nás na adrese:
-        <a href="https://www.google.com/maps/search/?api=1&query=29.augusta+92+Handlová" target="_blank"
-          class="address-link">
-          29.augusta 92, Handlová
-        </a>
-      </p>
+      <div class="list-or-nothing">
+        <div class="hero-title">Handlovská tenisová liga</div>
+        <div class="hero-subtitle">Tenis, ktorý spája ľudí, mestá a príbehy</div>
 
-      <p>
-        Pre viac informácií sledujte náš
-        <a href="https://www.facebook.com/profile.php?id=100034650532111" target="_blank" rel="noopener noreferrer"
-          class="facebook-link">
-          <img src="/images/facebook.png" alt="Facebook" />
-        </a>
-        acebook
-      </p>
+        <div class="hero-list">
+          <p>Handlovská tenisová liga vznikla v roku 2020 ako sen niekoľkých tenisových nadšencov v Handlovej. To, čo sa
+            spočiatku zdalo len ako odvážna myšlienka, sa vďaka vôli, nadšeniu a priateľstvu rýchlo zmenilo na realitu.
+            Už
+            v máji 2020 odštartoval prvý ročník a začal sa písať príbeh ligy, ktorá dnes patrí medzi stabilné a
+            rešpektované amatérske tenisové súťaže v regióne.</p>
+          <p>
+            Prvé ročníky sa odohrávali na kurtoch s tenisovým kobercom, no v roku 2022 prišla veľká výzva –
+            <strong>kompletná rekonštrukcia troch tenisových kurtov.</strong> Všetko vlastnými silami. Tenisti sami
+            odstránili staré povrchy, vyrovnali podklad a naviezli takmer <strong> 40 ton antuky.</strong> Výsledkom sú
+            kurty, ktoré dnes patria medzi <strong>
+              najkvalitnejšie a najkrajšie v okrese.
+            </strong>
+          </p>
+          <p>Každým rokom liga rastie – počtom hráčov, kvalitou aj športovou úrovňou. <strong>Aktuálne má Handlovská
+              tenisová liga už viac ako 60 aktívnych hráčov.</strong>
+          </p>
+          <p>
+            V roku 2026 odštartuje už <strong>7. ročník,</strong>do ktorého sa okrem Handlovej pravidelne zapájajú aj
+            tenisti z <strong>Prievidze, Novák, Žiaru nad Hronom, Žarnovice, Kremnice či Ráztočna.</strong>
+          </p>
+          <p>
+            Naša vášeň pre tenis presahuje bežné hranice. Dôkazom je aj <strong>certifikát za organizáciu Handlovského
+              tenisového maratónu,</strong> ktorý sa 12. septembra 2021 hral neuveriteľných <strong>24 hodín bez
+              prerušenia.</strong>
+          </p>
+          <p>Ak miluješ tenis, fair play a komunitu skvelých ľudí, <strong>budeme radi, ak sa staneš súčasťou našej
+              tenisovej rodiny.</strong></p>
+        </div>
+      </div>
+      <div class="contact-info">
+        <p>
+          Nájdete nás na adrese:
+          <a href="https://www.google.com/maps/search/?api=1&query=29.augusta+92+Handlová" target="_blank"
+            class="address-link">
+            29.augusta 92, Handlová
+          </a>
+        </p>
+
+        <p>
+          Pre viac informácií sledujte náš
+          <a href="https://www.facebook.com/profile.php?id=100034650532111" target="_blank" rel="noopener noreferrer"
+            class="facebook-link">
+            <img src="/images/facebook.png" alt="Facebook" />
+          </a>
+          acebook
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+
 
 export default {
   name: 'About Us'
@@ -52,28 +86,18 @@ export default {
 
 <style scoped>
 .right-side {
-  height: 50vh;
-  background: url('/images/aboutus.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  padding-top: 5rem;
+}
 
-  -webkit-mask-image: radial-gradient(ellipse at 50% 50%,
-      black 40%,
-      transparent 70%);
-
-  mask-image: radial-gradient(ellipse at 50% 50%,
-      black 40%,
-      transparent 70%);
+.list-or-nothing {
+  color: white;
 }
 
 .contact-info {
-  display: flex;
   flex-direction: column;
-  gap: 15px;
   font-size: 30px;
-  /* line-height: 1.5; */
-  padding-right: 50px;
 }
 
 .contact-info p {
@@ -85,17 +109,9 @@ export default {
   text-decoration: none;
   color: inherit;
   font-size: 2rem;
-    filter: drop-shadow(0 4px 5px rgb(255, 0, 0));
-}
-
-.bottom-text {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
   filter: drop-shadow(0 4px 5px rgb(255, 0, 0));
-  padding: 10px 20px;
-
 }
+
 
 .facebook-link {
   display: inline-flex;
@@ -115,27 +131,49 @@ export default {
   transform: scale(1.5);
 }
 
-@media (max-width: 768px) {
-  .right-side {
-    -webkit-mask-image: radial-gradient(ellipse at 50% 50%,
-        black 50%,
-        transparent 75%);
+.hero-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  width: 100%;
+}
 
-    mask-image: radial-gradient(ellipse at 50% 50%,
-        black 50%,
-        transparent 75%);
+.hero-subtitle {
+  text-align: center;
+  font-size: 1.3rem;
+  opacity: 0.8;
+  width: 100%;
+}
+
+.hero-list {
+  text-align: center;
+  list-style: none;
+  padding: 10px;
+}
+
+strong {
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+
+  .hero-title {
+    font-size: 1.2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .hero-list {
+  font-size: 0.9rem;
   }
 
   .contact-info {
     font-size: 20px;
     text-align: right;
-    align-items: flex-end; 
+    align-items: flex-end;
     padding-right: 1px;
-  }
-
-  .bottom-text {
-    flex-direction: column;
-    padding-top: 2rem;
   }
 
   .address-link {

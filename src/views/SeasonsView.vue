@@ -35,7 +35,7 @@
                         </div>
 
                         <div v-if="isAdmin" class="season-actions">
-                            <AppButton icon="🗑️" type="delete" htmlType="button" :preventPropagation="true"
+                            <AppButton icon="🗑️" type="delete" htmlType="button"
                                 @clicked="confirmDeleteSeason(season)" title="Vymazať sezónu" />
                         </div>
                     </div>

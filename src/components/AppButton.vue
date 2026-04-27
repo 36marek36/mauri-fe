@@ -1,8 +1,8 @@
 <template>
   <!-- miesto @touchend vyskusat -->
+  <!-- @click="handleClick" @touchend="handleClick" -->
   <!-- @pointerup="handleClick" -->
-  <button class="app-button" :class="buttonClass" @click="handleClick" @touchend="handleClick" :disabled="disabled"
-    :type="htmlType">
+  <button class="app-button" :class="buttonClass" @click.stop="handleClick" :disabled="disabled" :type="htmlType">
     <span v-if="icon" class="icon">{{ icon }}</span>
     <span>{{ label }}</span>
   </button>
@@ -30,10 +30,6 @@ export default {
     disabled: {
       type: Boolean,
       default: false
-    },
-    preventPropagation: {
-      type: Boolean,
-      default: false
     }
   },
   computed: {
@@ -43,7 +39,7 @@ export default {
   },
   methods: {
     handleClick(event) {
-      if (this.preventPropagation) event.stopPropagation();
+      // if (this.preventPropagation) event.stopPropagation();
       this.$emit('clicked', event);
     }
   }
@@ -65,6 +61,7 @@ export default {
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  touch-action: manipulation;
 }
 
 .app-button:active {

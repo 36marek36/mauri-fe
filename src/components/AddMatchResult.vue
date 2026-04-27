@@ -55,10 +55,10 @@
 
                     <template v-else>
                         <option :value="match.homeTeam?.id">
-                            {{ match.homeTeam?.name }} (domáci tím)
+                            {{ match.homeTeam?.name }}
                         </option>
                         <option :value="match.awayTeam?.id">
-                            {{ match.awayTeam?.name }} (hosťujúci tím)
+                            {{ match.awayTeam?.name }}
                         </option>
                     </template>
 
@@ -179,7 +179,7 @@ export default {
 .form-group input,
 .form-group select {
     padding: 0.5rem;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .set-fieldset {
@@ -196,4 +196,5 @@ export default {
 .submit-btn {
     margin-top: 1rem;
 }
+
 </style>

@@ -22,7 +22,8 @@
                     <div v-else class="list-or-nothing">
                         <ParticipantList class="participants" :title="'Zoznam hráčov'" :participants="paginatedPlayers"
                             :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
-                            :showProgress="false" @view-detail="(id) => goToDetail('players', id)" />
+                            :edit="isAdmin ? (id) => editPlayer(id) : null" :showProgress="false"
+                            @view-detail="(id) => goToDetail('players', id)" />
                         <div v-if="totalPagesPlayers > 1" class="pagination">
                             <AppButton label="Predošlá" icon="←" type="edit" htmlType="button"
                                 @clicked="currentPagePlayers--" :disabled="currentPagePlayers === 1" />
@@ -58,14 +59,16 @@
                             <select id="player1" v-model="newTeam.player1Id">
                                 <option value="">-- Vyber hráča --</option>
                                 <option v-for="player in players" :key="player.id" :value="player.id">
-                                    {{ player.firstName }} {{ player.lastName }}
+                                    <!-- {{ player.firstName }} {{ player.lastName }} -->
+                                      {{ player.name }}
                                 </option>
                             </select>
                             <label for="player2">Hráč 2:</label>
                             <select id="player2" v-model="newTeam.player2Id">
                                 <option value="">-- Vyber hráča --</option>
                                 <option v-for="player in players" :key="player.id" :value="player.id">
-                                    {{ player.firstName }} {{ player.lastName }}
+                                    <!-- {{ player.firstName }} {{ player.lastName }} -->
+                                      {{ player.name }}
                                 </option>
                             </select>
 
@@ -283,6 +286,9 @@ export default {
         cancelDelete() {
             this.participant = null;
             this.showDeleteModal = false;
+        },
+        editPlayer(id) {
+            this.$router.push(`/players/edit/${id}`);
         }
     },
     computed: {

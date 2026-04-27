@@ -14,7 +14,7 @@ export const useFlashMessageStore = defineStore('flashMessage',{
 
             setTimeout(()=>{
                 this.clearMessage()
-            },4000)
+            },8000)
         },
         clearMessage(){
             this.message = ''

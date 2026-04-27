@@ -129,23 +129,25 @@
                             <tr v-for="(entry, index) in standings" :key="entry.id" @click="goToDetail(isSingles ? 'players' : 'teams',
                                 isSingles ? entry.playerId : entry.teamId)" style="cursor: pointer;"
                                 :class="{ dropped: entry.droppedFromLeague }">
-                                <td>{{ index + 1 }}.</td>
-                                <td colspan="2">
+                                <td data-label="#">{{ index + 1 }}.</td>
+                                <td :data-label="isSingles ? 'Hráč' : 'Tím'" colspan="2">
                                     {{ isSingles ? entry.playerName : entry.teamName }}
                                 </td>
-                                <td>
+                                <td data-label="Progres">
                                     <CircularProgress :progress="entry.leagueProgress" />
                                 </td>
-                                <td>{{ entry.setsWon }}</td>
-                                <td>{{ entry.matches }}</td>
-                                <td>{{ entry.wins }}</td>
-                                <td>{{ entry.losses }}</td>
-                                <td>{{ entry.setsLost }}</td>
+                                <td data-label="Body">{{ entry.setsWon }}</td>
+                                <td data-label="Odohraté zápasy">{{ entry.matches }}</td>
+                                <td data-label="Výhry">{{ entry.wins }}</td>
+                                <td data-label="Prehry">{{ entry.losses }}</td>
+                                <td data-label="Prehraté sety">{{ entry.setsLost }}</td>
 
-                                <td v-if="isAdmin">
-                                    <AppButton label="" icon="🔓" type="edit" htmlType="button" title="Odhlásiť hráča z ligy"
+                                <td v-if="isAdmin" data-label="Admin">
+                                    <AppButton label="" icon="🔓" type="edit" htmlType="button"
+                                        title="Odhlásiť hráča z ligy"
                                         @click.stop="confirmDropParticipant(isSingles ? 'players' : 'teams', isSingles ? entry.playerId : entry.teamId)" />
-                                    <AppButton label="" icon="🗑️" type="delete" htmlType="button" title="Vymazať hráča z ligy"
+                                    <AppButton label="" icon="🗑️" type="delete" htmlType="button"
+                                        title="Vymazať hráča z ligy"
                                         @click.stop="confirmDeleteParticipant(isSingles ? 'players' : 'teams', isSingles ? entry.playerId : entry.teamId)" />
                                 </td>
                             </tr>
@@ -245,7 +247,7 @@ export default {
 
             try {
                 const [playersRes, teamsRes] = await Promise.all([
-                    api.get('/players/not-in-league/'+this.leagueId),
+                    api.get('/players/not-in-league/' + this.leagueId),
                     api.get('/teams/not-in-league/' + this.leagueId)
                 ]);
 
@@ -775,30 +777,50 @@ export default {
         min-width: unset;
     }
 
-    /* Voliteľne uprav poradie */
-
     .standings {
         order: 1;
     }
 
     .matches {
         flex: 1 1 auto;
-        order: 3;
+        order: 2;
     }
 
     .match-display {
         font-size: 1rem;
     }
 
-    .standings-table th,
+    .standings-table,
+    .standings-table thead,
+    .standings-table tbody,
+    .standings-table tr,
     .standings-table td {
-        padding: 0.3rem 0.5rem;
+        display: block;
+        width: 100%;
+    }
+
+    .standings-table thead {
+        display: none;
+    }
+
+    .standings-table tr {
+        margin-bottom: 1rem;
+        padding: 0.8rem;
+        border-radius: 10px;
+        background: #1e1e1e;
+    }
+
+    .standings-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 0;
+        border: none;
         font-size: 0.9rem;
     }
 
-    /* Minimalna sirka tabuľky na mobil aby nebola natiahnuta */
-    .standings-table {
-        min-width: 600px;
+    .standings-table td::before {
+        content: attr(data-label);
+        color: #ffd700;
     }
 }
 </style>

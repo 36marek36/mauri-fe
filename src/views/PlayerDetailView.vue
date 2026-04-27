@@ -26,7 +26,7 @@
                     <div class="list-or-nothing">
 
                         <div class="my-teams">
-                            <h3 class="label">Moje tímy:</h3>
+                            <h3 class="label">Tímy:</h3>
                             <h3>
                                 <div class="value" v-for="team in player.teams" :key="team.id"
                                     @click="$router.push('/teams/' + team.id)" style="cursor: pointer;">
@@ -36,7 +36,7 @@
                         </div>
 
                         <div class="my-leagues">
-                            <h3 class="label">Moje ligy:</h3>
+                            <h3 class="label">Ligy:</h3>
                             <h3>
                                 <div class="value" v-for="league in player.leagues" :key="league.leagueId"
                                     @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
@@ -49,10 +49,10 @@
             </div>
 
             <!-- tabuľka zápasov -->
-            <div v-if="leagueId" class="list-or-nothing matches-list">
+            <div v-if="leagueId" class="list-or-nothing">
                 <div class="matches-selection">
                     <div class="matches-table">
-                        <h3 class="value">Moje zápasy sezóny</h3>
+                        <h3 class="value">Zápasy sezóny</h3>
                         <table>
                             <thead>
                                 <tr>
@@ -69,10 +69,10 @@
 
                                     <!-- 🔹 HLAVNÝ RIADOK -->
                                     <tr>
-                                        <td>{{ match.homePlayer.name }}</td>
-                                        <td>{{ match.awayPlayer.name }}</td>
+                                        <td data-label="Domáci">{{ match.homePlayer.name }}</td>
+                                        <td data-label="Hosť">{{ match.awayPlayer.name }}</td>
                                         <!-- Výsledok -->
-                                        <td>
+                                        <td data-label="Výsledok">
                                             <span
                                                 v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
                                                 {{ match.result.score1 }} : {{ match.result.score2 }}
@@ -86,13 +86,13 @@
 
                                             <span v-else>-</span>
                                         </td>
-                                        <td>{{ getLeagueName(match.leagueId) }}</td>
+                                        <td data-label="Liga">{{ getLeagueName(match.leagueId) }}</td>
 
 
 
-                                        <td>{{ match.roundNumber }}</td>
+                                        <td data-label="Kolo">{{ match.roundNumber }}</td>
 
-                                        <td>
+                                        <td data-label="Status">
                                             <span :class="{
                                                 'badge-finished': match.status === 'FINISHED',
                                                 'badge-cancelled': match.status === 'CANCELLED',
@@ -114,9 +114,11 @@
 
                                     <!-- 🔥 FORMULÁR -->
                                     <tr v-if="activeMatchId === match.id">
-                                        <td colspan="6" class="form-row">
-                                            <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
-                                                @result-submitted="fetchMatchesAndClose" />
+                                        <td colspan="6">
+                                            <div>
+                                                <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
+                                                    @result-submitted="fetchMatchesAndClose" />
+                                            </div>
                                         </td>
                                     </tr>
                                 </template>
@@ -286,21 +288,21 @@ export default {
     width: 100%;
 }
 
+.list-or-nothing {
+    align-items: center;
+    justify-content: flex-start;
+}
+
 .player-info {
     /* list-style: none; */
     padding: 0.5rem;
     margin: 0;
-    /* width: 40%; */
+    width: 100%;
 }
 
 .second {
     width: 60%;
     padding: 0.5rem;
-}
-
-.list-or-nothing {
-    align-items: center;
-    justify-content: flex-start;
 }
 
 .matches-selection {
@@ -349,10 +351,7 @@ export default {
 .matches-table td {
     white-space: nowrap;
 }
-.matches-list .form-row > * {
-    width: 70vw;
-    margin: 0;
-}
+
 
 .badge-finished {
     color: #ADFF2F;
@@ -380,27 +379,48 @@ export default {
         font-size: 1.5rem;
     }
 
-    .matches-section {
-        /* order: 1; */
-        width: 100%;
-    }
-
     .details-section {
         flex-direction: column;
         /* order: 2; */
     }
 
-    .player-info {
-        width: 100%;
-    }
 
     .second {
         width: 100%;
     }
 
+    .matches-table table,
+    .matches-table thead,
+    .matches-table tbody,
     .matches-table th,
+    .matches-table td,
+    .matches-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .matches-table thead {
+        display: none;
+    }
+
+    .matches-table tr {
+        margin-bottom: 1rem;
+        background: #1e1e1e;
+        padding: 0.8rem;
+        border-radius: 8px;
+    }
+
     .matches-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.3rem 0;
+        border: none;
         font-size: 0.9rem;
+    }
+
+    .matches-table td::before {
+        content: attr(data-label);
+        color: #ffd700;
     }
 }
 </style>

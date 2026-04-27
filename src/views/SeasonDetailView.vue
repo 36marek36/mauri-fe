@@ -60,7 +60,7 @@
                                 </td>
 
                                 <td v-if="isAdmin">
-                                    <AppButton icon="🗑️" type="delete" htmlType="button" :preventPropagation="true"
+                                    <AppButton icon="🗑️" type="delete" htmlType="button"
                                         @clicked="() => confirmDeleteLeague(league)" />
                                 </td>
                             </tr>
@@ -91,7 +91,7 @@
                                 </td>
 
                                 <td v-if="isAdmin">
-                                    <AppButton icon="🗑️" type="delete" htmlType="button" :preventPropagation="true"
+                                    <AppButton icon="🗑️" type="delete" htmlType="button"
                                         @clicked="() => confirmDeleteLeague(league)" />
                                 </td>
                             </tr>
