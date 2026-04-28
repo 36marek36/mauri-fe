@@ -124,11 +124,21 @@ export default {
   height: 40px;
   cursor: pointer;
   transition: transform 0.2s ease;
-  filter: drop-shadow(0 4px 5px rgb(0, 26, 255));
+  filter:
+    drop-shadow(0 0 4px rgba(255, 255, 255, 0.9))
+    /* biele halo */
+    drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))
+    /* širšie halo */
+    drop-shadow(0 2px 4px rgba(0, 26, 255, 0.5));
+  /* modrý tieň */
 }
 
 .facebook-link img:hover {
   transform: scale(1.5);
+    filter:
+    drop-shadow(0 0 6px rgba(255, 255, 255, 1))
+    drop-shadow(0 0 12px rgba(255, 255, 255, 0.8))
+    drop-shadow(0 4px 8px rgba(0, 26, 255, 0.7));
 }
 
 .hero-title {
@@ -166,7 +176,7 @@ strong {
   }
 
   .hero-list {
-  font-size: 0.9rem;
+    font-size: 0.9rem;
   }
 
   .contact-info {

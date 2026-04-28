@@ -2,7 +2,7 @@
   <!-- miesto @touchend vyskusat -->
   <!-- @click="handleClick" @touchend="handleClick" -->
   <!-- @pointerup="handleClick" -->
-  <button class="app-button" :class="buttonClass" @click.stop="handleClick" :disabled="disabled" :type="htmlType">
+  <button class="app-button" :class="buttonClass" @pointerup="handleClick" :disabled="disabled" :type="htmlType">
     <span v-if="icon" class="icon">{{ icon }}</span>
     <span>{{ label }}</span>
   </button>

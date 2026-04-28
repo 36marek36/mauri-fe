@@ -1,6 +1,6 @@
 <template>
-    <div v-if="visible" class="modal-overlay" @click.self="cancel">
-        <div class="modal">
+    <div v-if="visible" class="modal-overlay" @pointerdown.self="cancel">
+        <div class="modal" @pointerdown.stop>
             <p>{{ message }}</p>
 
             <div class="buttons">
