@@ -3,24 +3,37 @@
 
 /* 🌌 Hlavné pozadie celej stránky */
 body {
-  height: 100%;
+  /* height: 100%; */
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', sans-serif;
   font-weight: normal;
   color: #FFD700;
   background-color: #000;
-  background-image: url('/images/background.jpg');
+  /* background-image: url('/images/background.jpg'); */
   /* uprav cestu podľa projektu */
-  background-size: 100% 100%;
+  /* background-size: 100% 100%; */
   /* prispôsobenie veľkosti */
-  background-position: center top;
+  /* background-position: center top; */
   /* zarovnanie */
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  /* background-repeat: no-repeat; */
+  /* background-attachment: fixed; */
   /* pozadie sa neposúva pri scrollovaní */
-  transition: background-position 0.3s ease, background-size 0.3s ease;
+  /* transition: background-position 0.3s ease, background-size 0.3s ease; */
   /* jemný prechod pri resize */
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+
+  background-image: url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  z-index: -1;
 }
 
 h1,
@@ -50,7 +63,7 @@ h4 {
   font-size: 1.2rem;
 }
 
-th{
+th {
   font-size: 1.5rem;
 }
 
@@ -109,8 +122,7 @@ select:focus {
 
 
 @media (max-width: 768px) {
-  body {
-    background-size: cover;
+  body::before {
     background-position: 30% top;
   }
 

@@ -53,23 +53,39 @@
               tenisovej rodiny.</strong></p>
         </div>
       </div>
-      <div class="contact-info">
-        <p>
-          Nájdete nás na adrese:
-          <a href="https://www.google.com/maps/search/?api=1&query=29.augusta+92+Handlová" target="_blank"
-            class="address-link">
-            29.augusta 92, Handlová
-          </a>
-        </p>
+      <div class="list-or-nothing">
+        <div class="contact-info">
+          <p>
+            Nájdete nás na adrese:
+            <a href="https://www.google.com/maps/search/?api=1&query=29.augusta+92+Handlová" target="_blank"
+              class="address-link">
+              29.augusta 92, Handlová
+            </a>
+          </p>
+          <p> Kontakty 📞 </p>
+          <div class="phones">
+            <a href="tel:0905542596" class="phone-link">
+              <span>Tenisová liga: p.Uríček</span>
+              <span>0905 542 596</span></a>
+            <a href="tel:0905878476" class="phone-link">
+              <span>Objednávky športovísk:</span>
+              <span>0905 878 476</span></a>
+          </div>
 
-        <p>
-          Pre viac informácií sledujte náš
-          <a href="https://www.facebook.com/profile.php?id=100034650532111" target="_blank" rel="noopener noreferrer"
-            class="facebook-link">
-            <img src="/images/facebook.png" alt="Facebook" />
-          </a>
-          acebook
-        </p>
+
+          <p>
+            Pre viac informácií sledujte náš
+            <a href="https://www.facebook.com/profile.php?id=100034650532111" target="_blank" rel="noopener noreferrer"
+              class="facebook-link">
+              <img src="/images/facebook.png" alt="Facebook" />
+            </a>
+            acebook
+          </p>
+          <br>
+          <div class="credits">
+            © 2026 – Vytvoril a prevádzkuje Marek Krnčok
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -96,22 +112,32 @@ export default {
 }
 
 .contact-info {
+  display: flex;
   flex-direction: column;
-  font-size: 30px;
-}
-
-.contact-info p {
-  margin: 0;
+  padding: 10px 0;
   color: #f5eeee;
+  font-size: 1.3rem;
+  width: 100%;
+  text-align: center;
+  justify-content: center;
 }
 
 .address-link {
   text-decoration: none;
   color: inherit;
-  font-size: 2rem;
+  font-size: 1.4rem;
   filter: drop-shadow(0 4px 5px rgb(255, 0, 0));
 }
 
+.credits {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.credits a {
+  font-size: 0.8rem;
+  color: #f5eeee;
+}
 
 .facebook-link {
   display: inline-flex;
@@ -135,10 +161,8 @@ export default {
 
 .facebook-link img:hover {
   transform: scale(1.5);
-    filter:
-    drop-shadow(0 0 6px rgba(255, 255, 255, 1))
-    drop-shadow(0 0 12px rgba(255, 255, 255, 0.8))
-    drop-shadow(0 4px 8px rgba(0, 26, 255, 0.7));
+  filter:
+    drop-shadow(0 0 6px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.8)) drop-shadow(0 4px 8px rgba(0, 26, 255, 0.7));
 }
 
 .hero-title {
@@ -158,7 +182,17 @@ export default {
 .hero-list {
   text-align: center;
   list-style: none;
-  padding: 10px;
+  padding: 30px 5%;
+}
+
+.phones {
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-link {
+  display: flex;
+  flex-direction: column;
 }
 
 strong {
@@ -177,12 +211,11 @@ strong {
 
   .hero-list {
     font-size: 0.9rem;
+    padding: 10px;
   }
 
   .contact-info {
     font-size: 20px;
-    text-align: right;
-    align-items: flex-end;
     padding-right: 1px;
   }
 

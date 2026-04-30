@@ -32,43 +32,72 @@
             </div>
 
             <!-- Zápasy -->
-            <div v-if="leagueId" class="list-or-nothing matches-list">
-                <div class="matches-selection">
-                    <div class="matches-table">
-                        <h3 class="value">Tímové zápasy sezóny</h3>
-                        <table>
+            <section v-if="leagueId" class="matches">
+
+                <div class="list-or-nothing">
+                    <h3 class="center-title" @click="showMatches = !showMatches">
+                        Tímové zápasy sezóny
+                        <span v-if="showMatches">▲</span>
+                        <span v-else>▼</span>
+                    </h3>
+
+                    <transition name="fade">
+                        <table v-show="showMatches" class="matches-table">
+
                             <thead>
                                 <tr>
-                                    <th>Domáci</th>
-                                    <th>Hostia</th>
+                                    <th colspan="2">Zápas</th>
                                     <th>Výsledok</th>
                                     <th>Liga</th>
                                     <th>Kolo</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
+
                             <tbody>
                                 <template v-for="match in allMatches" :key="match.id">
+
+                                    <!-- 🔹 HLAVNÝ RIADOK -->
                                     <tr>
-                                        <td data-label="Domáci">{{ match.homeTeam.name }}</td>
-                                        <td data-label="Hostia">{{ match.awayTeam.name }}</td>
+
+                                        <td colspan="2" data-label="Zápas">
+                                            <div class="match-cell">
+                                                <div :class="getTeamClass(match, 'home')">
+                                                    <strong>{{ match.homeTeam.name }}</strong>
+                                                </div>
+                                                <div class="vs">
+                                                    vs
+                                                </div>
+                                                <div :class="getTeamClass(match, 'away')">
+                                                    <strong>{{ match.awayTeam.name }}</strong>
+                                                </div>
+
+                                            </div>
+                                        </td>
 
                                         <td data-label="Výsledok">
                                             <span
                                                 v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
                                                 {{ match.result.score1 }} : {{ match.result.score2 }}
                                             </span>
+
                                             <span v-else-if="(isAdmin || isUserPlayerInMatch(match))">
-                                                <!-- <AppButton label="Zadať" type="edit" html-type="button"
-                                                    @clicked="toggleForm(match.id)"></AppButton> -->
                                                 <AppButton :label="activeMatchId === match.id ? 'Zavrieť' : 'Zadať'"
                                                     :type="activeMatchId === match.id ? 'delete' : 'edit'"
                                                     html-type="button" @clicked="toggleForm(match.id)" />
                                             </span>
+
                                             <span v-else>-</span>
                                         </td>
-                                        <td data-label="Liga">{{ getLeagueName(match.leagueId) }}</td>
-                                        <td data-label="Kolo">{{ match.roundNumber }}</td>
+
+                                        <td data-label="Liga">
+                                            {{ getLeagueName(match.leagueId) }}
+                                        </td>
+
+                                        <td data-label="Kolo">
+                                            {{ match.roundNumber }}
+                                        </td>
+
                                         <td data-label="Status">
                                             <span :class="{
                                                 'badge-finished': match.status === 'FINISHED',
@@ -77,31 +106,31 @@
                                                 'badge-pending': !['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status)
                                             }">
                                                 {{
-                                                    match.status === 'FINISHED'
-                                                        ? 'Odohratý'
-                                                        : match.status === 'CANCELLED'
-                                                            ? 'Zrušený'
-                                                            : match.status === 'SCRATCHED'
-                                                                ? 'Skrečovaný'
-                                                                : 'Neodohratý'
+                                                    match.status === 'FINISHED' ? 'Odohratý' :
+                                                        match.status === 'CANCELLED' ? 'Zrušený' :
+                                                            match.status === 'SCRATCHED' ? 'Skrečovaný' :
+                                                                'Neodohratý'
                                                 }}
                                             </span>
                                         </td>
+
                                     </tr>
+
+                                    <!-- 🔥 FORMULÁR -->
                                     <tr v-if="activeMatchId === match.id">
                                         <td colspan="6">
-                                            <div>
-                                                <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
-                                                    @result-submitted="fetchMatchesAndClose" />
-                                            </div>
+                                            <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
+                                                @result-submitted="fetchMatchesAndClose" />
                                         </td>
                                     </tr>
+
                                 </template>
                             </tbody>
                         </table>
-                    </div>
+                    </transition>
                 </div>
-            </div>
+
+            </section>
         </div>
     </div>
 </template>
@@ -112,6 +141,7 @@ import AddMatchResult from '@/components/AddMatchResult.vue';
 import AppButton from '@/components/AppButton.vue';
 import { useHeaderStore } from '@/stores/header';
 import { useUserStore } from '@/stores/user';
+import { useFlashMessageStore } from '@/stores/flashMessage';
 
 export default {
     name: 'TeamDetailView.vue',
@@ -124,6 +154,7 @@ export default {
             scratchedMatches: [],
             activeMatchId: null,
             loading: true,
+            showMatches: window.innerWidth > 768,
             header: useHeaderStore(),
             userStore: useUserStore()
         }
@@ -184,6 +215,7 @@ export default {
         async fetchMatchesAndClose() {
             await this.fetchTeamMatches()
             this.activeMatchId = null;
+            this.flash.showMessage('✅ Výsledok bol úspešne uložený!', 'success')
         },
         isUserPlayerInMatch(match) {
             const playerId = this.userStore.playerId;
@@ -202,6 +234,23 @@ export default {
             }
 
             return false;
+        },
+        getTeamClass(match, side) {
+            if (!match.result) return '';
+
+            const home = match.result.score1;
+            const away = match.result.score2;
+
+            const isDraw = home === away;
+
+            if (isDraw) return '';
+
+            const isHomeWinner = home > away;
+
+            if (side === 'home' && isHomeWinner) return 'winner';
+            if (side === 'away' && !isHomeWinner) return 'winner';
+
+            return 'loser';
         }
     },
     computed: {
@@ -217,9 +266,9 @@ export default {
         leagueId() {
             return this.activeLeague?.leagueId || null;
         },
-        // activeMatch() {
-        //     return this.allMatches.find(m => m.id === this.activeMatchId)
-        // },
+        flash() {
+            return useFlashMessageStore();
+        },
         isSingles() {
             return this.activeLeague.leagueType === 'SINGLES';
         },
@@ -274,23 +323,25 @@ export default {
     font-size: 1.4rem;
 }
 
-.matches-selection {
+.matches {
     width: 100%;
 }
 
+/* nadpis */
+.center-title {
+    text-align: center;
+    cursor: pointer;
+}
+
+/* table */
 .matches-table {
     width: 100%;
-}
-
-.matches-table table {
     border-collapse: collapse;
-    width: 100%;
-    /* table-layout: fixed; */
 }
 
 .matches-table th,
 .matches-table td {
-    padding: 0.2rem;
+    padding: 0.5rem;
     text-align: center;
 }
 
@@ -301,31 +352,68 @@ export default {
     line-height: 1.2;
 }
 
-.matches-list .form-row>* {
-    width: 70vw;
-    margin: 0;
+.matches-table tbody tr:hover {
+    background-color: #363537;
 }
 
+.matches-table tbody tr {
+    border-bottom: 1px solid #2a2a2a;
+}
+
+/* match cell */
+.match-cell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.vs {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    text-transform: lowercase;
+}
+
+.winner {
+    color: #ADFF2F;
+    text-shadow: 0 0 6px rgba(173, 255, 47, 0.3);
+}
+
+.loser {
+    color: #e0e0e0;
+    text-shadow: none;
+}
+
+/* statusy */
 .badge-finished {
     color: #ADFF2F;
-    /* font-weight: normal; */
 }
 
 .badge-cancelled {
     color: #FF4C4C;
-    /* font-weight: bold; */
 }
 
 .badge-scratched {
     color: #FFC107;
-    /* font-weight: bold; */
 }
 
 .badge-pending {
     color: #f5f5f5;
     font-style: italic;
-
 }
+
+/* fade animácia */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
 
 @media (max-width: 768px) {
     .players-container {
@@ -338,16 +426,12 @@ export default {
         padding-right: 0.3rem;
     }
 
-    /* .matches-table th,
-    .matches-table td {
-        font-size: 0.9rem;
+    .center-title {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
     }
 
-    .matches-table table {
-        min-width: 600px;
-    } */
-
-    .matches-table table,
+    .matches-table,
     .matches-table thead,
     .matches-table tbody,
     .matches-table th,
@@ -380,6 +464,5 @@ export default {
         content: attr(data-label);
         color: #ffd700;
     }
-
 }
 </style>

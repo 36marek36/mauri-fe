@@ -208,7 +208,7 @@ export default {
 
 .dropdown-menu {
   position: absolute;
-  backdrop-filter: blur(12px);
+  background: rgb(49, 49, 49);
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 8px;

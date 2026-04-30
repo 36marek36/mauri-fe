@@ -108,7 +108,7 @@
                             :title="'Neaktívne (vymazané) tímy'" :participants="inactiveTeams"
                             @view-detail="(id) => goToDetail('teams', id)" :showProgress="false"
                             :remove="(id) => confirmDeleteParticipant('teams', id)" />
-                        <p v-else>Žiadne neaktívne tími nie sú k dispozícii.</p>
+                        <p v-else>Žiadne neaktívne tímy nie sú k dispozícii.</p>
                     </div>
                 </div>
             </div>
