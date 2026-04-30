@@ -14,7 +14,13 @@ const router = createRouter({
       path: '/aboutus',
       name: 'aboutus',
       component: () => import('../views/AboutUs.vue'),
-      meta:{hideHeader:true}
+      meta: { hideHeader: true }
+    },
+    {
+      path: '/league-rules',
+      name: 'rules',
+      component: () => import('../views/Rules.vue'),
+      meta: { hideHeader: true }
     },
     {
       path: '/users',

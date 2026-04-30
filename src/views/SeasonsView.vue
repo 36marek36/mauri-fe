@@ -21,9 +21,7 @@
 
                 <!-- AKTUÁLNA SEZÓNA -->
                 <div v-if="currentSeason">
-
-
-                    <div class="season-center" v-if="currentSeason">
+                    <div class="season-center">
                         <div class="season-card highlight" @click="$router.push('/seasons/' + currentSeason.id)">
                             <h3>Aktuálna</h3>
                             <h3 class="season-year">{{ currentSeason.year }}</h3>
@@ -125,7 +123,7 @@ export default {
     name: 'SeasonsView',
     data() {
         return {
-            seasons: null,
+            seasons: [],
             showCreateSeasonForm: false,
             showArchived: false,
             newSeason: {
@@ -145,7 +143,7 @@ export default {
             this.loading = true
             try {
                 const res = await api.get('/seasons/')
-                this.seasons = res.data
+                this.seasons = Array.isArray(res.data) ? res.data : []
 
                 const header = useHeaderStore()
                 header.setTitle('Sezóny', '')
@@ -205,7 +203,7 @@ export default {
     },
     computed: {
         currentSeason() {
-            return this.seasons?.find(s => s.status === 'ACTIVE')
+            return this.seasons?.find(s => s.status === 'ACTIVE') || null
         },
 
         upcomingSeason() {
@@ -213,7 +211,7 @@ export default {
         },
 
         archivedSeasons() {
-            return this.seasons?.filter(s => s.status === 'FINISHED')
+            return this.seasons?.filter(s => s.status === 'FINISHED') || []
         },
         flash() {
             return useFlashMessageStore();

@@ -29,6 +29,12 @@
             <RouterLink to="/seasons" @click="closeMobileMenu">Sezóny</RouterLink>
           </li>
           <li>
+            <a href="#" @click.prevent="showContacts = true; closeMobileMenu()">Kontakty</a>
+          </li>
+          <li>
+            <RouterLink to="/league-rules" @click="closeMobileMenu">Pravidlá</RouterLink>
+          </li>
+          <li>
             <RouterLink to="/aboutus" @click="closeMobileMenu">O nás</RouterLink>
           </li>
 
@@ -37,7 +43,7 @@
             <div v-if="showDropdown" class="dropdown-menu">
               <AppButton v-if="playerId" label="Detail hráča" type="create" @clicked="goToPlayerDetail"
                 htmlType="button" />
-              <AppButton v-else label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" />
+              <!-- <AppButton v-else label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" /> -->
               <AppButton v-if="playerId" label="Upraviť profil hráča" type="edit" @clicked="goToEditPlayer" />
               <AppButton label="Zmeniť prihlasovacie meno" type="edit" @clicked="goToChangeUsername" />
               <AppButton label="Zmeniť heslo" type="edit" @clicked="goToChangePassword" />
@@ -51,7 +57,26 @@
         </ul>
         <LogoutModal :visible="showLogout" @confirm="logout" @cancel="cancelLogout" />
       </nav>
+
+      <div v-if="showMobileMenu" class="mobile-overlay" @click="closeMobileMenu" />
+
+      <div v-if="showContacts" class="modal-overlay" @click.self="showContacts = false">
+        <div class="modal">
+          <h3>Kontakty</h3>
+
+          <a href="tel:0905542596" class="phone-link">
+            <span>Tenisová liga: p.Uríček</span>
+            <p>📞 0905 542 596</p>
+          </a>
+          <a href="tel:0905878476" class="phone-link">
+            <span>Objednávky športovísk:</span>
+            <p>📞 0905 878 476</p>
+          </a>
+          <AppButton label="Zavrieť" type="default" @clicked="showContacts = false" />
+        </div>
+      </div>
     </div>
+
   </div>
 
 </template>
@@ -69,7 +94,8 @@ export default {
     return {
       showDropdown: false,
       showLogout: false,
-      showMobileMenu: false
+      showMobileMenu: false,
+      showContacts: false
     }
 
   },
@@ -100,6 +126,7 @@ export default {
     },
     toggleMobileMenu() {
       this.showMobileMenu = !this.showMobileMenu
+      this.showDropdown = false
     },
     closeMobileMenu() {
       this.showMobileMenu = false
@@ -184,6 +211,7 @@ export default {
   align-items: center;
   list-style: none;
   text-shadow: 0 0 1px black, 0 0 2px black, 0 0 4px black;
+  z-index: 1001;
 }
 
 .user-dropdown {
@@ -244,6 +272,36 @@ export default {
 .hamburger .label {
   font-weight: 600;
   letter-spacing: 0.5px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal {
+  background: #002E2C;
+  border: 2px solid gold;
+  border-radius: 10px;
+  padding: 20px;
+  min-width: 260px;
+  text-align: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1000;
 }
 
 

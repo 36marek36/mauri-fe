@@ -9,16 +9,16 @@
                 <div class="list-or-nothing">
                     <div class="player-info">
                         <div>
-                            <h3 class="value">{{ player.email || 'email nezadaný' }}</h3>
-                            <h3 class="value">{{ player.phone || 'telefón nezadaný' }}</h3>
+                            <p class="value">{{ player.phone || 'telefón nezadaný' }}</p>
+                            <picture class="value small">{{ player.email || 'email nezadaný' }}</picture>
                         </div>
                         <div>
-                            <h3 class="label">Dátum registrácie: </h3>
-                            <h3 class="value">{{ player.registrationDate }}</h3>
+                            <p class="label small">Dátum registrácie: </p>
+                            <path class="value small">{{ player.registrationDate }}</path>
                         </div>
                         <div v-if="player.deletedDate">
-                            <h3 class="label">Dátum zmazania: </h3>
-                            <h3 class="value">{{ player.deletedDate }}</h3>
+                            <p class="label small">Dátum zmazania: </p>
+                            <p class="value small">{{ player.deletedDate }}</p>
                         </div>
                     </div>
                 </div>
@@ -27,22 +27,18 @@
 
                         <div class="my-teams">
                             <h3 class="label">Tímy:</h3>
-                            <h3>
-                                <div class="value" v-for="team in player.teams" :key="team.id"
-                                    @click="$router.push('/teams/' + team.id)" style="cursor: pointer;">
-                                    {{ team.name }}
-                                </div>
-                            </h3>
+                            <div class="value" v-for="team in player.teams" :key="team.id"
+                                @click="$router.push('/teams/' + team.id)" style="cursor: pointer;">
+                                {{ team.name }}
+                            </div>
                         </div>
 
                         <div class="my-leagues">
                             <h3 class="label">Ligy:</h3>
-                            <h3>
-                                <div class="value" v-for="league in player.leagues" :key="league.leagueId"
-                                    @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
-                                    {{ league.leagueName }} ({{ league.seasonYear }})
-                                </div>
-                            </h3>
+                            <div class="value" v-for="league in sortedLeagues" :key="league.leagueId"
+                                @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
+                                {{ league.leagueName }} ({{ league.seasonYear }})
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -311,6 +307,10 @@ export default {
         },
         isAdmin() {
             return this.userStore.isAdmin;
+        },
+        sortedLeagues() {
+            return [...(this.player.leagues || [])]
+                .sort((a, b) => b.seasonYear - a.seasonYear)
         }
     },
     components: { AppButton, AddMatchResult }
@@ -339,6 +339,7 @@ export default {
 
 .player-info {
     /* list-style: none; */
+    text-align: center;
     padding: 0.5rem;
     margin: 0;
     width: 100%;
@@ -351,10 +352,12 @@ export default {
 
 .my-teams {
     width: 100%;
+    text-align: center;
 }
 
 .my-leagues {
     width: 100%;
+    text-align: center;
 }
 
 .label {
@@ -364,7 +367,13 @@ export default {
 
 .value {
     font-size: 1.4rem;
+    color: #e0e0e0;
 }
+
+.small {
+    font-size: 1rem;
+}
+
 
 .matches-table {
     width: 100%;
@@ -454,19 +463,10 @@ export default {
 }
 
 @media (max-width: 768px) {
-    .label {
-        font-size: 1.2rem;
-    }
-
-    .value {
-        font-size: 1.2rem;
-    }
-
     .details-section {
         flex-direction: column;
         /* order: 2; */
     }
-
 
     .second {
         width: 100%;

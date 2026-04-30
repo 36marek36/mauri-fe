@@ -10,7 +10,7 @@ export default {
   data() {
     return {
       logos: [
-        '/images/logo.png',
+        // '/images/logo.png',
         '/images/lg_mauri.png'
       ]
     }
