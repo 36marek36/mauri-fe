@@ -28,146 +28,127 @@
             <!-- 🏓 Zápasy -->
             <section class="matches">
 
-
                 <div class="list-or-nothing" v-if="hasMatches">
-                    <h3 class="center-title" v-if="hasMatches">Zápasy ligy</h3>
+
+                    <h3 class="center-title">Zápasy ligy</h3>
+
                     <div class="matches-wrapper">
+
                         <AppButton :label="areAnyRoundsOpened ? 'Skryť všetky kolá' : 'Zobraziť všetky kolá'"
                             :icon="areAnyRoundsOpened ? '🔼' : '🔽'" type="default" htmlType="button"
                             @clicked="toggleAllRounds" />
 
                         <div v-for="(roundMatches, roundNumber) in groupedMatches" :key="roundNumber">
-                            <h4 @click="toggleRound(roundNumber)" style="cursor: pointer">
+
+                            <h4 @click="toggleRound(roundNumber)" class="round-title">
                                 Kolo: {{ roundNumber }}
                                 <span v-if="openedRounds.includes(roundNumber)">▲</span>
                                 <span v-else>▼</span>
                             </h4>
 
-                            <ul v-show="openedRounds.includes(roundNumber)">
-                                <li v-for="match in roundMatches" :key="match.id" class="match-item">
-                                    <div>
-                                        <div class="match-display">
-                                            <div :class="getMatchClass(match, 'home')">{{ isSingles ?
-                                                match.homePlayer?.name : match.homeTeam?.name }}</div>
-                                            <div class="vs">vs</div>
-                                            <div :class="getMatchClass(match, 'away')">{{ isSingles ?
-                                                match.awayPlayer?.name : match.awayTeam?.name }}</div>
-                                        </div>
+                            <ul v-show="openedRounds.includes(roundNumber)" class="match-list">
+                                <MatchItem v-for="match in roundMatches" :key="match.id" :match="match"
+                                    :isSingles="isSingles" :leagueType="league.leagueType"
+                                    :leagueStatus="league.leagueStatus" :isAdmin="isAdmin"
+                                    :activeMatchId="activeMatchId" :getMatchClass="getMatchClass"
+                                    :isUserPlayerInMatch="isUserPlayerInMatch" @toggle-form="toggleForm"
+                                    @edit="requestEditResult" @cancel="requestCancelResult"
+                                    @refresh="fetchMatchesAndClose" />
 
-                                        <!-- Pridanie výsledku (admin alebo hráč) -->
-                                        <div
-                                            v-if="(isAdmin || isUserPlayerInMatch(match)) && match.status === 'CREATED' && leagueStatus === 'ACTIVE'">
-                                            <AppButton
-                                                :label="activeMatchId === match.id ? 'Zavrieť formulár' : 'Pridať výsledok'"
-                                                :type="activeMatchId === match.id ? 'delete' : 'default'"
-                                                htmlType="button" icon="📝" @clicked="toggleForm(match.id)" />
-                                            <AddMatchResult v-if="activeMatchId === match.id" :match="match"
-                                                :leagueType="league.leagueType"
-                                                @result-submitted="fetchMatchesAndClose" />
-                                        </div>
-
-                                        <!-- Výsledok zápasu -->
-                                        <div v-else-if="match.status === 'FINISHED' || match.status === 'CANCELLED' || match.status === 'SCRATCHED'"
-                                            class="match-result-wrapper">
-                                            <div class="match-result-text">
-                                                <strong>Výsledok:</strong>
-                                                {{ match.result?.score1 }} : {{ match.result?.score2 }}
-                                                <span v-if="match.result?.setScores?.length">
-                                                    (
-                                                    <span v-for="(set, index) in match.result.setScores" :key="index">
-                                                        {{ set.score1 }}:{{ set.score2 }}
-                                                        <span v-if="index < match.result.setScores.length - 1">, </span>
-                                                    </span>
-                                                    )
-                                                </span>
-                                            </div>
-
-                                            <!-- 🔧 Admin môže upraviť výsledok -->
-                                            <div class="match-result-buttons">
-                                                <div v-if="isAdmin && leagueStatus === 'ACTIVE'">
-                                                    <AppButton
-                                                        :label="activeMatchId === match.id ? 'Zavrieť úpravu' : 'Upraviť výsledok'"
-                                                        :type="activeMatchId === match.id ? 'delete' : 'default'"
-                                                        htmlType="button" icon="✏️"
-                                                        @clicked="requestEditResult(match.id)" />
-                                                    <AddMatchResult v-if="activeMatchId === match.id" :match="match"
-                                                        :leagueType="league.leagueType"
-                                                        @result-submitted="fetchMatchesAndClose" />
-                                                </div>
-                                                <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'"
-                                                    label="Zrušiť výsledok" icon="❌" type="delete" htmlType="button"
-                                                    @clicked="requestCancelResult(match.id)"
-                                                    :disabled="activeMatchId === match.id" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
                             </ul>
+
                         </div>
+
                     </div>
+
                 </div>
+
                 <h3 v-else>Žiadne zápasy pre túto ligu.</h3>
+
             </section>
 
             <!-- 📊 Tabuľka -->
             <section class="standings" v-if="standings.length > 0">
                 <div class="list-or-nothing" v-if="hasParticipants">
+
                     <h3 class="center-title" @click="showStandings = !showStandings">
                         Tabuľka
                         <span v-if="showStandings">▲</span>
                         <span v-else>▼</span>
                     </h3>
+
                     <transition name="fade">
                         <table v-show="showStandings" class="standings-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th colspan="2">{{ isSingles ? 'Hráč' : 'Tím' }}</th>
-                                    <th>Progres</th>
-                                    <th>Body</th>
-                                    <th>Zápasy</th>
-                                    <th>Výhry</th>
-                                    <th>Prehry</th>
-                                    <th>Prehraté<br>sety</th>
-                                    <th v-if="isAdmin">Admin</th>
-                                </tr>
-                            </thead>
-
                             <tbody>
-                                <tr v-for="(entry, index) in standings" :key="entry.id" @click="goToDetail(
-                                    isSingles ? 'players' : 'teams',
-                                    isSingles ? entry.playerId : entry.teamId
-                                )" style="cursor: pointer;" :class="{ dropped: entry.droppedFromLeague }">
-                                    <td data-label="#">{{ index + 1 }}.</td>
+                                <template v-for="(entry, index) in standings"
+                                    :key="isSingles ? entry.playerId : entry.teamId">
 
-                                    <td :data-label="isSingles ? 'Hráč' : 'Tím'" colspan="2">
-                                        {{ isSingles ? entry.playerName : entry.teamName }}
-                                    </td>
+                                    <!-- HLAVNÝ RIADOK -->
+                                    <tr @click="toggleRow(isSingles ? entry.playerId : entry.teamId)"
+                                        :class="{ dropped: entry.droppedFromLeague }" class="main-row">
+                                        <td>
+                                            {{ index + 1 }}.
+                                        </td>
 
-                                    <td data-label="Progres">
-                                        <CircularProgress :progress="entry.leagueProgress" />
-                                    </td>
+                                        <td>
+                                            <div class="name-cell">
+                                                <span class="name">
+                                                    {{ isSingles ? entry.playerName : entry.teamName }}
+                                                </span>
+                                            </div>
+                                        </td>
 
-                                    <td data-label="Body">{{ entry.setsWon }}</td>
-                                    <td data-label="Odohraté zápasy">{{ entry.matches }}</td>
-                                    <td data-label="Výhry">{{ entry.wins }}</td>
-                                    <td data-label="Prehry">{{ entry.losses }}</td>
-                                    <td data-label="Prehraté sety">{{ entry.setsLost }}</td>
+                                        <td>
+                                            <CircularProgress :progress="entry.leagueProgress" />
+                                        </td>
 
-                                    <td v-if="isAdmin" data-label="Admin">
-                                        <AppButton icon="🔓" type="edit" htmlType="button" title="Odhlásiť hráča z ligy"
-                                            @clicked.stop="confirmDropParticipant(
-                                                isSingles ? 'players' : 'teams',
-                                                isSingles ? entry.playerId : entry.teamId
-                                            )" />
+                                        <td class="actions">
+                                            <div v-if="isAdmin" class="admin-buttons">
+                                                <AppButton icon="🔓" type="edit" htmlType="button" @clicked.stop="confirmDropParticipant(
+                                                    isSingles ? 'players' : 'teams',
+                                                    isSingles ? entry.playerId : entry.teamId
+                                                )" />
 
-                                        <AppButton icon="🗑️" type="delete" htmlType="button"
-                                            title="Vymazať hráča z ligy" @clicked.stop="confirmDeleteParticipant(
-                                                isSingles ? 'players' : 'teams',
-                                                isSingles ? entry.playerId : entry.teamId
-                                            )" />
-                                    </td>
-                                </tr>
+                                                <AppButton icon="🗑️" type="delete" htmlType="button" @clicked.stop="confirmDeleteParticipant(
+                                                    isSingles ? 'players' : 'teams',
+                                                    isSingles ? entry.playerId : entry.teamId
+                                                )" />
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- DETAIL -->
+                                    <tr v-if="expandedRow === (isSingles ? entry.playerId : entry.teamId)"
+                                        class="detail-row">
+                                        <td colspan="100%">
+                                            <div class="detail-stats">
+                                                <div class="label">Body:</div>
+                                                <div>{{ entry.setsWon }}</div>
+
+                                                <div class="label">Zápasy:</div>
+                                                <div>{{ entry.matches }}</div>
+
+                                                <div class="label">Výhry:</div>
+                                                <div>{{ entry.wins }}</div>
+
+                                                <div class="label">Prehry:</div>
+                                                <div>{{ entry.losses }}</div>
+
+                                                <div class="label">Prehraté sety:</div>
+                                                <div>{{ entry.setsLost }}</div>
+                                            </div>
+
+                                            <div class="detail-button">
+                                                <AppButton :label="isSingles ? 'Detail hráča' : 'Detail tímu'"
+                                                    type="default" htmlType="button" @clicked.stop="goToDetail(
+                                                        isSingles ? 'players' : 'teams',
+                                                        isSingles ? entry.playerId : entry.teamId
+                                                    )" />
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </template>
                             </tbody>
                         </table>
                     </transition>
@@ -195,7 +176,6 @@
 import AppButton from '@/components/AppButton.vue';
 import AddMatchResult from '@/components/AddMatchResult.vue';
 import api from '@/axios-interceptor';
-import ParticipantList from '@/components/ParticipantList.vue';
 import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
 import { useUserStore } from '@/stores/user';
 import AppModal from '@/components/AppModal.vue';
@@ -203,6 +183,7 @@ import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
 
 import CircularProgress from '@/components/CircularProgress.vue';
+import MatchItem from '@/components/MatchItem.vue';
 
 
 export default {
@@ -229,6 +210,7 @@ export default {
             targetMatchId: null,
             participant: null,
             showStandings: window.innerWidth > 768,
+            expandedRow: null,
             header: useHeaderStore(),
             userStore: useUserStore()
 
@@ -611,6 +593,9 @@ export default {
             }
 
             return '';
+        },
+        toggleRow(id) {
+            this.expandedRow = this.expandedRow === id ? null : id
         }
     },
     computed: {
@@ -677,7 +662,7 @@ export default {
             };
         }
     },
-    components: { AppButton, AddMatchResult, ParticipantList, AddParticipantsForm, AppModal, CircularProgress }
+    components: { AppButton, AddMatchResult, AddParticipantsForm, AppModal, CircularProgress, MatchItem }
 }
 
 </script>
@@ -688,7 +673,6 @@ export default {
     max-width: 100%;
     width: 100%;
     margin: 0 auto;
-    /* padding: 1rem; */
     box-sizing: border-box;
 }
 
@@ -700,10 +684,13 @@ export default {
     flex-wrap: wrap;
 }
 
-/* 🎾 Zápasy */
-/* Základný layout pre zápasy */
 .matches {
-    flex: 1.5 1 0;
+    flex: 2 1 0;
+    padding: 1rem;
+}
+
+.standings {
+    flex: 2 1 0;
     padding: 1rem;
 }
 
@@ -712,81 +699,25 @@ export default {
     text-align: center;
 }
 
-/* Trojriadkové meno zápasu */
-.match-display {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    font-weight: 600;
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
+.round-title {
+    cursor: pointer;
 }
 
-/* Položka zápasu */
-.match-item {
+.match-list {
     list-style: none;
-    padding: 12px 0;
-    border-bottom: 1px solid #ddd;
-
-}
-
-/* Posledná položka bez spodného okraja */
-.match-item:last-child {
-    border-bottom: none;
-}
-
-/* Wrapper pre výsledok a tlačidlá */
-.match-result-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1rem;
-    background-color: #705846;
-    padding: 1rem 1.25rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-    font-size: 1rem;
-    color: #faf3e0;
-
-}
-
-/* Text výsledku - oddelený od tlačidiel */
-.match-result-text {
-    font-weight: 600;
-}
-
-/* Kontajner pre tlačidlá */
-.match-result-buttons {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
+    padding: 0;
+    margin: 0;
 }
 
 /* 📊 Tabuľka */
-.standings {
-    flex: 3 1 0;
-    padding: 1rem;
-}
-
 .standings-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.standings-table th,
 .standings-table td {
     padding: 0.5rem;
     text-align: center;
-}
-
-.standings-table th {
-    text-transform: uppercase;
-    font-size: 1rem;
-    color: #ffd700;
-    line-height: 1.2;
 }
 
 .standings-table tbody tr:hover {
@@ -816,27 +747,56 @@ export default {
     width: 100%;
 }
 
-
 .admin-buttons {
     display: flex;
-    flex-direction: column;
+    gap: 0.3rem;
+    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
 }
 
-.vs {
-    font-size: 0.8rem;
-    opacity: 0.7;
-    text-transform: lowercase;
+.main-row {
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.winner {
-    color: #ADFF2F;
-    text-shadow: 0 0 6px rgba(173, 255, 47, 0.3);
+/* DETAIL */
+.detail-row td {
+    background: #002E2C;
+    padding: 0.8rem;
 }
 
-.loser {
-    color: #e0e0e0;
+.detail-stats {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 0.5rem 1.5rem;
+    align-items: center;
+}
+
+.detail-stats .label {
+    font-weight: 700;
+    color: #ffd700;
+}
+
+/* tlačidlá */
+.actions {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.name-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    width: 100%;
+}
+
+.name-cell .name {
+    font-weight: 600;
+}
+
+.detail-button {
+    margin-top: 1rem;
 }
 
 @media (max-width: 768px) {
@@ -847,9 +807,6 @@ export default {
     .center-title {
         font-size: 1.2rem;
         margin-bottom: 0.8rem;
-    }
-    h4{
-        font-size: 1rem;
     }
 
     .matches,
@@ -867,41 +824,21 @@ export default {
         order: 2;
     }
 
-    .match-display {
-        font-size: 1rem;
-    }
-
-    .standings-table,
-    .standings-table thead,
-    .standings-table tbody,
-    .standings-table tr,
-    .standings-table td {
-        display: block;
+    .standings-table {
         width: 100%;
-    }
-
-    .standings-table thead {
-        display: none;
-    }
-
-    .standings-table tr {
-        margin-bottom: 1rem;
-        padding: 0.8rem;
-        border-radius: 10px;
-        background: #1e1e1e;
-    }
-
-    .standings-table td {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.25rem 0;
-        border: none;
         font-size: 0.9rem;
     }
 
-    .standings-table td::before {
-        content: attr(data-label);
-        color: #ffd700;
+    .standings-table td {
+        font-size: 0.9rem;
+        padding: 0.3rem;
     }
+
+    .detail-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+
 }
 </style>

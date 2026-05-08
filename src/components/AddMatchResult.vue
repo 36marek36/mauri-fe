@@ -3,43 +3,53 @@
     <form @submit.prevent="submitResult" v-show="match" class="match-form">
 
         <!-- 🔹 SETY -->
-        <div v-if="!formData.scratchedId">
-            <fieldset v-for="(set, index) in formData.setScores" :key="index" class="set-fieldset">
-                <legend>Set {{ index + 1 }}</legend>
+        <div v-if="!formData.scratchedId" class="sets">
 
-                <div class="form-group">
-                    <label>{{ participantName('home') }}</label>
-                    <input type="number" v-model.number="set.score1" />
+            <div v-for="(set, index) in formData.setScores" :key="index" class="set-card">
+
+                <div class="set-title">
+                    Set {{ index + 1 }}
                 </div>
 
-                <div class="form-group">
-                    <label>{{ participantName('away') }}</label>
-                    <input type="number" v-model.number="set.score2" />
+                <!-- HRÁČI -->
+                <div class="player-stack">
+
+                    <div class="player-row">
+                        <span>{{ participantName('home') }}</span>
+                        <input type="number" v-model.number="set.score1" />
+                    </div>
+
+                    <div class="player-row">
+                        <span>{{ participantName('away') }}</span>
+                        <input type="number" v-model.number="set.score2" />
+                    </div>
+
                 </div>
 
-                <div class="text-center">
-                    <AppButton label="Odstrániť set" type="default" htmlType="button" icon="❌"
+                <div class="center">
+                    <AppButton label="Odstrániť set" type="delete" icon="❌" htmlType="button"
                         @clicked="removeSet(index)" />
                 </div>
-            </fieldset>
+
+            </div>
+
         </div>
 
         <!-- 🔹 PRIDAŤ SET -->
-        <div v-if="!formData.scratchedId" class="text-center">
-            <AppButton label="Pridať set" type="default" htmlType="button" icon="➕" @clicked="addSet" />
+        <div v-if="!formData.scratchedId" class="center">
+            <AppButton label="Pridať set" type="default" icon="➕" htmlType="button" @clicked="addSet" />
         </div>
 
         <!-- 🔹 SKREČ -->
-        <div class="form-group">
+        <div class="scratch-box">
 
-            <!-- TLAČIDLO -->
-            <div v-if="!showScratchSelect">
-                <AppButton label="Skreč zápasu" type="delete" htmlType="button" icon="⚠️"
+            <div v-if="!showScratchSelect" class="center">
+                <AppButton label="Skreč zápasu" type="delete" icon="⚠️" htmlType="button"
                     @clicked="showScratchSelect = true" />
             </div>
 
-            <!-- SELECT sa zobrazí až po kliknutí -->
-            <div v-else>
+            <div v-else class="scratch-select">
+
                 <select v-model="formData.scratchedId">
 
                     <option value="">-- vyberte --</option>
@@ -64,20 +74,20 @@
 
                 </select>
 
-                <!-- Zrušiť -->
-                <div style="margin-top: 0.5rem;">
+                <div class="center" style="margin-top: 0.5rem;">
                     <AppButton label="Zrušiť skreč" type="default" htmlType="button" @clicked="
                         showScratchSelect = false;
                     formData.scratchedId = null;
                     " />
                 </div>
+
             </div>
 
         </div>
 
         <!-- 🔹 ODOSLANIE -->
-        <div class="text-center submit-btn">
-            <AppButton label="Odoslať výsledok" type="create" htmlType="submit" icon="✅" />
+        <div class="center submit">
+            <AppButton label="Odoslať výsledok" type="create" icon="✅" htmlType="submit" />
         </div>
 
     </form>
@@ -166,35 +176,76 @@ export default {
 
 <style scoped>
 .match-form {
+    width: 100%;
     max-width: 600px;
-    margin: 0 auto;
+    margin: 0;
+    padding: 1rem;
+    background: #002E2C;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    box-sizing: border-box;
 }
 
-.form-group {
+/* ===== SETY ===== */
+
+.set-card {
+    background: #013834;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
     margin-bottom: 1rem;
+}
+
+.set-title {
+    font-weight: bold;
+    margin-bottom: 0.8rem;
+    color: #ffd700;
+}
+
+/* HRÁČI POD SEBOU */
+.player-stack {
     display: flex;
     flex-direction: column;
+    gap: 0.6rem;
 }
 
-.form-group input,
-.form-group select {
-    padding: 0.5rem;
-    font-size: 0.9rem;
+.player-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 
-.set-fieldset {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+.player-row span {
+    flex: 1;
+    color: #e0e0e0;
 }
 
-.text-center {
+.player-row input {
+    width: 80px;
+    padding: 0.4rem;
     text-align: center;
 }
 
-.submit-btn {
+/* ===== SKREČ ===== */
+
+.scratch-box {
     margin-top: 1rem;
 }
 
+.scratch-select select {
+    width: 100%;
+    padding: 0.5rem;
+}
+
+/* ===== COMMON ===== */
+
+.center {
+    text-align: center;
+    margin-top: 0.8rem;
+}
+
+.submit {
+    margin-top: 1.5rem;
+}
 </style>

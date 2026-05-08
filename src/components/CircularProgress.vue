@@ -1,20 +1,3 @@
-<!-- <template>
-    <div class="circular-progress">
-        <svg viewBox="0 0 36 36" class="circular-chart">
-            <path class="circle-bg" d="M18 2.0845
-           a 15.9155 15.9155 0 0 1 0 31.831
-           a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <path class="circle" :class="progressClass" :style="circleStyle" d="M18 2.0845
-           a 15.9155 15.9155 0 0 1 0 31.831
-           a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <text x="18" y="18" class="percentage" transform="rotate(90 18 18)" text-anchor="middle"
-                dominant-baseline="middle">
-                {{ progress }}%
-            </text>
-        </svg>
-    </div>
-</template> -->
-
 <template>
     <div class="circular-progress">
         <svg viewBox="0 0 36 36" class="circular-chart">
@@ -74,40 +57,6 @@ export default {
 };
 </script>
 
-<!-- export default {
-    name: 'CircularProgress',
-    props: {
-        progress: {
-            type: Number,
-            required: true
-        }
-    },
-    data() {
-        return {
-            currentOffset: 100 // Začneme na 100% (prázdny kruh)
-        };
-    },
-    computed: {
-        progressClass() {
-            if (this.progress <= 30) return 'red';
-            if (this.progress <= 70) return 'orange';
-            return 'green';
-        },
-        circleStyle() {
-            return {
-                strokeDasharray: '100',
-                strokeDashoffset: this.currentOffset
-            };
-        }
-    },
-    mounted() {
-        // Spustenie animácie v ďalšom snímku
-        requestAnimationFrame(() => {
-            this.currentOffset = 100 - this.progress;
-        });
-    }
-}; -->
-
 <style scoped>
 .circular-progress {
     width: 3.5em;
@@ -151,11 +100,11 @@ export default {
 
 .percentage {
     fill: white;
-    font-size: 0.4em;
+    font-size: 0.6em;
 }
 
 @media (max-width: 768px) {
-    .percentage{
+    .percentage {
         font-size: 0.6rem;
     }
 }

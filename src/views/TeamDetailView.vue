@@ -118,9 +118,11 @@
 
                                     <!-- 🔥 FORMULÁR -->
                                     <tr v-if="activeMatchId === match.id">
-                                        <td colspan="6">
-                                            <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
-                                                @result-submitted="fetchMatchesAndClose" />
+                                        <td colspan="6" class="form-cell">
+                                            <div class="form-wrapper">
+                                                <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
+                                                    @result-submitted="fetchMatchesAndClose" />
+                                            </div>
                                         </td>
                                     </tr>
 
@@ -294,19 +296,29 @@ export default {
 }
 
 .player-card {
-    border: 1px solid #ccc;
-    padding: 0.5rem;
-    border-radius: 8px;
-    background: linear-gradient(to left,
-            rgba(0, 0, 0, 1),
-
-            rgba(0, 0, 0, 0.05)
-            /* takmer priehľadné napravo */
-        );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg,
+            #1a1a1a 0%,
+            #0f0f0f 100%);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.932);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 50px;
 }
 
 .player-card:hover {
     cursor: pointer;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 215, 0, 0.25);
+}
+.player-card:hover h3 {
+    color: #ffd700;
 }
 
 .list-or-nothing {
@@ -352,12 +364,18 @@ export default {
     line-height: 1.2;
 }
 
-.matches-table tbody tr:hover {
-    background-color: #363537;
-}
-
 .matches-table tbody tr {
     border-bottom: 1px solid #2a2a2a;
+}
+
+.form-cell {
+    text-align: center;
+}
+
+.form-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 /* match cell */

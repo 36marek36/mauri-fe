@@ -26,25 +26,31 @@
             </h3>
 
             <!-- SINGLES -->
-            <h3 v-if="currentSingleLeagues.length">Dvojhry</h3>
+            <h4 v-if="currentSingleLeagues.length">Dvojhry</h4>
 
             <table v-if="currentSingleLeagues.length" class="league-table">
               <tbody>
                 <tr v-for="league in currentSingleLeagues" :key="league.leagueId" class="league-row"
                   @click="$router.push('/leagues/' + league.leagueId)">
                   <td>{{ league.leagueName }}</td>
+                  <td>
+                    <CircularProgress :progress="league.leagueProgress" />
+                  </td>
                 </tr>
               </tbody>
             </table>
 
             <!-- DOUBLES -->
-            <h3 v-if="currentDoubleLeagues.length">Štvorhry</h3>
+            <h4 v-if="currentDoubleLeagues.length">Štvorhry</h4>
 
             <table v-if="currentDoubleLeagues.length" class="league-table">
               <tbody>
                 <tr v-for="league in currentDoubleLeagues" :key="league.leagueId" class="league-row"
                   @click="$router.push('/leagues/' + league.leagueId)">
                   <td>{{ league.leagueName }}</td>
+                  <td>
+                    <CircularProgress :progress="league.leagueProgress" />
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -96,49 +102,55 @@
 
         <!-- 3. LOGGED IN + PLAYER -->
         <div v-else class="panel success">
-          <h3>{{ userStore.user.playerName }}</h3>
 
-          <!-- LOADING MATCHES -->
-          <p v-if="loadingMatches">Načítavam zápasy...</p>
+          <!-- HEADER (klikateľný iba on/off) -->
+          <div class="panel-header" @click="matchesOpen = !matchesOpen">
+            <h3>
+              {{ userStore.user.playerName }}
+            </h3>
+          </div>
 
-          <div class="panel matches-preview" v-else-if="playerMatches.length">
+          <!-- CONTENT -->
+          <div v-show="matchesOpen">
 
-            <div v-for="match in playerMatches" :key="match.id" class="match-row">
+            <!-- LOADING MATCHES -->
+            <p v-if="loadingMatches">Načítavam zápasy...</p>
 
-              <!-- HRÁČI -->
-              <div class="match-players">
+            <!-- MATCHES -->
+            <div v-else-if="playerMatches.length">
 
-                <span :class="getPlayerClass(match, 'home')">
-                  {{ match.homePlayer.name }}
-                </span>
+              <div v-for="match in playerMatches" :key="match.id" class="match-row">
 
-                <span class="vs">vs</span>
+                <!-- HRÁČI -->
+                <div class="match-players">
+                  <span :class="getPlayerClass(match, 'home')">
+                    {{ match.homePlayer.name }}
+                  </span>
 
-                <span :class="getPlayerClass(match, 'away')">
-                  {{ match.awayPlayer.name }}
-                </span>
+                  <span class="vs">vs</span>
 
-              </div>
+                  <span :class="getPlayerClass(match, 'away')">
+                    {{ match.awayPlayer.name }}
+                  </span>
+                </div>
 
-              <!-- VÝSLEDOK -->
-              <div class="match-result">
-                <span v-if="match.result">
-                  {{ match.result.score1 }} : {{ match.result.score2 }}
-                </span>
-                <span v-else>-</span>
-              </div>
-
-              <!-- STATUS -->
-              <div class="match-status" :class="statusClass(match.status)">
-                {{ statusText(match.status) }}
+                <!-- VÝSLEDOK -->
+                <div class="match-result">
+                  <span v-if="match.result">
+                    {{ match.result.score1 }} : {{ match.result.score2 }}
+                  </span>
+                  <span v-else>-</span>
+                </div>
               </div>
 
             </div>
 
+            <!-- EMPTY STATE -->
+            <p v-else-if="!playerMatches.length && !loadingMatches">
+              Zatiaľ nemáš žiadne zápasy.
+            </p>
+
           </div>
-          <p v-else-if="!playerMatches.length && !loadingMatches">
-            Zatiaľ nemáš žiadne zápasy.
-          </p>
         </div>
       </div>
 
@@ -152,8 +164,8 @@ import LoginRegisterForm from '@/components/LoginRegisterForm.vue';
 import { useHeaderStore } from '@/stores/header';
 import { useUserStore } from '@/stores/user';
 import api from '@/axios-interceptor';
-import CircularProgress from '@/components/CircularProgress.vue';
 import AppButton from '@/components/AppButton.vue';
+import CircularProgress from '@/components/CircularProgress.vue';
 
 export default {
   name: 'Home Page',
@@ -167,6 +179,7 @@ export default {
       finishedMatches: [],
       cancelledMatches: [],
       scratchedMatches: [],
+      matchesOpen: false,
       header: useHeaderStore(),
       userStore: useUserStore()
     }
@@ -284,7 +297,7 @@ export default {
       ]
     }
   },
-  components: { LoginRegisterForm, CircularProgress, AppButton }
+  components: { LoginRegisterForm, CircularProgress, AppButton, CircularProgress }
 }
 
 </script>
@@ -370,6 +383,11 @@ export default {
   min-width: 140px;
 }
 
+.panel-header {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
 .hint {
   /* margin-top: 6px; */
   font-size: 0.85rem;
@@ -408,19 +426,19 @@ export default {
 }
 
 .match-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 10px;
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0.6rem 0.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .match-players {
   display: flex;
-  justify-content: center;
-  gap: 8px;
   align-items: center;
+  gap: 0.4rem;
+  flex: 2;
 }
 
 .vs {

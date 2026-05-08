@@ -22,7 +22,6 @@ export default {
   padding: 12px 48px;
   border-radius: 5px;
   font-weight: 500;
-  /* margin: 1rem auto; */
   border: 1px solid transparent;
   max-width: 600px;
   width: fit-content;

@@ -26,16 +26,16 @@
                     <div class="list-or-nothing">
 
                         <div class="my-teams">
-                            <h3 class="label">Tímy:</h3>
-                            <div class="value" v-for="team in player.teams" :key="team.id"
+                            <h3 class="label small">Tímy:</h3>
+                            <div class="value small" v-for="team in player.teams" :key="team.id"
                                 @click="$router.push('/teams/' + team.id)" style="cursor: pointer;">
                                 {{ team.name }}
                             </div>
                         </div>
 
                         <div class="my-leagues">
-                            <h3 class="label">Ligy:</h3>
-                            <div class="value" v-for="league in sortedLeagues" :key="league.leagueId"
+                            <h3 class="label small">Ligy:</h3>
+                            <div class="value small" v-for="league in sortedLeagues" :key="league.leagueId"
                                 @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
                                 {{ league.leagueName }} ({{ league.seasonYear }})
                             </div>
@@ -71,7 +71,6 @@
 
                                     <!-- 🔹 HLAVNÝ RIADOK -->
                                     <tr>
-
                                         <td colspan="2" data-label="Zápas">
                                             <div class="match-cell">
                                                 <div :class="getPlayerClass(match, 'home')">
@@ -132,9 +131,11 @@
 
                                     <!-- 🔥 FORMULÁR -->
                                     <tr v-if="activeMatchId === match.id">
-                                        <td colspan="6">
-                                            <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
-                                                @result-submitted="fetchMatchesAndClose" />
+                                        <td colspan="6" class="form-cell">
+                                            <div class="form-wrapper">
+                                                <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
+                                                    @result-submitted="fetchMatchesAndClose" />
+                                            </div>
                                         </td>
                                     </tr>
 
@@ -189,8 +190,8 @@ export default {
                 await Promise.all(promises);
 
                 this.header.setTitle(
-                    this.player.name,
-                    this.stats?.rank !== undefined ? '#' + this.stats.rank : ''
+                    this.player.firstName || '',
+                    this.player.lastName || ''
                 );
 
             } finally {
@@ -319,8 +320,13 @@ export default {
 </script>
 
 <style scoped>
+/* =======================
+   LAYOUT
+======================= */
+
 .right-side {
     flex-direction: column;
+    justify-content: flex-start;
 }
 
 .details-section {
@@ -332,13 +338,16 @@ export default {
     width: 100%;
 }
 
+/* =======================
+   PLAYER INFO / SIDE PANELS
+======================= */
+
 .list-or-nothing {
     align-items: center;
     justify-content: flex-start;
 }
 
 .player-info {
-    /* list-style: none; */
     text-align: center;
     padding: 0.5rem;
     margin: 0;
@@ -350,15 +359,15 @@ export default {
     padding: 0.5rem;
 }
 
-.my-teams {
-    width: 100%;
-    text-align: center;
-}
-
+.my-teams,
 .my-leagues {
     width: 100%;
     text-align: center;
 }
+
+/* =======================
+   TEXT STYLES
+======================= */
 
 .label {
     color: #ffd700;
@@ -374,6 +383,9 @@ export default {
     font-size: 1rem;
 }
 
+/* =======================
+   TABLE BASE (DESKTOP)
+======================= */
 
 .matches-table {
     width: 100%;
@@ -384,6 +396,7 @@ export default {
 .matches-table td {
     padding: 0.5rem;
     text-align: center;
+    vertical-align: middle;
 }
 
 .matches-table th {
@@ -394,18 +407,27 @@ export default {
 }
 
 .matches-table td {
-    white-space: nowrap;
+    white-space: normal;
 }
 
-/* hover */
-.matches-table tbody tr:hover {
-    background-color: #363537;
-}
-
-/* oddelenie riadkov */
+/* divider */
 .matches-table tbody tr {
     border-bottom: 1px solid #2a2a2a;
 }
+
+.form-cell {
+    text-align: center;
+}
+
+.form-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* =======================
+   MATCH CELL
+======================= */
 
 .match-cell {
     display: flex;
@@ -421,16 +443,10 @@ export default {
     text-transform: lowercase;
 }
 
-.winner {
-    color: #ADFF2F;
-    text-shadow: 0 0 6px rgba(173, 255, 47, 0.3);
-}
+/* =======================
+   STATUS BADGES
+======================= */
 
-.loser {
-    color: #e0e0e0;
-}
-
-/* statusy (môžeš nechať rovnaké ako predtým) */
 .badge-finished {
     color: #ADFF2F;
 }
@@ -448,6 +464,10 @@ export default {
     font-style: italic;
 }
 
+/* =======================
+   ANIMATIONS
+======================= */
+
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.25s ease;
@@ -458,14 +478,22 @@ export default {
     opacity: 0;
 }
 
+/* =======================
+   TITLE
+======================= */
+
 .center-title {
     cursor: pointer;
 }
 
+/* =======================
+   MOBILE
+======================= */
+
 @media (max-width: 768px) {
+
     .details-section {
         flex-direction: column;
-        /* order: 2; */
     }
 
     .second {
@@ -477,16 +505,10 @@ export default {
         margin-bottom: 0.8rem;
     }
 
-    .matches {
-        width: 100%;
-    }
-
+    /* TABLE becomes card layout */
     .matches-table,
     .matches-table thead,
-    .matches-table tbody,
-    .matches-table th,
-    .matches-table td,
-    .matches-table tr {
+    .matches-table tbody {
         display: block;
         width: 100%;
     }
@@ -496,15 +518,18 @@ export default {
     }
 
     .matches-table tr {
-        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0.6rem;
         background: #1e1e1e;
-        padding: 0.8rem;
         border-radius: 8px;
+        padding: 0.8rem;
     }
 
     .matches-table td {
         display: flex;
         justify-content: space-between;
+        width: 100%;
         padding: 0.3rem 0;
         border: none;
         font-size: 0.9rem;

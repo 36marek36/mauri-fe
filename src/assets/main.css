@@ -3,26 +3,15 @@
 
 /* 🌌 Hlavné pozadie celej stránky */
 body {
-  /* height: 100%; */
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', sans-serif;
   font-weight: normal;
   color: #FFD700;
   background-color: #000;
-  /* background-image: url('/images/background.jpg'); */
-  /* uprav cestu podľa projektu */
-  /* background-size: 100% 100%; */
-  /* prispôsobenie veľkosti */
-  /* background-position: center top; */
-  /* zarovnanie */
-  /* background-repeat: no-repeat; */
-  /* background-attachment: fixed; */
-  /* pozadie sa neposúva pri scrollovaní */
-  /* transition: background-position 0.3s ease, background-size 0.3s ease; */
-  /* jemný prechod pri resize */
 }
 
+/* BACKGROUND */
 body::before {
   content: "";
   position: fixed;
@@ -36,22 +25,31 @@ body::before {
   z-index: -1;
 }
 
+/* =========================
+   TYPOGRAFIA (bez rozbitia tabuliek)
+   ========================= */
+
 h1,
 h2,
 h3,
 h4,
 h5,
-h6,
-th,
-td,
-a {
+h6 {
   font-variant-caps: petite-caps;
   font-weight: 600;
   letter-spacing: 1px;
-  font-size: 3.5rem;
   text-align: center;
   color: whitesmoke;
   text-shadow: 5px 5px 3px rgba(0, 0, 0, 0.85);
+}
+
+/* veľkosti headingov */
+h1 {
+  font-size: 3rem;
+}
+
+h2 {
+  font-size: 2.5rem;
 }
 
 h3 {
@@ -63,61 +61,85 @@ h4 {
   font-size: 1.2rem;
 }
 
+h5 {
+  font-size: 1rem;
+}
+
+h6 {
+  font-size: 0.9rem;
+}
+
+/* =========================
+   TABUĽKY (FIX BUGOV)
+   ========================= */
+
+table {
+  width: 100%;
+  padding: 0.5rem;
+  border-collapse: collapse;
+}
+
 th {
-  font-size: 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  color: #FFD700;
+  text-transform: uppercase;
 }
 
 td {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: normal;
+  text-align: center;
+  vertical-align: middle;
   letter-spacing: normal;
-  /* color: whitesmoke; */
-  text-shadow:
-    -0.5px -0.5px 0 #ff0000,
-    0.5px -0.5px 0 #ff0000,
-    -0.5px 0.5px 0 #ff0000,
-    0.5px 0.5px 0 #ff0000;
+  color: whitesmoke;
 }
 
-/* 📦 Vizuálny štýl obsahových blokov */
-ul,
-table {
-  padding: 1rem;
-}
-
+/* jemné oddelenie riadkov */
 table td {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #333;
 }
 
 table tr:last-child td {
   border-bottom: none;
 }
 
+/* =========================
+   LINKY
+   ========================= */
+
 a {
-  font-size: 1.2rem;
-  text-shadow: none;
+  font-size: 1.1rem;
   text-decoration: none;
   color: #FFD700;
-  transition: 0.4s;
-  padding: 3px
+  transition: 0.3s;
+  padding: 3px;
 }
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* =========================
+   FORM ELEMENTS
+   ========================= */
 
 select {
   padding: 0.4rem 0.6rem;
   font-size: 0.9rem;
-  border: 1px solid var(--border-color, #ccc);
+  border: 1px solid #ccc;
   border-radius: 6px;
-  background-color: var(--background-input, #fff);
-  color: var(--text-color, #333);
+  background-color: #fff;
+  color: #333;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* Hover / Focus efekt pre výberové menu */
 select:hover,
 select:focus {
-  border-color: var(--primary-color, #007bff);
-  box-shadow: 0 0 4px var(--primary-color, #007bff33);
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.2);
 }
 
 
