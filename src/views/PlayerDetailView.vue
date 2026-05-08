@@ -6,6 +6,10 @@
         <div class="right-side">
             <div class="details-section">
                 <!--  údaje o hráčovi -->
+                <div class="player-photo-wrapper">
+                    <img :src="getPlayerPhoto(player.id)" @click="toggleZoom" @error="hideMissingImage"
+                        :class="['player-photo', { zoomed: isZoomed }]" />
+                </div>
                 <div class="list-or-nothing">
                     <div class="player-info">
                         <div>
@@ -170,6 +174,7 @@ export default {
             activeMatchId: null,
             loading: true,
             showMatches: window.innerWidth > 768,
+            isZoomed: false,
             header: useHeaderStore(),
             userStore: useUserStore()
         }
@@ -282,6 +287,17 @@ export default {
             if (side === 'away' && !isHomeWinner) return 'winner';
 
             return 'loser';
+        },
+        getPlayerPhoto(playerId) {
+            const url = `/players/${playerId}.png`
+
+            return url
+        },
+        hideMissingImage(e) {
+            e.target.style.display = 'none'
+        },
+        toggleZoom() {
+            this.isZoomed = !this.isZoomed
         }
     },
     computed: {
@@ -363,6 +379,29 @@ export default {
 .my-leagues {
     width: 100%;
     text-align: center;
+}
+
+.player-photo-wrapper {
+    display: flex;
+    padding: 0 0.5rem 0.5rem 0;
+}
+
+.player-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ffd700;
+    transition: transform 0.2s ease;
+    cursor: zoom-in;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.player-photo.zoomed {
+    transform: scale(2);
+    z-index: 10;
+    cursor: zoom-out;
 }
 
 /* =======================
@@ -494,6 +533,14 @@ export default {
 
     .details-section {
         flex-direction: column;
+    }
+
+    .player-photo-wrapper {
+        justify-content: flex-end;
+    }
+
+    .player-photo.zoomed {
+        transform: translate(-50%, -50%) scale(2);
     }
 
     .second {

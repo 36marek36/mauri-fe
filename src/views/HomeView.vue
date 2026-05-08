@@ -135,11 +135,16 @@
                 </div>
 
                 <!-- VÝSLEDOK -->
-                <div class="match-result">
-                  <span v-if="match.result">
-                    {{ match.result.score1 }} : {{ match.result.score2 }}
+                <div class="match-result" :class="statusClass(match.status)">
+
+                  <span v-if="match.status === 'FINISHED'">
+                    {{ match.result?.score1 }} : {{ match.result?.score2 }}
                   </span>
-                  <span v-else>-</span>
+
+                  <span v-else>
+                    {{ statusText(match.status) }}
+                  </span>
+
                 </div>
               </div>
 
@@ -244,14 +249,14 @@ export default {
       this.$router.push('/players/create')
     },
     getPlayerClass(match, side) {
-      const userId = this.userStore.user.playerId
+      const winnerId = match.result?.winnerId
 
-      const isUser =
-        (side === 'home' && match.homePlayer.id === userId) ||
-        (side === 'away' && match.awayPlayer.id === userId)
+      const isWinner =
+        (side === 'home' && match.homePlayer?.id === winnerId) ||
+        (side === 'away' && match.awayPlayer?.id === winnerId)
 
       return {
-        me: isUser
+        winner: isWinner
       }
     },
 
@@ -445,9 +450,7 @@ export default {
   opacity: 0.6;
 }
 
-.match-result {
-  text-align: center;
-}
+
 
 .match-status {
   text-align: right;
@@ -472,7 +475,7 @@ export default {
 }
 
 /* zvýraznenie usera */
-.me {
+.winner {
   color: #FFD700;
 }
 
