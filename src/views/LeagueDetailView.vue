@@ -102,6 +102,12 @@
                                             <CircularProgress :progress="entry.leagueProgress" />
                                         </td>
 
+                                        <td>
+                                            <span>
+                                                {{ entry.points }} b.
+                                            </span>
+                                        </td>
+
                                         <td class="actions">
                                             <div v-if="isAdmin" class="admin-buttons">
                                                 <AppButton icon="🔓" type="edit" htmlType="button" @clicked.stop="confirmDropParticipant(
@@ -122,20 +128,15 @@
                                         class="detail-row">
                                         <td colspan="100%">
                                             <div class="detail-stats">
-                                                <div class="label">Body:</div>
-                                                <div>{{ entry.setsWon }}</div>
 
-                                                <div class="label">Zápasy:</div>
+                                                <div class="label">Odohraté zápasy:</div>
                                                 <div>{{ entry.matches }}</div>
 
-                                                <div class="label">Výhry:</div>
-                                                <div>{{ entry.wins }}</div>
+                                                <div class="label">W-L:</div>
+                                                <div>{{ entry.wins }}-{{ entry.losses }}</div>
 
-                                                <div class="label">Prehry:</div>
-                                                <div>{{ entry.losses }}</div>
-
-                                                <div class="label">Prehraté sety:</div>
-                                                <div>{{ entry.setsLost }}</div>
+                                                <div class="label">Sety:</div>
+                                                <div>{{ entry.setsWon }}:{{ entry.setsLost }}</div>
                                             </div>
 
                                             <div class="detail-button">

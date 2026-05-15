@@ -14,6 +14,7 @@
                                 <th>Rola</th>
                                 <th>📝</th>
                                 <th>Hráč</th>
+                                <th></th>
                                 <th>Prihlásený</th>
                             </tr>
                         </thead>
@@ -28,8 +29,6 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <!-- <input type="checkbox" v-model="user.showDetails"
-                                        @change="updateShowDetails(user)" /> -->
                                     <label class="switch">
                                         <input type="checkbox" v-model="user.showDetails"
                                             @change="updateShowDetails(user)">
@@ -41,6 +40,7 @@
                                         @click="goToDetail('players', user.playerId)">
                                         {{ user.playerName }}
                                     </span>
+
                                     <div v-else>
                                         <select v-model="selectedPlayers[user.id]">
                                             <option value=""></option>
@@ -49,10 +49,14 @@
                                                 {{ player.name }}
                                             </option>
                                         </select>
-                                        <AppButton html-type="submit" label="Priradiť"
-                                            :disabled="!selectedPlayers[user.id]"
-                                            @clicked="() => assignPlayerToUser(user)" />
                                     </div>
+                                </td>
+                                <td>
+                                    <AppButton v-if="user.playerId" html-type="button" type="delete" label="Odpojiť"
+                                        @clicked="() => openUnassignModal(user)" />
+                                    <AppButton v-else html-type="button" type="edit" label="Priradiť"
+                                        :disabled="!selectedPlayers[user.id]"
+                                        @clicked="() => assignPlayerToUser(user)" />
                                 </td>
                                 <td>
                                     <span v-if="user.lastLogin"> {{ user.lastLogin }} </span>
@@ -74,6 +78,8 @@
     <AppModal :visible="showDeleteModal" :message="deleteMessage" @confirm="deleteUser" @cancel="cancelDelete" />
     <AppModal :visible="showChangeRoleModal" :message="changeRoleMessage" @confirm="confirmChange"
         @cancel="cancelChange" />
+    <AppModal :visible="showUnassignModal" :message="unassignMessage" @confirm="unassignPlayerFromUser"
+        @cancel="cancelUnassign" />
 </template>
 
 <script>
@@ -94,6 +100,7 @@ export default {
             showDeleteModal: false,
             previousRole: null,
             showChangeRoleModal: false,
+            showUnassignModal: false,
             user: null,
             loading: true
         }
@@ -166,6 +173,29 @@ export default {
                 console.error('Chyba pri priraďovaní hráča:', error)
                 alert('Nepodarilo sa priradiť hráča.')
             }
+        },
+        async unassignPlayerFromUser() {
+            try {
+                const res = await api.patch(`/players/unassignFromUser/${this.user?.playerId}`, {
+                })
+                this.flash.showMessage(res.data, 'warning')
+                this.selectedPlayers = []
+                await this.fetchUsers()
+                await this.fetchUnassignedPlayers()
+            } catch (error) {
+                console.error('Chyba pri vyraďovaní hráča:', error)
+                alert('Nepodarilo sa vyradiť hráča.')
+            } finally {
+                this.cancelUnassign()
+            }
+        },
+        openUnassignModal(user) {
+            this.user = user
+            this.showUnassignModal = true
+        },
+        cancelUnassign() {
+            this.user = null
+            this.showUnassignModal = false
         },
         storePreviousRole(user) {
             // toto sa zavolá ešte pred zmenou
@@ -251,6 +281,9 @@ export default {
         },
         changeRoleMessage() {
             return 'Naozaj chcete zmenit rolu používatela ' + this.user?.username + ' na ' + this.user?.selectedRole + ' ?';
+        },
+        unassignMessage() {
+            return `Naozaj chceš odpojiť hráča ${this.user?.playerName} od používateľa ${this.user?.username}?`
         }
     },
     components: { AppButton, AppModal, ParticipantList }
