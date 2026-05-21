@@ -3,67 +3,67 @@
     <div class="left-side">
     </div>
     <div class="right-side">
-      <div class="currentSeason">
-        <div class="list-or-nothing">
 
-          <!-- LOADING -->
-          <p v-if="loading">Načítavam aktuálnu sezónu...</p>
+      <!-- LOADING -->
+      <p v-if="loading && isLoggedIn">
+        Načítavam posledné výsledky...
+      </p>
 
-          <!-- ERROR -->
-          <p class="error-message" v-else-if="errorMessage">{{ errorMessage }}</p>
+      <!-- ERROR -->
+      <p v-else-if="errorMessage && isLoggedIn" class="error-message">
+        {{ errorMessage }}
+      </p>
 
-          <!-- NO SEASON -->
-          <p v-else-if="!currentSeason">
-            Žiadna aktívna sezóna
+      <!-- ACTIVITIES -->
+      <div v-else-if="isLoggedIn" class="list-or-nothing">
+        <div class="activities">
+
+          <h3>Posledné výsledky</h3>
+
+          <p v-if="!matchActivities.length">
+            V posledných 3 dňoch sa neodohrali žiadne zápasy
           </p>
 
-          <!-- CONTENT -->
-          <div v-else>
+          <div v-for="group in groupedActivities" :key="group.date">
 
-            <!-- TITLE -->
-            <h3>
-              Sezóna {{ currentSeason.year }}
-            </h3>
+            <h4 class="day-title">
+              {{ group.date }}
+            </h4>
 
-            <!-- SINGLES -->
-            <h4 v-if="currentSingleLeagues.length">Dvojhry</h4>
+            <div v-for="activity in group.activities" :key="activity.match.id" class="activity-item">
+              <div class="scoreboard">
 
-            <table v-if="currentSingleLeagues.length" class="league-table">
-              <tbody>
-                <tr v-for="league in currentSingleLeagues" :key="league.leagueId" class="league-row"
-                  @click="$router.push('/leagues/' + league.leagueId)">
-                  <td>{{ league.leagueName }}</td>
-                  <td>
-                    <CircularProgress :progress="league.leagueProgress" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                <!-- HOME -->
+                <div class="row">
+                  <div class="name" :class="getPlayerClass(activity.match, 'home')">
+                    {{ getHomeName(activity.match) }}
+                  </div>
 
-            <!-- DOUBLES -->
-            <h4 v-if="currentDoubleLeagues.length">Štvorhry</h4>
+                  <div class="sets">
+                    <span v-for="(set, i) in getHomeSets(activity.match)" :key="i">
+                      {{ set }}
+                    </span>
+                  </div>
+                </div>
 
-            <table v-if="currentDoubleLeagues.length" class="league-table">
-              <tbody>
-                <tr v-for="league in currentDoubleLeagues" :key="league.leagueId" class="league-row"
-                  @click="$router.push('/leagues/' + league.leagueId)">
-                  <td>{{ league.leagueName }}</td>
-                  <td>
-                    <CircularProgress :progress="league.leagueProgress" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                <!-- AWAY -->
+                <div class="row">
+                  <div class="name" :class="getPlayerClass(activity.match, 'away')">
+                    {{ getAwayName(activity.match) }}
+                  </div>
 
-            <!-- EMPTY STATE -->
-            <p v-if="!currentSingleLeagues.length && !currentDoubleLeagues.length">
-              Sezóna neobsahuje žiadne ligy.
-            </p>
-
+                  <div class="sets">
+                    <span v-for="(set, i) in getAwaySets(activity.match)" :key="i">
+                      {{ set }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-
         </div>
       </div>
+
       <div class="second">
 
         <!-- 1. NOT LOGGED IN -->
@@ -101,61 +101,8 @@
         </div>
 
         <!-- 3. LOGGED IN + PLAYER -->
-        <div v-else class="panel success">
-
-          <!-- HEADER (klikateľný iba on/off) -->
-          <div class="panel-header" @click="matchesOpen = !matchesOpen">
-            <h3>
-              {{ userStore.user.playerName }}
-            </h3>
-          </div>
-
-          <!-- CONTENT -->
-          <div v-show="matchesOpen">
-
-            <!-- LOADING MATCHES -->
-            <p v-if="loadingMatches">Načítavam zápasy...</p>
-
-            <!-- MATCHES -->
-            <div v-else-if="playerMatches.length">
-
-              <div v-for="match in playerMatches" :key="match.id" class="match-row">
-
-                <!-- HRÁČI -->
-                <div class="match-players">
-                  <span :class="getPlayerClass(match, 'home')">
-                    {{ match.homePlayer.name }}
-                  </span>
-
-                  <span class="vs">vs</span>
-
-                  <span :class="getPlayerClass(match, 'away')">
-                    {{ match.awayPlayer.name }}
-                  </span>
-                </div>
-
-                <!-- VÝSLEDOK -->
-                <div class="match-result" :class="statusClass(match.status)">
-
-                  <span v-if="match.status === 'FINISHED'">
-                    {{ match.result?.score1 }} : {{ match.result?.score2 }}
-                  </span>
-
-                  <span v-else>
-                    {{ statusText(match.status) }}
-                  </span>
-
-                </div>
-              </div>
-
-            </div>
-
-            <!-- EMPTY STATE -->
-            <p v-else-if="!playerMatches.length && !loadingMatches">
-              Zatiaľ nemáš žiadne zápasy.
-            </p>
-
-          </div>
+        <div v-else class="panel success" @click="openActiveSeason">
+          Aktuálna sezóna
         </div>
       </div>
 
@@ -170,150 +117,228 @@ import { useHeaderStore } from '@/stores/header';
 import { useUserStore } from '@/stores/user';
 import api from '@/axios-interceptor';
 import AppButton from '@/components/AppButton.vue';
-import CircularProgress from '@/components/CircularProgress.vue';
 
 export default {
   name: 'Home Page',
   data() {
     return {
-      currentSeason: null,
+      player: null,
       loading: true,
-      loadingMatches: false,
       errorMessage: '',
-      createdMatches: [],
-      finishedMatches: [],
-      cancelledMatches: [],
-      scratchedMatches: [],
-      matchesOpen: false,
+      matchActivities: [],
       header: useHeaderStore(),
       userStore: useUserStore()
     }
   },
   async created() {
-    await this.initHeader();
-    await this.fetchCurrentSeason();
-    await this.fetchPlayerMatches()
+    await this.userStore.fetchCurrentUser();
+
+    await this.fetchPlayer(); // ⬅️ musí byť prvé
+
+    await this.initHeader();   // ⬅️ až potom header
+
+    if (this.isLoggedIn) {
+      await this.loadMatchActivities();
+    }
   },
   methods: {
-    async fetchCurrentSeason() {
-      this.loading = true
+    async loadMatchActivities() {
+
       try {
-        const response = await api.get('/seasons/current');
-        this.currentSeason = response.data;
-      } catch (err) {
-        if (err.response && err.response.data && err.response.data.message) {
-          this.errorMessage = err.response.data.message;
-        } else {
-          this.errorMessage = 'Nepodarilo sa načítať aktuálnu sezónu.';
-        }
+        this.loading = true;
+        this.errorMessage = null;
+
+        const res = await api.get('/match-activities/recent');
+        this.matchActivities = res.data;
+
+      } catch (e) {
+        this.errorMessage = "Nepodarilo sa načítať aktivity";
       } finally {
         this.loading = false;
       }
     },
     async initHeader() {
-      await this.userStore.fetchCurrentUser()
-
-      if (this.isLoggedIn) {
-        this.header.setTitle(`Vitaj ${this.userStore.user.username}`, '')
-      } else {
-        this.header.setTitle('Vitajte', '')
+      if (!this.isLoggedIn) {
+        this.header.setTitle('Vitajte', '');
+        return;
       }
+
+      const player = this.player;
+
+      if (!player) {
+        this.header.setTitle('Vitajte', '');
+        return;
+      }
+
+      this.header.setTitle(
+        'Vitaj',
+        player.firstName || ''
+      );
     },
-    async fetchPlayerMatches() {
-      this.loadingMatches = true
-
+    async fetchPlayer() {
       try {
-        const playerId = this.userStore.user?.playerId
-        if (!playerId) return
+        const playerId = this.userStore.user?.playerId;
 
+        if (!playerId) return; // ⬅️ nič nerob
 
-        const [createdRes, finishedRes, cancelledRes, scratchedRes] = await Promise.all([
-          api.get(`/matches/player/${playerId}/status/CREATED`),
-          api.get(`/matches/player/${playerId}/status/FINISHED`),
-          api.get(`/matches/player/${playerId}/status/CANCELLED`),
-          api.get(`/matches/player/${playerId}/status/SCRATCHED`)
-        ])
-
-        this.createdMatches = createdRes.data
-        this.finishedMatches = finishedRes.data
-        this.cancelledMatches = cancelledRes.data
-        this.scratchedMatches = scratchedRes.data
+        const response = await api.get('/players/' + playerId);
+        this.player = response.data;
 
       } catch (error) {
-        console.error('Chyba pri načítavaní zápasov:', error)
-      } finally {
-        this.loadingMatches = false
+        console.error('Chyba pri načítavaní hráča:', error);
       }
     },
     goToCreatePlayer() {
       this.$router.push('/players/create')
     },
     getPlayerClass(match, side) {
-      const winnerId = match.result?.winnerId
+      const winnerId = match.result?.winnerId;
 
-      const isWinner =
-        (side === 'home' && match.homePlayer?.id === winnerId) ||
-        (side === 'away' && match.awayPlayer?.id === winnerId)
+      const id =
+        match.matchType === 'SINGLES'
+          ? side === 'home'
+            ? match.homePlayer?.id
+            : match.awayPlayer?.id
+          : side === 'home'
+            ? match.homeTeam?.id
+            : match.awayTeam?.id;
 
       return {
-        winner: isWinner
-      }
+        winner: id === winnerId
+      };
+    },
+    getHomeName(match) {
+      return match.matchType === "SINGLES"
+        ? match.homePlayer?.name
+        : match.homeTeam?.name;
     },
 
-    statusText(status) {
-      if (status === 'FINISHED') return 'Odohraný'
-      if (status === 'CANCELLED') return 'Zrušený'
-      if (status === 'SCRATCHED') return 'Skrečovaný'
-      return 'Neodohraný'
+    getAwayName(match) {
+      return match.matchType === "SINGLES"
+        ? match.awayPlayer?.name
+        : match.awayTeam?.name;
     },
 
-    statusClass(status) {
-      return {
-        'st-finished': status === 'FINISHED',
-        'st-cancelled': status === 'CANCELLED',
-        'st-scratched': status === 'SCRATCHED',
-        'st-pending': !['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(status)
+    getHomeSets(match) {
+      return match.result?.setScores?.map(s => s.score1) || [];
+    },
+
+    getAwaySets(match) {
+      return match.result?.setScores?.map(s => s.score2) || [];
+    },
+    async openActiveSeason() {
+      try {
+        const res = await api.get('/seasons/current');
+        this.currentSeason = res.data;
+
+        this.$router.push(`/seasons/${res.data.id}`);
+
+      } catch (e) {
+        this.errorMessage = "Nepodarilo sa načítať aktívnu sezónu";
       }
     }
   },
 
   computed: {
-    hasLeagues() {
-      return this.currentSeason?.leagues?.length > 0;
-    },
     isLoggedIn() {
       return this.userStore.isLoggedIn
-    },
-    currentSingleLeagues() {
-      return this.currentSeason?.leagues?.filter(l => l.leagueType === 'SINGLES') ?? []
-    },
-    currentDoubleLeagues() {
-      return this.currentSeason?.leagues?.filter(l => l.leagueType === 'DOUBLES') ?? []
     },
     hasPlayer() {
       return !!this.userStore.user?.playerId
     },
-    playerMatches() {
-      return [
-        ...(this.createdMatches || []),
-        ...(this.finishedMatches || []),
-        ...(this.cancelledMatches || []),
-        ...(this.scratchedMatches || [])
-      ]
-    }
+    groupedActivities() {
+      if (!this.matchActivities?.length) return [];
+
+      const groups = {};
+
+      this.matchActivities.forEach(activity => {
+        const date = new Date(activity.playedAt);
+
+        const dayKey = date.toLocaleDateString("sk-SK", {
+          weekday: "long",
+          day: "2-digit",
+          month: "2-digit"
+        });
+
+        if (!groups[dayKey]) {
+          groups[dayKey] = [];
+        }
+
+        groups[dayKey].push(activity);
+      });
+
+      return Object.entries(groups).map(([date, activities]) => ({
+        date,
+        activities
+      }));
+    },
   },
-  components: { LoginRegisterForm, CircularProgress, AppButton, CircularProgress }
+  components: { LoginRegisterForm, AppButton }
 }
 
 </script>
 
 <style scoped>
-.currentSeason {
+.activities {
+  width: 100%;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.day-title {
+  color: #CAE5FF;
+  padding: 2px 8px;
+  font-weight: 400;
+  text-transform: capitalize;
+  text-align: left;
+}
+
+.activity-item {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.scoreboard {
   display: flex;
   flex-direction: column;
-  width: 50%;
-  font-size: 30px;
-  max-height: 70vh;
+  gap: 4px;
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.name {
+  font-size: 1.2rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+.sets {
+  display: flex;
+  gap: 6px;
+  font-family: monospace;
+}
+
+.sets span {
+  background: #8b0000;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.9rem;
 }
 
 .second {
@@ -323,30 +348,6 @@ export default {
 .error-message {
   text-align: center;
   margin: 10px auto;
-}
-
-.league-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-
-.league-row {
-  font-size: x-large;
-  height: 60px;
-  cursor: pointer;
-}
-
-.league-table td {
-  padding-left: 2rem;
-  text-align: left;
-  white-space: nowrap;
-  text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700;
-}
-
-.league-table tbody tr:hover {
-  background-color: #363537;
 }
 
 .list-or-nothing {
@@ -377,20 +378,13 @@ export default {
   border: 2px solid #4CAF50;
   border-radius: 12px;
   padding: 16px 20px;
-  max-width: 420px;
+  max-width: 200px;
   margin: 0 auto;
   color: #fff;
+  font-size: 1rem;
+  text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.panel.success p strong {
-  color: #FFD700;
-  min-width: 140px;
-}
-
-.panel-header {
   cursor: pointer;
-  transition: background 0.2s ease;
 }
 
 .hint {
@@ -430,50 +424,6 @@ export default {
   color: #d9ff00;
 }
 
-.match-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  padding: 0.6rem 0.4rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.match-players {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex: 2;
-}
-
-.vs {
-  opacity: 0.6;
-}
-
-
-
-.match-status {
-  text-align: right;
-  font-size: 0.8rem;
-}
-
-/* statusy */
-.st-finished {
-  color: #4CAF50;
-}
-
-.st-cancelled {
-  color: #f44336;
-}
-
-.st-scratched {
-  color: #ff9800;
-}
-
-.st-pending {
-  color: #ccc;
-}
-
 /* zvýraznenie usera */
 .winner {
   color: #FFD700;
@@ -481,21 +431,35 @@ export default {
 
 
 @media (max-width: 768px) {
-  .currentSeason {
-    width: 100%;
-    max-height: none;
+
+  .activities {
+    padding: 0 5px;
+    font-size: 1rem;
+  }
+
+  .activities h3 {
+    font-size: 1.2rem;
+  }
+
+  .day-title {
+    font-size: 0.9rem;
+  }
+
+  .name {
+    font-size: 0.9rem;
   }
 
   .right-side {
     flex-direction: column-reverse;
   }
 
-  .league-table td {
-    font-size: 1.1rem;
-  }
-
   .second {
     width: 100%;
+  }
+
+  .panel.success {
+    margin: 0 0 0 auto;
+    /* ← toto ho posunie doprava */
   }
 }
 </style>

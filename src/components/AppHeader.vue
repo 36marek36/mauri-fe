@@ -65,7 +65,7 @@ export default {
   }
   .text {
     text-align: right;
-    padding-right: 2rem;
+    /* padding-right: 2rem; */
   }
   .second{
     display: none;
