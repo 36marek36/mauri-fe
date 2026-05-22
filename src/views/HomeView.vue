@@ -5,17 +5,17 @@
     <div class="right-side">
 
       <!-- LOADING -->
-      <p v-if="loading && isLoggedIn">
+      <p v-if="loading">
         Načítavam posledné výsledky...
       </p>
 
       <!-- ERROR -->
-      <p v-else-if="errorMessage && isLoggedIn" class="error-message">
+      <p v-else-if="errorMessage" class="error-message">
         {{ errorMessage }}
       </p>
 
       <!-- ACTIVITIES -->
-      <div v-else-if="isLoggedIn" class="list-or-nothing">
+      <div v-else class="list-or-nothing">
         <div class="activities">
 
           <h3>Posledné výsledky</h3>
@@ -66,7 +66,11 @@
 
       <div class="second">
 
+
+
         <!-- 1. NOT LOGGED IN -->
+
+
         <div v-if="!isLoggedIn" class="panel onboarding">
 
           <h3>Vitaj medzi hráčmi tenisovej ligy</h3>
@@ -100,13 +104,15 @@
           <!-- <AppButton label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" /> -->
         </div>
 
-        <!-- 3. LOGGED IN + PLAYER -->
-        <div v-else class="panel success" @click="openActiveSeason">
+        <div class="active-season" @click="openActiveSeason">
           Aktuálna sezóna
         </div>
       </div>
 
-      <LoginRegisterForm v-if="!isLoggedIn" />
+      <!-- <div>
+        <LoginRegisterForm v-if="!isLoggedIn" />
+      </div> -->
+
     </div>
   </div>
 </template>
@@ -137,9 +143,8 @@ export default {
 
     await this.initHeader();   // ⬅️ až potom header
 
-    if (this.isLoggedIn) {
-      await this.loadMatchActivities();
-    }
+    await this.loadMatchActivities();
+
   },
   methods: {
     async loadMatchActivities() {
@@ -279,6 +284,17 @@ export default {
 </script>
 
 <style scoped>
+.right-side {
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.list-or-nothing {
+  overflow-y: auto;
+  align-items: center;
+  font-size: 1.5rem;
+}
+
 .activities {
   width: 100%;
   padding: 0 16px;
@@ -350,11 +366,7 @@ export default {
   margin: 10px auto;
 }
 
-.list-or-nothing {
-  overflow-y: auto;
-  align-items: center;
-  font-size: 1.5rem;
-}
+
 
 .panel.onboarding {
   background: #002E2C;
@@ -362,6 +374,7 @@ export default {
   border-radius: 10px;
   padding: 16px;
   color: #e5e7eb;
+  margin-bottom: 1rem;
 }
 
 .panel.onboarding h3 {
@@ -373,18 +386,19 @@ export default {
   margin-bottom: 10px;
 }
 
-.panel.success {
+.active-season {
   background: #002E2C;
   border: 2px solid #4CAF50;
   border-radius: 12px;
   padding: 16px 20px;
-  max-width: 200px;
+  max-width: 420px;
   margin: 0 auto;
   color: #fff;
-  font-size: 1rem;
+  font-size: 1.2rem;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   cursor: pointer;
+  letter-spacing: 0.5px;
 }
 
 .hint {
@@ -455,11 +469,6 @@ export default {
 
   .second {
     width: 100%;
-  }
-
-  .panel.success {
-    margin: 0 0 0 auto;
-    /* ← toto ho posunie doprava */
   }
 }
 </style>

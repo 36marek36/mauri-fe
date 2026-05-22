@@ -6,15 +6,13 @@
       <div class="header-wrapper">
 
         <div class="headings">
-          <h1 class="text">{{ title }}</h1>
-          <h2 class="text" v-if="subtitle">{{ subtitle }}</h2>
+          <h1>{{ title }}</h1>
+          <h2 v-if="subtitle">{{ subtitle }}</h2>
         </div>
 
         <div class="second">
 
         </div>
-
-
       </div>
 
     </div>
@@ -60,14 +58,11 @@ export default {
 
 
 @media (max-width: 768px) {
-  .headings{
+  .headings {
     width: 100%;
   }
-  .text {
-    text-align: right;
-    /* padding-right: 2rem; */
-  }
-  .second{
+
+  .second {
     display: none;
   }
 }

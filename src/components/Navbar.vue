@@ -9,9 +9,7 @@
       <nav class="navbar">
         <!-- HAMBURGER -->
         <button class="hamburger" @click="toggleMobileMenu">
-          <span class="line"></span>
-          <span class="line"></span>
-          <span class="line"></span>
+          <img src="/images/icon-ball.png" class="tennis-icon" />
           <span class="label">Menu</span>
         </button>
 
@@ -251,27 +249,69 @@ export default {
 
 .hamburger {
   display: none;
+  position: relative;
+  top: -15px;
+
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 5px;
+
+  padding: 10px 14px;
+
   background: none;
+  outline: none;
   border: none;
+
+  border-radius: 14px;
+
   cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+
   color: white;
-  font-size: 1rem;
 }
 
-.hamburger .line {
-  width: 26px;
-  height: 3px;
-  background: white;
-  border-radius: 2px;
-  display: block;
+.tennis-icon {
+  width: 30px;
+  height: 30px;
+
+  object-fit: contain;
+
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
 }
 
 .hamburger .label {
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  color: #FFD700;
+}
+
+.hamburger:hover {
+  transform: translateY(-2px);
+
+  background: rgba(255, 255, 255, 0.12);
+
+  border-color: rgba(255, 215, 0, 0.4);
+}
+
+.hamburger:hover .tennis-icon {
+  transform: rotate(90deg) scale(1.08);
+
+  filter:
+    drop-shadow(0 0 8px rgba(255, 255, 0, 0.6));
+}
+
+.hamburger:active {
+  transform: scale(0.96);
 }
 
 .modal-overlay {

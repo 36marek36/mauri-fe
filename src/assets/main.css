@@ -46,10 +46,18 @@ h6 {
 /* veľkosti headingov */
 h1 {
   font-size: 3rem;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 2px;
+  font-weight: 400;
+  font-style: normal;
 }
 
 h2 {
   font-size: 2.5rem;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 2px;
+  font-weight: 400;
+  font-style: normal;
 }
 
 h3 {
@@ -145,12 +153,13 @@ select:focus {
 
 @media (max-width: 768px) {
   body::before {
-    background-position: 30% top;
+    background-image: url('/images/backgroundMob.jpg');
+    background-position: center top;
   }
 
   h1,
   h2 {
-    font-size: 1.8rem;
+    font-size: 2.2rem;
   }
 
   table th {

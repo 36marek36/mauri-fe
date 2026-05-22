@@ -104,7 +104,7 @@ export default {
 .right-side {
   display: flex;
   flex-direction: column;
-  padding-top: 5rem;
+  padding-top: 8rem;
 }
 
 .list-or-nothing {
