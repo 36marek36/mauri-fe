@@ -20,7 +20,7 @@
 
                     <!-- Aktívni hráči -->
                     <div v-else class="list-or-nothing">
-                        <ParticipantList class="participants" :title="'Zoznam hráčov'" :participants="paginatedPlayers"
+                        <ParticipantList class="participants" :title="'Zoznam hráčov'" :participants="paginatedPlayersWithIndex"
                             :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
                             :edit="isAdmin ? (id) => editPlayer(id) : null" :showProgress="false"
                             @view-detail="(id) => goToDetail('players', id)" />
@@ -60,7 +60,7 @@
                                 <option value="">-- Vyber hráča --</option>
                                 <option v-for="player in players" :key="player.id" :value="player.id">
                                     <!-- {{ player.firstName }} {{ player.lastName }} -->
-                                      {{ player.name }}
+                                    {{ player.name }}
                                 </option>
                             </select>
                             <label for="player2">Hráč 2:</label>
@@ -68,7 +68,7 @@
                                 <option value="">-- Vyber hráča --</option>
                                 <option v-for="player in players" :key="player.id" :value="player.id">
                                     <!-- {{ player.firstName }} {{ player.lastName }} -->
-                                      {{ player.name }}
+                                    {{ player.name }}
                                 </option>
                             </select>
 
@@ -90,7 +90,7 @@
 
                     <!-- Aktívne tímy -->
                     <div v-else class="list-or-nothing">
-                        <ParticipantList class="participants" :title="'Zoznam tímov'" :participants="paginatedTeams"
+                        <ParticipantList class="participants" :title="'Zoznam tímov'" :participants="paginatedTeamsWithIndex"
                             :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
                             :showProgress="false" @view-detail="(id) => goToDetail('teams', id)" />
                         <div v-if="totalPagesTeams > 1" class="pagination">
@@ -309,6 +309,12 @@ export default {
             const end = start + this.participantsPerPage;
             return this.players.slice(start, end);
         },
+        paginatedPlayersWithIndex() {
+            return this.paginatedPlayers.map((p, i) => ({
+                ...p,
+                index: (this.currentPagePlayers - 1) * this.participantsPerPage + i + 1
+            }))
+        },
         totalPagesTeams() {
             return Math.ceil(this.teams.length / this.participantsPerPage);
         },
@@ -316,6 +322,12 @@ export default {
             const start = (this.currentPageTeams - 1) * this.participantsPerPage;
             const end = start + this.participantsPerPage;
             return this.teams.slice(start, end);
+        },
+        paginatedTeamsWithIndex(){
+            return this.paginatedTeams.map((t, i)=> ({
+                ...t,
+                index: (this.currentPageTeams - 1) * this.participantsPerPage + i + 1
+            }))
         },
         deleteMessage() {
             return `Naozaj chcete zmazať ${this.participant?.type === 'players' ? 'hráča' : 'tím'}: ${this.participant?.name}?`;

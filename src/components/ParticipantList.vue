@@ -5,6 +5,7 @@
             <li v-for="participant in participants" :key="participant.id" :class="{ inactive: !participant.active }">
                 <div class="participant-content">
                     <div class="info">
+                        <span class="index">{{ participant.index }}</span>
                         <span @click="openDetail(participant.id)">{{ participant.name }}</span>
                         <CircularProgress v-if="showProgress" :progress="participant.leagueProgress" />
                     </div>
@@ -66,6 +67,7 @@ export default {
 <style scoped>
 ul {
     list-style-type: none;
+    padding: 0;
 }
 
 li {
@@ -83,13 +85,19 @@ li:not(:last-child) {
 
 .participant-content {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+}
+.index {
+    width: 20px;
+    display: inline-block;
+    font-weight: bold;
+    color: #ffffff;
 }
 
 .info {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: flex-start; */
     align-items: center;
     gap: 10px;
     width: 75%;

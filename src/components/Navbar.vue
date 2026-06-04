@@ -251,6 +251,7 @@ export default {
   display: none;
   position: relative;
   top: -15px;
+  right: 230px;
 
   flex-direction: column;
   align-items: center;
@@ -297,8 +298,6 @@ export default {
 
 .hamburger:hover {
   transform: translateY(-2px);
-
-  background: rgba(255, 255, 255, 0.12);
 
   border-color: rgba(255, 215, 0, 0.4);
 }

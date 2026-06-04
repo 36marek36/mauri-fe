@@ -33,6 +33,8 @@
             <div v-for="activity in group.activities" :key="activity.match.id" class="activity-item">
               <div class="scoreboard">
 
+                <span class="league-name">{{ activity.leagueName }}</span>
+
                 <!-- HOME -->
                 <div class="row">
                   <div class="name" :class="getPlayerClass(activity.match, 'home')">
@@ -104,9 +106,13 @@
           <!-- <AppButton label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" /> -->
         </div>
 
-        <div class="active-season" @click="openActiveSeason">
-          Aktuálna sezóna
+        <div class="list-or-nothing" @click="openActiveSeason">
+          <div class="active-season">
+            <span>Aktuálna sezóna</span>
+          </div>
+
         </div>
+
       </div>
 
       <!-- <div>
@@ -335,6 +341,10 @@ export default {
   align-items: center;
 }
 
+.league-name{
+  color: #ffffff;
+}
+
 .name {
   font-size: 1.2rem;
   text-overflow: ellipsis;
@@ -387,18 +397,18 @@ export default {
 }
 
 .active-season {
-  background: #002E2C;
-  border: 2px solid #4CAF50;
-  border-radius: 12px;
   padding: 16px 20px;
-  max-width: 420px;
-  margin: 0 auto;
+  width: 100%;
+  text-align: center;
   color: #fff;
   font-size: 1.2rem;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  transition: background-color 0.2s ease;
+}
+
+.active-season:hover {
+  background: #002E2C;
 }
 
 .hint {

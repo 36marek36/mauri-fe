@@ -44,7 +44,7 @@ import AppFooter from './components/AppFooter.vue';
 
 .main-content {
     flex-grow: 1;
-    padding: 20px;
+    /* padding: 20px; */
     display: flex;
     flex-direction: column;
 }
@@ -52,6 +52,7 @@ import AppFooter from './components/AppFooter.vue';
 @media (max-width: 768px) {
     .header {
         height: 100px;
+         margin-top: 130px;
     }
 }
 </style>
