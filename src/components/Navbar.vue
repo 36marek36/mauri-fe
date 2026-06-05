@@ -251,8 +251,6 @@ export default {
   display: none;
   position: relative;
   top: -15px;
-  right: 230px;
-
   flex-direction: column;
   align-items: center;
   justify-content: center;

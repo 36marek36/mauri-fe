@@ -33,16 +33,13 @@
     box-shadow: 0 0 5px #FFD700;
     border-radius: 16px;
     overflow-x: auto;
-    background: linear-gradient(to right,
+    background: linear-gradient(to bottom,
             rgba(0, 0, 0, 1),
-            /* viac čierna zľava */
-            rgba(0, 0, 0, 0.05)
-            /* takmer priehľadné napravo */
+            /* viac čierna zhora */
+            rgba(0, 0, 0, 0.7)
+            /* takmer priehľadné dole */
         );
-    /* skoro neviditeľné pozadie */
-    backdrop-filter: blur(12px);
-    /* silné rozmazanie za tabuľkou */
-    -webkit-backdrop-filter: blur(12px);
+
 }
 
 .list-or-nothing::-webkit-scrollbar {

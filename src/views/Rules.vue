@@ -66,7 +66,7 @@ export default {
 .right-side {
   display: flex;
   flex-direction: column;
-  padding-top: 8rem;
+  padding-top: 12rem;
 }
 
 .list-or-nothing {

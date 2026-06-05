@@ -55,13 +55,17 @@
       </div>
       <div class="list-or-nothing">
         <div class="contact-info">
-          <p>
+          <div>
             Nájdete nás na adrese:
-            <a href="https://www.google.com/maps/search/?api=1&query=29.augusta+92+Handlová" target="_blank"
-              class="address-link">
-              29.augusta 92, Handlová
-            </a>
-          </p>
+            <div>
+              <a href="https://www.google.com/maps/search/?api=1&query=29.augusta+92+Handlová" target="_blank"
+                class="address-link">
+                29.augusta 92, Handlová
+              </a>
+
+            </div>
+
+          </div>
           <p> Kontakty 📞 </p>
           <div class="phones">
             <a href="tel:0905542596" class="phone-link">
@@ -73,14 +77,16 @@
           </div>
 
 
-          <p>
+          <div>
             Pre viac informácií sledujte náš
-            <a href="https://www.facebook.com/profile.php?id=100034650532111" target="_blank" rel="noopener noreferrer"
-              class="facebook-link">
-              <img src="/images/facebook.png" alt="Facebook" />
-            </a>
-            acebook
-          </p>
+            <div>
+              <a href="https://www.facebook.com/profile.php?id=100034650532111" target="_blank"
+                rel="noopener noreferrer" class="facebook-link">
+                <img src="/images/facebook.png" alt="Facebook" />
+              </a>
+              acebook
+            </div>
+          </div>
           <br>
           <div class="credits">
             © 2026 – Vytvoril a prevádzkuje Marek Krnčok
@@ -104,7 +110,7 @@ export default {
 .right-side {
   display: flex;
   flex-direction: column;
-  padding-top: 8rem;
+  padding-top: 12rem;
 }
 
 .list-or-nothing {

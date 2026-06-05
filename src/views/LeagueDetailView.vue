@@ -40,11 +40,11 @@
 
                         <div v-for="(roundMatches, roundNumber) in groupedMatches" :key="roundNumber">
 
-                            <h4 @click="toggleRound(roundNumber)" class="round-title">
+                            <h5 @click="toggleRound(roundNumber)" class="round-title">
                                 Kolo: {{ roundNumber }}
                                 <span v-if="openedRounds.includes(roundNumber)">▲</span>
                                 <span v-else>▼</span>
-                            </h4>
+                            </h5>
 
                             <ul v-show="openedRounds.includes(roundNumber)" class="match-list">
                                 <MatchItem v-for="match in roundMatches" :key="match.id" :match="match"

@@ -2,13 +2,16 @@
     <div id="app">
         <Navbar class="navbar" />
 
-        <AppHeader class="header" v-if="!$route.meta?.hideHeader" />
+        <div class="page-scroll">
+            <AppHeader class="header" v-if="!$route.meta?.hideHeader" />
 
-        <main class="main-content">
-            <RouterView />
-        </main>
+            <main class="main-content">
+                <RouterView />
+            </main>
 
-        <AppFooter />
+            <AppFooter />
+
+        </div>
 
     </div>
 </template>
@@ -36,6 +39,21 @@ import AppFooter from './components/AppFooter.vue';
     align-items: center;
 }
 
+.page-scroll {
+    height: 100vh;
+    overflow-y: auto;
+
+    mask-image: linear-gradient(to bottom,
+            transparent 100px,
+            black 150px,
+            black 100%);
+
+    -webkit-mask-image: linear-gradient(to bottom,
+            transparent 100px,
+            black 150px,
+            black 100%);
+}
+
 .header {
     width: 100%;
     height: 200px;
@@ -44,7 +62,6 @@ import AppFooter from './components/AppFooter.vue';
 
 .main-content {
     flex-grow: 1;
-    /* padding: 20px; */
     display: flex;
     flex-direction: column;
 }
@@ -52,7 +69,19 @@ import AppFooter from './components/AppFooter.vue';
 @media (max-width: 768px) {
     .header {
         height: 100px;
-         margin-top: 130px;
+        margin-top: 175px;
+    }
+
+    .page-scroll {
+        mask-image: linear-gradient(to bottom,
+                transparent 160px,
+                black 210px,
+                black 100%);
+
+        -webkit-mask-image: linear-gradient(to bottom,
+                transparent 160px,
+                black 210px,
+                black 100%);
     }
 }
 </style>

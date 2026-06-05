@@ -332,6 +332,9 @@ export default {
 </script>
 
 <style scoped>
+h3{
+    font-size: 1.2rem;
+}
 .leagues {
     width: 100%;
 }
