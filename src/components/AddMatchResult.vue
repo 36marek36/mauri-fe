@@ -91,8 +91,9 @@
         </div>
 
     </form>
-    <AppModal :visible="showConfirmModal" :message="'Naozaj chcete odoslať výsledok tohto zápasu?'"
-        @confirm="onModalConfirm" @cancel="onModalCancel" />
+
+    <AppModal :visible="showConfirmModal" :title="formData.scratchedId ? '⚠️ Potvrdenie skreču' : '🟢 Potvrdenie výsledku'"
+        :message="confirmMessage" @confirm="onModalConfirm" @cancel="onModalCancel" />
 </template>
 
 <script>
@@ -120,6 +121,28 @@ export default {
     computed: {
         flash() {
             return useFlashMessageStore();
+        },
+        confirmMessage() {
+            const home = this.participantName('home');
+            const away = this.participantName('away');
+
+            const isScratch = !!this.formData.scratchedId;
+
+            if (isScratch) {
+                const scratchedIsHome =
+                    this.formData.scratchedId == this.match.homePlayer?.id ||
+                    this.formData.scratchedId == this.match.homeTeam?.id;
+
+                const scratched = scratchedIsHome ? home : away;
+
+                return `Naozaj chcete odoslať výsledok zápasu ${home} vs ${away} (skreč: ${scratched})?`;
+            }
+
+            const result = this.formData.setScores
+                .map(set => `${set.score1}:${set.score2}`)
+                .join(', ');
+
+            return `Naozaj chcete odoslať výsledok zápasu ${home} vs ${away} (${result})?`;
         }
     },
     methods: {

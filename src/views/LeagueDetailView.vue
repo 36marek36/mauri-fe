@@ -157,14 +157,16 @@
             </section>
         </main>
     </div>
-    <AppModal :visible="showDeleteModal"
+    <AppModal :visible="showDeleteModal" :title="'Odstránenie z ligy'"
         :message="`Naozaj chcete odstrániť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy?`"
         @confirm="() => removeParticipantFromLeague(participant?.id)" @cancel="cancelDelete" />
-    <AppModal :visible="showDropModal"
+    <AppModal :visible="showDropModal" :title="'Odhlásenie z ligy'"
         :message="`Naozaj chcete odhlásiť ${participant?.type === 'players' ? 'hráča' : 'tím'} ${participant?.name} z ligy? 
         Všetky zapasy ${participant?.type === 'players' ? 'hráča' : 'tímu'} budú zrušené. Táto akcia sa nebude dať vrátiť.`"
         @confirm="() => dropParticipantFromLeague(participant?.id)" @cancel="cancelDrop" />
-    <AppModal :visible="showConfirmModal" :message="modalMessage" @confirm="onModalConfirm" @cancel="onModalCancel" />
+    <AppModal :visible="showConfirmModal"
+        :title="confirmationAction === 'generate' ? 'Spustenie ligy' : 'Ukončenie ligy'" :message="modalMessage"
+        @confirm="onModalConfirm" @cancel="onModalCancel" />
     <AppModal :visible="showActionModal" :title="actionType === 'edit' ? 'Úprava výsledku' : 'Zrušenie výsledku'"
         :message="actionType === 'edit'
             ? 'Naozaj chcete upraviť výsledok tohto zápasu?'

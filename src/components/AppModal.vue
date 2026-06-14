@@ -1,6 +1,7 @@
 <template>
     <div v-if="visible" class="modal-overlay" @pointerdown.self="cancel">
         <div class="modal" @pointerdown.stop>
+            <h3 v-if="title" class="modal-title">{{ title }}</h3>
             <p>{{ message }}</p>
 
             <div class="buttons">
@@ -16,6 +17,7 @@ import AppButton from './AppButton.vue';
 
 export default {
     props: {
+        title: { type: String, default: '' },
         message: { type: String, default: 'Naozaj chcete pokračovať?' },
         visible: { type: Boolean, required: true },
     },
@@ -32,45 +34,6 @@ export default {
 }
 </script>
 
-<!-- <style scoped>
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-
-    z-index: 9999;
-}
-
-.modal {
-    margin-top: 100px;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-
-    position: relative;
-    z-index: 10000;
-}
-
-.buttons {
-    margin-top: 15px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-button {
-    padding: 10px 16px;
-    font-size: 16px;
-
-    /* mobile fix */
-    touch-action: manipulation;
-}
-</style> -->
-
 <style scoped>
 .modal-overlay {
     position: fixed;
@@ -79,7 +42,8 @@ button {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 50px;
+    padding-top: 200px;
+    z-index: 9999;
 }
 
 .modal {
@@ -96,6 +60,12 @@ button {
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: normal;
+}
+
+.modal-title {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .buttons {
