@@ -55,8 +55,8 @@ export default {
         }
     },
     methods: {
-        openDetail(participant) {
-            this.$emit('view-detail', participant)
+        openDetail(participantId) {
+            this.$emit('view-detail', participantId)
         }
     },
     components: { AppButton, CircularProgress }

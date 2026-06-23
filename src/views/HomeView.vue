@@ -15,7 +15,7 @@
       </p>
 
       <!-- ACTIVITIES -->
-      <div v-else class="list-or-nothing">
+      <div v-else-if="currentSeason" class="list-or-nothing">
         <div class="activities">
 
           <h3>Posledné výsledky</h3>
@@ -103,38 +103,32 @@
             Je to rýchle – zaberie to len pár sekúnd.
           </p>
 
-          <!-- <AppButton label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" /> -->
         </div>
 
-        <div class="list-or-nothing" @click="openActiveSeason">
-          <div class="active-season">
-            <span>Aktuálna sezóna</span>
-          </div>
+        <div v-if="currentSeason" class="active-season" @click="openActiveSeason">
+          <h4>Aktuálna sezóna</h4>
+        </div>
 
+        <div v-else class="active-season">
+          <h4>Momentálne nie je aktívna žiadna sezóna</h4>
         </div>
 
       </div>
-
-      <!-- <div>
-        <LoginRegisterForm v-if="!isLoggedIn" />
-      </div> -->
 
     </div>
   </div>
 </template>
 
 <script>
-import LoginRegisterForm from '@/components/LoginRegisterForm.vue';
 import { useHeaderStore } from '@/stores/header';
 import { useUserStore } from '@/stores/user';
 import api from '@/axios-interceptor';
-import AppButton from '@/components/AppButton.vue';
 
 export default {
-  name: 'Home Page',
+  name: 'HomePage',
   data() {
     return {
-      player: null,
+      currentSeason: null,
       loading: true,
       errorMessage: '',
       matchActivities: [],
@@ -145,62 +139,59 @@ export default {
   async created() {
     await this.userStore.fetchCurrentUser();
 
-    await this.fetchPlayer(); // ⬅️ musí byť prvé
+    this.initHeader();
 
-    await this.initHeader();   // ⬅️ až potom header
-
-    await this.loadMatchActivities();
+    try {
+      await Promise.all([
+        this.loadMatchActivities(),
+        this.loadCurrentSeason()
+      ]);
+    } finally {
+      this.loading = false;
+    }
 
   },
+
   methods: {
     async loadMatchActivities() {
 
       try {
-        this.loading = true;
-        this.errorMessage = null;
+        this.errorMessage = '';
 
         const res = await api.get('/match-activities/recent');
         this.matchActivities = res.data;
 
       } catch (e) {
         this.errorMessage = "Nepodarilo sa načítať aktivity";
-      } finally {
-        this.loading = false;
       }
     },
-    async initHeader() {
+    initHeader() {
       if (!this.isLoggedIn) {
         this.header.setTitle('Vitajte', '');
         return;
       }
 
-      const player = this.player;
+      const fullName = this.userStore.user?.playerName || '';
 
-      if (!player) {
-        this.header.setTitle('Vitajte', '');
-        return;
-      }
+      const firstName = fullName.split(' ')[0];
 
       this.header.setTitle(
         'Vitaj',
-        player.firstName || ''
+        firstName
       );
     },
-    async fetchPlayer() {
+    async loadCurrentSeason() {
       try {
-        const playerId = this.userStore.user?.playerId;
-
-        if (!playerId) return; // ⬅️ nič nerob
-
-        const response = await api.get('/players/' + playerId);
-        this.player = response.data;
-
-      } catch (error) {
-        console.error('Chyba pri načítavaní hráča:', error);
+        const res = await api.get('/seasons/current');
+        this.currentSeason = res.data;
+      } catch {
+        this.currentSeason = null;
       }
     },
-    goToCreatePlayer() {
-      this.$router.push('/players/create')
+    openActiveSeason() {
+      if (!this.currentSeason) return;
+
+      this.$router.push(`/seasons/${this.currentSeason.id}`);
     },
     getPlayerClass(match, side) {
       const winnerId = match.result?.winnerId;
@@ -236,17 +227,6 @@ export default {
 
     getAwaySets(match) {
       return match.result?.setScores?.map(s => s.score2) || [];
-    },
-    async openActiveSeason() {
-      try {
-        const res = await api.get('/seasons/current');
-        this.currentSeason = res.data;
-
-        this.$router.push(`/seasons/${res.data.id}`);
-
-      } catch (e) {
-        this.errorMessage = "Nepodarilo sa načítať aktívnu sezónu";
-      }
     }
   },
 
@@ -283,8 +263,7 @@ export default {
         activities
       }));
     },
-  },
-  components: { LoginRegisterForm, AppButton }
+  }
 }
 
 </script>
@@ -341,7 +320,7 @@ export default {
   align-items: center;
 }
 
-.league-name{
+.league-name {
   color: #ffffff;
 }
 
@@ -376,8 +355,6 @@ export default {
   margin: 10px auto;
 }
 
-
-
 .panel.onboarding {
   background: #002E2C;
   border: 2px solid gold;
@@ -397,18 +374,64 @@ export default {
 }
 
 .active-season {
+  position: relative;
+  overflow: hidden;
   padding: 16px 20px;
+  border: 1px solid green;
+  border-radius: 16px;
+
   width: 100%;
   text-align: center;
-  color: #fff;
-  font-size: 1.2rem;
   cursor: pointer;
-  letter-spacing: 0.8px;
   transition: background-color 0.2s ease;
+  background: #000000;
 }
 
 .active-season:hover {
   background: #002E2C;
+}
+
+.active-season h4 {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  color: #FFD700;
+  font-size: 1.2rem;
+  font-weight: 400;
+  letter-spacing: 3px;
+}
+
+.active-season::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+
+  background: linear-gradient(120deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 20%,
+      rgba(255, 255, 255, 0.9) 50%,
+      rgba(255, 215, 0, 0.6) 60%,
+      rgba(255, 255, 255, 0.1) 80%,
+      transparent 100%);
+
+  filter: blur(10px);
+  opacity: 0.3;
+  mix-blend-mode: screen;
+
+  animation: scan 9s linear infinite;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateX(-250%);
+  }
+
+  100% {
+    transform: translateX(550%);
+  }
 }
 
 .hint {

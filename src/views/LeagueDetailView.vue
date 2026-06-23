@@ -107,20 +107,6 @@
                                                 {{ entry.points }} b.
                                             </span>
                                         </td>
-
-                                        <td class="actions">
-                                            <div v-if="isAdmin" class="admin-buttons">
-                                                <AppButton icon="🔓" type="edit" htmlType="button" @clicked.stop="confirmDropParticipant(
-                                                    isSingles ? 'players' : 'teams',
-                                                    isSingles ? entry.playerId : entry.teamId
-                                                )" />
-
-                                                <AppButton icon="🗑️" type="delete" htmlType="button" @clicked.stop="confirmDeleteParticipant(
-                                                    isSingles ? 'players' : 'teams',
-                                                    isSingles ? entry.playerId : entry.teamId
-                                                )" />
-                                            </div>
-                                        </td>
                                     </tr>
 
                                     <!-- DETAIL -->
@@ -139,7 +125,23 @@
                                                 <div>{{ entry.setsWon }}:{{ entry.setsLost }}</div>
                                             </div>
 
+                                            <div v-if="isAdmin" class="actions">
+                                                <div class="admin-buttons">
+                                                    <AppButton label="odhlásiť z ligy" type="edit" htmlType="button" @clicked.stop="confirmDropParticipant(
+                                                        isSingles ? 'players' : 'teams',
+                                                        isSingles ? entry.playerId : entry.teamId
+                                                    )" />
+
+                                                    <AppButton label="odstrániť z ligy" type="delete" htmlType="button" @clicked.stop="confirmDeleteParticipant(
+                                                        isSingles ? 'players' : 'teams',
+                                                        isSingles ? entry.playerId : entry.teamId
+                                                    )" />
+                                                    </div>
+
+                                            </div>
+
                                             <div class="detail-button">
+                                                
                                                 <AppButton :label="isSingles ? 'Detail hráča' : 'Detail tímu'"
                                                     type="default" htmlType="button" @clicked.stop="goToDetail(
                                                         isSingles ? 'players' : 'teams',
@@ -753,6 +755,7 @@ export default {
 .admin-buttons {
     display: flex;
     gap: 0.3rem;
+    margin-top: 1rem;
     justify-content: center;
     align-items: center;
 }

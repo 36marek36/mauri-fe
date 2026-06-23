@@ -7,7 +7,7 @@
 
         <div class="headings">
           <h1>{{ title }}</h1>
-          <h2 v-if="subtitle">{{ subtitle }}</h2>
+          <h1 v-if="subtitle">{{ subtitle }}</h1>
         </div>
 
         <div class="second">

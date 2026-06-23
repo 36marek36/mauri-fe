@@ -332,9 +332,10 @@ export default {
 </script>
 
 <style scoped>
-h3{
+h3 {
     font-size: 1.2rem;
 }
+
 .leagues {
     width: 100%;
 }
@@ -385,13 +386,11 @@ h3{
 @media (max-width: 768px) {
     .league-table {
         width: 100%;
-        table-layout: fixed;
     }
 
     .league-table td {
         font-size: 0.9rem;
-        /* menšie písmo na mobiloch */
-        padding: 0.2rem;
+        /* padding: 0.2rem; */
         word-wrap: break-word;
         overflow-wrap: break-word;
         white-space: normal;

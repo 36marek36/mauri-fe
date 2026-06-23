@@ -10,25 +10,24 @@
             </main>
 
             <AppFooter />
-
         </div>
-
     </div>
 </template>
 
 <script setup>
 import Navbar from '@/components/Navbar.vue'
-import AppHeader from './components/AppHeader.vue';
-import AppFooter from './components/AppFooter.vue';
+import AppHeader from './components/AppHeader.vue'
+import AppFooter from './components/AppFooter.vue'
 </script>
 
 <style scoped>
 #app {
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
 }
 
+/* FIXNÝ NAVBAR */
 .navbar {
     position: fixed;
     z-index: 1000;
@@ -39,37 +38,46 @@ import AppFooter from './components/AppFooter.vue';
     align-items: center;
 }
 
+/* SCROLL KONTAJNER */
 .page-scroll {
-    height: 100vh;
+    flex: 1;
     overflow-y: auto;
 
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    /* fade efekt */
     mask-image: linear-gradient(to bottom,
             transparent 100px,
-            black 150px,
+            black 180px,
             black 100%);
-
     -webkit-mask-image: linear-gradient(to bottom,
             transparent 100px,
-            black 150px,
+            black 180px,
             black 100%);
 }
 
+/* HEADER */
 .header {
     width: 100%;
     height: 200px;
     margin-top: 100px;
+    margin-bottom: 40px;
 }
 
+/* HLAVNÝ OBSAH */
 .main-content {
-    flex-grow: 1;
+    flex: 1;
     display: flex;
     flex-direction: column;
 }
 
+/* RESPONSIVE */
 @media (max-width: 768px) {
     .header {
         height: 100px;
-        margin-top: 175px;
+        margin-top: 11rem;
     }
 
     .page-scroll {
@@ -77,7 +85,6 @@ import AppFooter from './components/AppFooter.vue';
                 transparent 160px,
                 black 210px,
                 black 100%);
-
         -webkit-mask-image: linear-gradient(to bottom,
                 transparent 160px,
                 black 210px,

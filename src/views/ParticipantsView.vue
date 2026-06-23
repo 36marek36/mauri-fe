@@ -344,7 +344,7 @@ export default {
     gap: 2rem;
     align-items: stretch;
     width: 100%;
-    margin-top: 150px;
+    margin-top: 200px;
 }
 
 .column {
@@ -352,7 +352,6 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    min-height: 100%;
 }
 
 .list-or-nothing {
