@@ -11,62 +11,124 @@
                         <thead>
                             <tr>
                                 <th>Používateľ</th>
-                                <th>Rola</th>
-                                <th>📝</th>
-                                <th>Hráč</th>
+                                <th>Detaily hráčov</th>
                                 <th></th>
-                                <th>Prihlásený</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="user in users" :key="user.id">
-                                <td>{{ user.username }}</td>
-                                <td>
-                                    <select v-model="user.selectedRole" @focus="storePreviousRole(user)"
-                                        @change="handleRoleChange()">
-                                        <option value="USER">USER</option>
-                                        <option value="ADMIN">ADMIN</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <label class="switch">
-                                        <input type="checkbox" v-model="user.showDetails"
-                                            @change="updateShowDetails(user)">
-                                        <span class="slider"></span>
-                                    </label>
-                                </td>
-                                <td>
-                                    <span v-if="user.playerId" class="player-link"
-                                        @click="goToDetail('players', user.playerId)">
-                                        {{ user.playerName }}
-                                    </span>
+                            <template v-for="user in users" :key="user.id">
+                                <tr>
+                                    <td class="clickable" @click="toggleUserDetails(user)">
+                                        {{ user.username }}
+                                        <span>
+                                            {{ user.expanded ? '▲' : '▼' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <label class="switch">
+                                            <input type="checkbox" v-model="user.showDetails"
+                                                @change="updateShowDetails(user)">
 
-                                    <div v-else>
-                                        <select v-model="selectedPlayers[user.id]">
-                                            <option value=""></option>
-                                            <option v-for="player in unassignedPlayers" :key="player.id"
-                                                :value="player.id">
-                                                {{ player.name }}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </td>
-                                <td>
-                                    <AppButton v-if="user.playerId" html-type="button" type="delete" label="Odpojiť"
-                                        @clicked="() => openUnassignModal(user)" />
-                                    <AppButton v-else html-type="button" type="edit" label="Priradiť"
-                                        :disabled="!selectedPlayers[user.id]"
-                                        @clicked="() => assignPlayerToUser(user)" />
-                                </td>
-                                <td>
-                                    <span v-if="user.lastLogin"> {{ user.lastLogin }} </span>
-                                    <span v-else>Zatial žiadne prihlásenie</span>
-                                </td>
-                                <td>
-                                    <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete" htmltype="button"
-                                        @clicked="() => confirmDeleteUser(user)" />
-                                </td>
-                            </tr>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <AppButton v-if="user.role === 'USER'" icon="🗑️" type="delete"
+                                            @clicked="() => confirmDeleteUser(user)" />
+                                    </td>
+                                </tr>
+                                <tr v-if="user.expanded">
+                                    <td colspan="3">
+                                        <div class="user-detail">
+
+                                            <!-- prvý riadok -->
+
+                                            <div class="detail-row">
+                                                <div class="detail-box">
+                                                    <b>Rola</b>
+                                                    <select v-model="user.selectedRole" @focus="storePreviousRole(user)"
+                                                        @change="handleRoleChange()">
+                                                        <option value="USER">
+                                                            USER
+                                                        </option>
+                                                        <option value="ADMIN">
+                                                            ADMIN
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="detail-box">
+                                                    <b>Hráč</b>
+                                                    <div v-if="user.playerId">
+                                                        <span class="clickable"
+                                                            @click="goToDetail('players', user.playerId)">
+                                                            {{ user.playerName }}
+                                                        </span>
+                                                        <div class="player-action">
+                                                            <AppButton type="delete" label="Odpojiť"
+                                                                @clicked="() => openUnassignModal(user)" />
+                                                        </div>
+                                                    </div>
+                                                    <div v-else>
+                                                        <select v-model="selectedPlayers[user.id]">
+                                                            <option value="">
+                                                            </option>
+                                                            <option v-for="player in unassignedPlayers" :key="player.id"
+                                                                :value="player.id">
+                                                                {{ player.name }}
+                                                            </option>
+                                                        </select>
+                                                        <div class="player-action">
+
+                                                            <AppButton type="edit" label="Priradiť"
+                                                                :disabled="!selectedPlayers[user.id]"
+                                                                @clicked="assignPlayerToUser(user)" />
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <!-- druhý riadok -->
+
+                                            <div>
+                                                <b>Posledné prihlásenie</b>
+                                                <br>
+                                                <span v-if="user.lastLogin">
+                                                    {{ user.lastLogin }}
+                                                </span>
+                                                <span v-else>
+                                                    Zatiaľ žiadne prihlásenie
+                                                </span>
+                                            </div>
+                                            <AppButton label="Reset hesla" type="edit"
+                                                @clicked="openResetPasswordModal(user)" />
+
+                                            <div v-if="showResetPasswordModal" class="modal-overlay"
+                                                @click.self="closeResetPasswordModal">
+                                                <div class="modal">
+                                                    <h3>Reset hesla používateľa {{ user?.username }}</h3>
+
+                                                    <input v-model="newPassword" type="password"
+                                                        placeholder="Nové heslo" />
+
+                                                    <input v-model="confirmPassword" type="password"
+                                                        placeholder="Potvrďte heslo" />
+
+                                                    <div class="modal-actions">
+                                                        <AppButton label="Zrušiť" type="default"
+                                                            @clicked="closeResetPasswordModal" />
+
+                                                        <AppButton label="Resetovať heslo" type="create"
+                                                            @clicked="resetPassword" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>
@@ -102,6 +164,9 @@ export default {
             showChangeRoleModal: false,
             showUnassignModal: false,
             user: null,
+            showResetPasswordModal: false,
+            newPassword: '',
+            confirmPassword: '',
             loading: true
         }
     },
@@ -129,7 +194,8 @@ export default {
                 this.users = response.data.map(user => ({
                     ...user,
                     selectedRole: user.role, // predvolená hodnota v selecte
-                    showDetails: user.showDetails
+                    showDetails: user.showDetails,
+                    expanded: false
                 }));
                 header.setTitle('Zoznam používateľov', '');
             } catch (error) {
@@ -155,6 +221,40 @@ export default {
             } finally {
                 this.loading = false;
             }
+        },
+        toggleUserDetails(user) {
+            user.expanded = !user.expanded
+        },
+        async resetPassword() {
+            if (!this.newPassword) {
+                this.flash.showMessage(
+                    'Zadajte nové heslo',
+                    'error'
+                )
+                return
+            }
+
+            if (this.newPassword !== this.confirmPassword) {
+                this.flash.showMessage(
+                    'Heslá sa nezhodujú',
+                    'error'
+                )
+                return
+            }
+
+            await api.patch(
+                `/auth/admin/users/${this.user.id}/reset-password`,
+                {
+                    newPassword: this.newPassword
+                }
+            )
+
+            this.flash.showMessage(
+                `Heslo používateľa ${this.user.username} bolo resetované`,
+                'success'
+            )
+
+            this.closeResetPasswordModal()
         },
         async assignPlayerToUser(user) {
             const playerId = this.selectedPlayers[user.id]
@@ -271,6 +371,16 @@ export default {
                 // vrátime hodnotu späť ak nastala chyba
                 user.showDetails = !user.showDetails
             }
+        },
+        openResetPasswordModal(user) {
+            this.user = user
+            this.newPassword = ''
+            this.confirmPassword = ''
+            this.showResetPasswordModal = true
+        },
+        closeResetPasswordModal() {
+            this.showResetPasswordModal = false
+            this.user = null
         }
     }, computed: {
         flash() {
@@ -294,10 +404,10 @@ export default {
 <style scoped>
 .users-section {
     width: 100%;
+    overflow-x: auto;
 }
 
 .users-table {
-    min-width: 600px;
     width: 100%;
     border-collapse: collapse;
 }
@@ -306,10 +416,45 @@ export default {
 .users-table td {
     font-size: 1.2rem;
     padding: 8px;
-    text-align: left;
 }
 
-.player-link {
+.user-detail {
+    padding: 15px;
+    border-radius: 10px;
+}
+
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+
+.detail-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+
+.detail-box select {
+    width: 100%;
+    max-width: 120px;
+}
+
+
+.detail-actions {
+    margin-top: 10px;
+}
+
+.player-action {
+    margin-top: 8px;
+}
+
+.clickable {
     cursor: pointer;
 }
 
@@ -329,10 +474,7 @@ export default {
 .slider {
     position: absolute;
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background-color: #d1d5db;
     /* sivé pozadie */
     transition: .3s;
@@ -359,5 +501,72 @@ export default {
 
 .switch input:checked+.slider:before {
     transform: translateX(24px);
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.modal {
+    background: #002E2C;
+    padding: 24px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.modal input {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 8px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+@media (max-width:768px) {
+
+    .users-table th {
+        font-size: 0.8rem;
+    }
+
+    .users-table td {
+        font-size: 1rem;
+    }
+
+
+    .detail-box select {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.7rem;
+        min-height: 36px;
+
+    }
+
+    /* menší toggle */
+    .switch {
+        width: 34px;
+        height: 18px;
+    }
+
+    .slider:before {
+        height: 14px;
+        width: 14px;
+        left: 2px;
+        bottom: 2px;
+    }
+
+    .switch input:checked+.slider:before {
+        transform: translateX(16px);
+    }
 }
 </style>

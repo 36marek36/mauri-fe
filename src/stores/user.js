@@ -55,11 +55,6 @@ export const useUserStore = defineStore('user', {
         },
 
         async logout() {
-            try {
-                await api.post('/auth/logout');
-            } catch (e) {
-                // aj keby backend padol, lokálny logout pokračuje
-            }
             localStorage.removeItem('jwt')  // odstráni token zo storage
             delete api.defaults.headers.common['Authorization']    // odstráni token z hlavičiek pre ďalšie požiadavky
             this.user = null    // resetuje používateľa

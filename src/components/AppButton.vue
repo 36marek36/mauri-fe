@@ -1,5 +1,6 @@
 <template>
-  <button class="app-button" :class="buttonClass" @pointerup="handleClick" @click.stop :disabled="disabled" :type="htmlType">
+  <button class="app-button" :class="buttonClass" @pointerup="handleClick" @click.stop :disabled="disabled"
+    :type="htmlType">
     <span v-if="icon" class="icon">{{ icon }}</span>
     <span>{{ label }}</span>
   </button>
@@ -36,6 +37,10 @@ export default {
   },
   methods: {
     handleClick(event) {
+      if (this.disabled) {
+        return
+      }
+
       this.$emit('clicked', event);
     }
   }
