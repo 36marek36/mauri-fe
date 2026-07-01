@@ -123,7 +123,7 @@ export default {
         await api.delete('/players/' + this.playerId)
         this.flash.showMessage(`Hráč ${this.player.firstName} ${this.player.lastName} bol úspešne vymazaný.`, 'success')
         await this.userStore.fetchCurrentUser();
-        this.$router.push('/participants')
+        this.$router.push('/tennis/participants')
       } catch (err) {
         console.error('Chyba', err)
       } finally {
@@ -153,7 +153,7 @@ export default {
           const response = await api.post(endpoint, this.player);
           this.flash.showMessage(`Hráč ${response.data.firstName} bol úspešne vytvorený.`, 'success');
           await this.userStore.fetchCurrentUser();
-          this.$router.push('/participants');
+          this.$router.push('/tennis/participants');
         }
       } catch (err) {
         if (err.response) {

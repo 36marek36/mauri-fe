@@ -1,507 +1,135 @@
 <template>
-  <div class="main-layout">
-    <div class="left-side">
-    </div>
-    <div class="right-side">
+    <div class="split-screen">
+        <div class="panel top" @click="goToVolleyball">
+            <img src="/images/volley.jpg" alt="Volleyball">
 
-      <!-- LOADING -->
-      <p v-if="loading">
-        Načítavam posledné výsledky...
-      </p>
-
-      <!-- ERROR -->
-      <p v-else-if="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </p>
-
-      <!-- ACTIVITIES -->
-      <div v-else-if="currentSeason" class="list-or-nothing">
-        <div class="activities">
-
-          <h3>Posledné výsledky</h3>
-
-          <p v-if="!matchActivities.length">
-            V posledných 3 dňoch sa neodohrali žiadne zápasy
-          </p>
-
-          <div v-for="group in groupedActivities" :key="group.date">
-
-            <h4 class="day-title">
-              {{ group.date }}
-            </h4>
-
-            <div v-for="activity in group.activities" :key="activity.match.id" class="activity-item">
-              <div class="scoreboard">
-
-                <span class="league-name">{{ activity.leagueName }}</span>
-
-                <!-- HOME -->
-                <div class="row">
-                  <div class="name" :class="getPlayerClass(activity.match, 'home')">
-                    {{ getHomeName(activity.match) }}
-                  </div>
-
-                  <div class="sets">
-                    <span v-for="(set, i) in getHomeSets(activity.match)" :key="i">
-                      {{ set }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- AWAY -->
-                <div class="row">
-                  <div class="name" :class="getPlayerClass(activity.match, 'away')">
-                    {{ getAwayName(activity.match) }}
-                  </div>
-
-                  <div class="sets">
-                    <span v-for="(set, i) in getAwaySets(activity.match)" :key="i">
-                      {{ set }}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <div class="overlay">
+                <h2>VOLEJBAL</h2>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="second">
-
-
-
-        <!-- 1. NOT LOGGED IN -->
-
-
-        <div v-if="!isLoggedIn" class="panel onboarding">
-
-          <h3>Vitaj medzi hráčmi tenisovej ligy</h3>
-
-          <p class="intro-text">
-            Zaregistruj sa a získaj prístup ku všetkým možnostiam ligy:
-          </p>
-
-          <ul class="onboarding-steps">
-            <li>Vytvor si účet</li>
-            <li>Nastav si hráčsky profil</li>
-            <li>Prihlás sa do ligy</li>
-            <li>Čakajú ťa zápasy, výsledky a porovnanie s ostatnými hráčmi</li>
-          </ul>
-
         </div>
 
-        <!-- 2. LOGGED IN BUT NO PLAYER -->
-        <div v-else-if="!hasPlayer" class="panel onboarding">
-          <h3>Dokonči svoj hráčsky profil</h3>
+        <div class="panel bottom" @click="goToTennis">
+            <img src="/images/tennis.jpg" alt="Tennis">
 
-          <p>
-            Aby si sa mohol zapojiť do líg a hrať zápasy,
-            potrebuješ si vytvoriť profil hráča.
-          </p>
-
-          <p class="hint">
-            Je to rýchle – zaberie to len pár sekúnd.
-          </p>
-
+            <div class="overlay">
+                <h2>TENIS</h2>
+            </div>
         </div>
-
-        <div v-if="currentSeason" class="active-season" @click="openActiveSeason">
-          <h4>Aktuálna sezóna</h4>
-        </div>
-
-        <div v-else class="active-season">
-          <h4>Momentálne nie je aktívna žiadna sezóna</h4>
-        </div>
-
-      </div>
 
     </div>
-  </div>
 </template>
 
 <script>
-import { useHeaderStore } from '@/stores/header';
-import { useUserStore } from '@/stores/user';
-import api from '@/axios-interceptor';
-
 export default {
-  name: 'HomePage',
-  data() {
-    return {
-      currentSeason: null,
-      loading: true,
-      errorMessage: '',
-      matchActivities: [],
-      header: useHeaderStore(),
-      userStore: useUserStore()
+    methods: {
+        goToTennis() {
+            this.$router.push({ name: 'TennisHome' })
+        },
+        goToVolleyball() {
+            alert('Volleyball stránka sa pripravuje ⚡')
+        },
     }
-  },
-  async created() {
-    await this.userStore.fetchCurrentUser();
-
-    this.initHeader();
-
-    try {
-      await Promise.all([
-        this.loadMatchActivities(),
-        this.loadCurrentSeason()
-      ]);
-    } finally {
-      this.loading = false;
-    }
-
-  },
-
-  methods: {
-    async loadMatchActivities() {
-
-      try {
-        this.errorMessage = '';
-
-        const res = await api.get('/match-activities/recent');
-        this.matchActivities = res.data;
-
-      } catch (e) {
-        this.errorMessage = "Nepodarilo sa načítať aktivity";
-      }
-    },
-    initHeader() {
-      if (!this.isLoggedIn) {
-        this.header.setTitle('Vitajte', '');
-        return;
-      }
-
-      const fullName = this.userStore.user?.playerName || '';
-
-      const firstName = fullName.split(' ')[0];
-
-      this.header.setTitle(
-        'Vitaj',
-        firstName
-      );
-    },
-    async loadCurrentSeason() {
-      try {
-        const res = await api.get('/seasons/current');
-        this.currentSeason = res.data;
-      } catch {
-        this.currentSeason = null;
-      }
-    },
-    openActiveSeason() {
-      if (!this.currentSeason) return;
-
-      this.$router.push(`/seasons/${this.currentSeason.id}`);
-    },
-    getPlayerClass(match, side) {
-      const winnerId = match.result?.winnerId;
-
-      const id =
-        match.matchType === 'SINGLES'
-          ? side === 'home'
-            ? match.homePlayer?.id
-            : match.awayPlayer?.id
-          : side === 'home'
-            ? match.homeTeam?.id
-            : match.awayTeam?.id;
-
-      return {
-        winner: id === winnerId
-      };
-    },
-    getHomeName(match) {
-      return match.matchType === "SINGLES"
-        ? match.homePlayer?.name
-        : match.homeTeam?.name;
-    },
-
-    getAwayName(match) {
-      return match.matchType === "SINGLES"
-        ? match.awayPlayer?.name
-        : match.awayTeam?.name;
-    },
-
-    getHomeSets(match) {
-      return match.result?.setScores?.map(s => s.score1) || [];
-    },
-
-    getAwaySets(match) {
-      return match.result?.setScores?.map(s => s.score2) || [];
-    }
-  },
-
-  computed: {
-    isLoggedIn() {
-      return this.userStore.isLoggedIn
-    },
-    hasPlayer() {
-      return !!this.userStore.user?.playerId
-    },
-    groupedActivities() {
-      if (!this.matchActivities?.length) return [];
-
-      const groups = {};
-
-      this.matchActivities.forEach(activity => {
-        const date = new Date(activity.playedAt);
-
-        const dayKey = date.toLocaleDateString("sk-SK", {
-          weekday: "long",
-          day: "2-digit",
-          month: "2-digit"
-        });
-
-        if (!groups[dayKey]) {
-          groups[dayKey] = [];
-        }
-
-        groups[dayKey].push(activity);
-      });
-
-      return Object.entries(groups).map(([date, activities]) => ({
-        date,
-        activities
-      }));
-    },
-  }
 }
+
 
 </script>
 
 <style scoped>
-.right-side {
-  justify-content: center;
-  align-items: flex-start;
+.split-screen {
+    width: min(1400px, calc(100% - 4rem));
+    height: calc(100vh - 4rem);
+
+    margin: 2rem auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.list-or-nothing {
-  overflow-y: auto;
-  align-items: center;
-  font-size: 1.5rem;
+.panel {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+
+    border-radius: 20px;
 }
 
-.activities {
-  width: 100%;
-  padding: 0 16px;
-  text-align: center;
+.panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+
+    border-radius: 20px;
+
+    filter: brightness(.8);
+    transition: transform .5s ease, filter .3s ease;
 }
 
-.day-title {
-  color: #CAE5FF;
-  padding: 2px 8px;
-  font-weight: 400;
-  text-transform: capitalize;
-  text-align: left;
+.panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(.8);
+    transition: transform .5s ease, filter .3s ease;
 }
 
-.activity-item {
-  border: 1px solid #eee;
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 10px;
-
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
+.panel:hover img {
+    transform: scale(1.05);
+    filter: brightness(1);
 }
 
-.scoreboard {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 100%;
+.split-screen:has(.bottom:hover) .top img {
+    filter: brightness(.35);
 }
 
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.split-screen:has(.top:hover) .bottom img {
+    filter: brightness(.35);
 }
 
-.league-name {
-  color: #ffffff;
+.overlay {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    padding: 1rem;
+
+    background: linear-gradient(to top,
+            rgba(0, 0, 0, .75),
+            rgba(0, 0, 0, .25),
+            transparent);
+
+    z-index: 20;
 }
 
-.name {
-  font-size: 1.2rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  color: #ffffff;
+.overlay h2 {
+    margin: 0;
+
+    color: white;
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 3px;
 }
-
-.sets {
-  display: flex;
-  gap: 6px;
-  font-family: monospace;
-}
-
-.sets span {
-  background: #8b0000;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-
-.second {
-  width: 50%;
-}
-
-.error-message {
-  text-align: center;
-  margin: 10px auto;
-}
-
-.panel.onboarding {
-  background: #002E2C;
-  border: 2px solid gold;
-  border-radius: 10px;
-  padding: 16px;
-  color: #e5e7eb;
-  margin-bottom: 1rem;
-}
-
-.panel.onboarding h3 {
-  margin-bottom: 10px;
-  color: gold;
-}
-
-.panel.onboarding p {
-  margin-bottom: 10px;
-}
-
-.active-season {
-  position: relative;
-  overflow: hidden;
-  padding: 16px 20px;
-  border: 1px solid green;
-  border-radius: 16px;
-
-  width: 100%;
-  text-align: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  background: #000000;
-}
-
-.active-season:hover {
-  background: #002E2C;
-}
-
-.active-season h4 {
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  color: #FFD700;
-  font-size: 1.2rem;
-  font-weight: 400;
-  letter-spacing: 3px;
-}
-
-.active-season::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -60%;
-  width: 40%;
-  height: 100%;
-
-  background: linear-gradient(120deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.1) 20%,
-      rgba(255, 255, 255, 0.9) 50%,
-      rgba(255, 215, 0, 0.6) 60%,
-      rgba(255, 255, 255, 0.1) 80%,
-      transparent 100%);
-
-  filter: blur(10px);
-  opacity: 0.3;
-  mix-blend-mode: screen;
-
-  animation: scan 9s linear infinite;
-}
-
-@keyframes scan {
-  0% {
-    transform: translateX(-250%);
-  }
-
-  100% {
-    transform: translateX(550%);
-  }
-}
-
-.hint {
-  /* margin-top: 6px; */
-  font-size: 0.85rem;
-  color: #94a3b8;
-
-  padding-left: 10px;
-  border-left: 2px solid rgba(217, 255, 0, 0.4);
-
-  opacity: 0.9;
-}
-
-.intro-text {
-  margin-bottom: 12px;
-  opacity: 0.9;
-}
-
-.onboarding-steps {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.onboarding-steps li {
-  position: relative;
-  padding-left: 22px;
-  margin-bottom: 8px;
-  line-height: 1.4;
-}
-
-/* custom bullet */
-.onboarding-steps li::before {
-  content: "✔";
-  position: absolute;
-  left: 0;
-  color: #d9ff00;
-}
-
-/* zvýraznenie usera */
-.winner {
-  color: #FFD700;
-}
-
 
 @media (max-width: 768px) {
+    .split-screen {
+        width: calc(100% - 2rem);
+        height: calc(100vh - 2rem);
 
-  .activities {
-    padding: 0 5px;
-    font-size: 1rem;
-  }
+        margin: 1rem auto;
+        gap: .5rem;
+    }
 
-  .activities h3 {
-    font-size: 1.2rem;
-  }
+    .panel,
+    .panel img {
+        border-radius: 12px;
+    }
 
-  .day-title {
-    font-size: 0.9rem;
-  }
-
-  .name {
-    font-size: 0.9rem;
-  }
-
-  .right-side {
-    flex-direction: column-reverse;
-  }
-
-  .second {
-    width: 100%;
-  }
+    .bottom img {
+        object-position: 15% center;
+    }
 }
 </style>

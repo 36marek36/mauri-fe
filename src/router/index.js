@@ -8,82 +8,137 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      // meta: { hideHeader: true }
-    },
-    {
-      path: '/aboutus',
-      name: 'aboutus',
-      component: () => import('../views/AboutUs.vue'),
-      meta: { hideHeader: true }
-    },
-    {
-      path: '/league-rules',
-      name: 'rules',
-      component: () => import('../views/Rules.vue'),
-      meta: { hideHeader: true }
+      meta: {
+        background: 'none',
+        hideHeader: true,
+        hideNavbar: true,
+        hideFooter: true
+      }
     },
     {
       path: '/users',
       name: 'users',
       component: () => import('../views/UsersView.vue'),
-    },
-    {
-      path: '/participants',
-      name: 'participants',
-      component: () => import('../views/ParticipantsView.vue'),
-      meta: { hideHeader: true }
-    },
-    {
-      path: '/players/:id',
-      name: 'playerDetail',
-      component: () => import('../views/PlayerDetailView.vue'),
-    },
-    {
-      path: '/teams/:id',
-      name: 'teamDetail',
-      component: () => import('../views/TeamDetailView.vue'),
-    },
-    {
-      path: '/players/create',
-      name: 'newPlayer',
-      component: () => import('../views/PlayerFormView.vue'),
-    },
-    {
-      path: '/players/edit/:id',
-      name: 'editPlayer',
-      component: () => import('../views/PlayerFormView.vue'),
-    },
-    {
-      path: '/seasons',
-      name: 'seasons',
-      component: () => import('../views/SeasonsView.vue'),
-    },
-    {
-      path: '/seasons/:id',
-      name: 'seasonDetail',
-      component: () => import('../views/SeasonDetailView.vue'),
-    },
-    {
-      path: '/leagues/:id',
-      name: 'leagueDetail',
-      component: () => import('../views/LeagueDetailView.vue'),
+      meta: {
+        background: 'tennis'
+      }
     },
     {
       path: '/login',
       name: 'login',
       component: () => import('../views/LoginView.vue'),
+      meta: {
+        background: 'tennis'
+      }
     },
     {
       path: '/change-username',
       name: 'ChangeUsername',
       component: () => import('@/views/ChangeUsernameView.vue'),
-      meta: { requiresAuth: true }
+      meta: {
+        requiresAuth: true,
+        background: 'tennis'
+      }
     },
     {
       path: '/change-password',
       name: 'ChangePassword',
       component: () => import('../views/ChangePasswordView.vue'),
-      meta: { requiresAuth: true }
+      meta: {
+        requiresAuth: true,
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis',
+      name: 'TennisHome',
+      component: () => import('../views/tennis/TennisHomeView.vue'),
+      meta: {
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/participants',
+      name: 'participants',
+      component: () => import('../views/tennis/ParticipantsView.vue'),
+      meta: {
+        hideHeader: true,
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/players/:id',
+      name: 'playerDetail',
+      component: () => import('../views/tennis/PlayerDetailView.vue'),
+      meta: {
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/teams/:id',
+      name: 'teamDetail',
+      component: () => import('../views/tennis/TeamDetailView.vue'),
+      meta: {
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/players/create',
+      name: 'newPlayer',
+      component: () => import('../views/tennis/PlayerFormView.vue'),
+      meta: {
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/players/edit/:id',
+      name: 'editPlayer',
+      component: () => import('../views/tennis/PlayerFormView.vue'),
+      meta: {
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/seasons',
+      name: 'seasons',
+      component: () => import('../views/tennis/SeasonsView.vue'),
+      meta: {
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/seasons/:id',
+      name: 'seasonDetail',
+      component: () => import('../views/tennis/SeasonDetailView.vue'),
+      meta: {
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/leagues/:id',
+      name: 'leagueDetail',
+      component: () => import('../views/tennis/LeagueDetailView.vue'),
+      meta: {
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/aboutus',
+      name: 'aboutus',
+      component: () => import('../views/tennis/AboutUs.vue'),
+      meta: {
+        hideHeader: true,
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/league-rules',
+      name: 'rules',
+      component: () => import('../views/tennis/Rules.vue'),
+      meta: {
+        hideHeader: true,
+        background: 'tennis'
+      }
     }
   ],
 })

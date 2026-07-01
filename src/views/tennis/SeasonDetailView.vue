@@ -41,7 +41,7 @@
                     <table v-if="singleLeagues.length" class="league-table">
                         <tbody>
                             <tr v-for="league in singleLeagues" :key="league.id"
-                                @click="$router.push('/leagues/' + league.leagueId)" class="league-row">
+                                @click="$router.push('/tennis/leagues/' + league.leagueId)" class="league-row">
 
                                 <td>{{ league.leagueName }}</td>
 
@@ -72,7 +72,7 @@
                     <table v-if="doubleLeagues.length" class="league-table">
                         <tbody>
                             <tr v-for="league in doubleLeagues" :key="league.id"
-                                @click="$router.push('/leagues/' + league.leagueId)" class="league-row">
+                                @click="$router.push('/tennis/leagues/' + league.leagueId)" class="league-row">
 
                                 <td>{{ league.leagueName }}</td>
 

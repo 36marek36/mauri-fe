@@ -17,12 +17,23 @@ body::before {
   position: fixed;
   inset: 0;
 
-  background-image: url('/images/background.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 
   z-index: -1;
+}
+
+body.bg-none::before {
+  background-image: none;
+}
+
+body.bg-tennis::before {
+  background-image: url('@/assets/images/background-tennis.jpg');
+}
+
+body.bg-volleyball::before {
+  background-image: url('@/assets/images/background-volleyball.jpg');
 }
 
 /* =========================
@@ -152,9 +163,13 @@ select:focus {
 
 
 @media (max-width: 768px) {
-  body::before {
-    background-image: url('/images/backgroundMob.jpg');
-    background-position: center top;
+
+  body.bg-tennis::before {
+    background-image: url('@/assets/images/background-tennis-mobile.jpg');
+  }
+
+  body.bg-volleyball::before {
+    background-image: url('@/assets/images/background-volleyball-mobile.jpg');
   }
 
   h1 {

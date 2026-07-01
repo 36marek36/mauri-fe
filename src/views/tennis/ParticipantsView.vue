@@ -20,7 +20,8 @@
 
                     <!-- Aktívni hráči -->
                     <div v-else class="list-or-nothing">
-                        <ParticipantList class="participants" :title="'Zoznam hráčov'" :participants="paginatedPlayersWithIndex"
+                        <ParticipantList class="participants" :title="'Zoznam hráčov'"
+                            :participants="paginatedPlayersWithIndex"
                             :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
                             :edit="isAdmin ? (id) => editPlayer(id) : null" :showProgress="false"
                             @view-detail="(id) => goToDetail('players', id)" />
@@ -90,7 +91,8 @@
 
                     <!-- Aktívne tímy -->
                     <div v-else class="list-or-nothing">
-                        <ParticipantList class="participants" :title="'Zoznam tímov'" :participants="paginatedTeamsWithIndex"
+                        <ParticipantList class="participants" :title="'Zoznam tímov'"
+                            :participants="paginatedTeamsWithIndex"
                             :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
                             :showProgress="false" @view-detail="(id) => goToDetail('teams', id)" />
                         <div v-if="totalPagesTeams > 1" class="pagination">
@@ -201,13 +203,13 @@ export default {
                 // Skúsi načítať detail hráča – backend overí prihlásenie a práva
                 await api.get(`/${type}/${id}`);
                 // Ak request prešiel, presmerujeme na detail
-                this.$router.push(`/${type}/${id}`);
+                this.$router.push(`/tennis/${type}/${id}`);
             } catch (error) {
                 // Chyby sa riešia automaticky v axios interceptore
             }
         },
         addPlayer() {
-            this.$router.push('/players/create')
+            this.$router.push('/tennis/players/create')
         },
         toggleCreateForm() {
             this.showCreateTeamForm = !this.showCreateTeamForm
@@ -288,7 +290,7 @@ export default {
             this.showDeleteModal = false;
         },
         editPlayer(id) {
-            this.$router.push(`/players/edit/${id}`);
+            this.$router.push(`/tennis/players/edit/${id}`);
         }
     },
     computed: {
@@ -323,8 +325,8 @@ export default {
             const end = start + this.participantsPerPage;
             return this.teams.slice(start, end);
         },
-        paginatedTeamsWithIndex(){
-            return this.paginatedTeams.map((t, i)=> ({
+        paginatedTeamsWithIndex() {
+            return this.paginatedTeams.map((t, i) => ({
                 ...t,
                 index: (this.currentPageTeams - 1) * this.participantsPerPage + i + 1
             }))

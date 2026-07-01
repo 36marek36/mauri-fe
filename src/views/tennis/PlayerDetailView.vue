@@ -32,7 +32,7 @@
                         <div class="my-teams">
                             <h3 class="label small">Tímy:</h3>
                             <div class="value small" v-for="team in player.teams" :key="team.id"
-                                @click="$router.push('/teams/' + team.id)" style="cursor: pointer;">
+                                @click="$router.push('/tennis/teams/' + team.id)" style="cursor: pointer;">
                                 {{ team.name }}
                             </div>
                         </div>
@@ -40,7 +40,7 @@
                         <div class="my-leagues">
                             <h3 class="label small">Ligy:</h3>
                             <div class="value small" v-for="league in sortedLeagues" :key="league.leagueId"
-                                @click="$router.push('/leagues/' + league.leagueId)" style="cursor: pointer;">
+                                @click="$router.push('/tennis/leagues/' + league.leagueId)" style="cursor: pointer;">
                                 {{ league.leagueName }} ({{ league.seasonYear }})
                             </div>
                         </div>

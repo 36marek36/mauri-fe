@@ -345,7 +345,7 @@ export default {
         async goToDetail(type, id) {
             try {
                 await api.get(`/${type}/${id}`);
-                this.$router.push(`/${type}/${id}`);
+                this.$router.push(`/tennis/${type}/${id}`);
             } catch (error) {
             }
         },

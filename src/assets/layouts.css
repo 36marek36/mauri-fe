@@ -1,7 +1,7 @@
 .main-layout {
     display: flex;
     flex: 1;
-    gap: 2rem;
+    gap: 2rem;   
     align-items: stretch;
 }
 

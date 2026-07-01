@@ -207,7 +207,7 @@ export default {
         async goToDetail(id) {
             try {
                 await api.get(`/players/${id}`);
-                this.$router.push(`/players/${id}`);
+                this.$router.push(`/tennis/players/${id}`);
             } catch (error) {
             }
         },

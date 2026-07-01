@@ -1,23 +1,42 @@
 <template>
     <div id="app">
-        <Navbar class="navbar" />
+        <Navbar class="navbar" v-if="!$route.meta?.hideNavbar" />
 
-        <div class="page-scroll">
+        <div class="page-scroll" :class="{ 'no-scroll-mask': $route.name === 'home' }">
             <AppHeader class="header" v-if="!$route.meta?.hideHeader" />
 
             <main class="main-content">
                 <RouterView />
             </main>
 
-            <AppFooter />
+            <AppFooter v-if="!$route.meta?.hideFooter" />
         </div>
     </div>
 </template>
 
 <script setup>
+import { watch } from 'vue';
+import { useRoute } from 'vue-router';
 import Navbar from '@/components/Navbar.vue'
 import AppHeader from './components/AppHeader.vue'
 import AppFooter from './components/AppFooter.vue'
+
+const route = useRoute()
+
+watch(
+    () => route.meta.background,
+    (background) => {
+        document.body.classList.remove(
+            'bg-home',
+            'bg-tennis',
+            'bg-volleyball'
+        )
+        document.body.classList.add(`bg-${background || 'home'}`)
+    },
+    // immediate: true zabezpečí, že sa správne pozadie nastaví už pri prvom načítaní stránky.
+    { immediate: true }
+)
+
 </script>
 
 <style scoped>
@@ -56,6 +75,11 @@ import AppFooter from './components/AppFooter.vue'
             transparent 100px,
             black 180px,
             black 100%);
+}
+
+.page-scroll.no-scroll-mask {
+    mask-image: none;
+    -webkit-mask-image: none;
 }
 
 /* HEADER */

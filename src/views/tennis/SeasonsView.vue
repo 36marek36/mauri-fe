@@ -22,7 +22,7 @@
                 <!-- AKTUÁLNA SEZÓNA -->
                 <div v-if="currentSeason">
                     <div class="season-center">
-                        <div class="season-card highlight" @click="$router.push('/seasons/' + currentSeason.id)">
+                        <div class="season-card highlight" @click="$router.push('/tennis/seasons/' + currentSeason.id)">
                             <h3>Aktuálna</h3>
                             <h3 class="season-year">{{ currentSeason.year }}</h3>
                             <h4>{{ currentSeason.totalParticipants }} účastníkov</h4>
@@ -48,7 +48,7 @@
 
 
                     <div class="season-center">
-                        <div class="season-card highlight" @click="$router.push('/seasons/' + upcomingSeason.id)">
+                        <div class="season-card highlight" @click="$router.push('/tennis/seasons/' + upcomingSeason.id)">
                             <h3>Pripravovaná</h3>
                             <h3 class="season-year">{{ upcomingSeason.year }}</h3>
                             <h4>{{ upcomingSeason.totalParticipants }} účastníkov</h4>
@@ -84,7 +84,7 @@
 
                         <div v-else class="seasons-grid">
                             <div v-for="season in archivedSeasons" :key="season.id" class="season-card"
-                                @click="$router.push('/seasons/' + season.id)">
+                                @click="$router.push('/tennis/seasons/' + season.id)">
                                 <h3 class="season-year">{{ season.year }}</h3>
                                 <h4>{{ season.totalParticipants }} účastníkov</h4>
                                 <p class="season-date start">{{ season.startDate }}</p>

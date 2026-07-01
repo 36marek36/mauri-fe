@@ -17,23 +17,26 @@
           <li>
             <RouterLink to="/" @click="closeMobileMenu">Domov</RouterLink>
           </li>
+          <li>
+            <RouterLink to="/tennis" @click="closeMobileMenu">Tenis</RouterLink>
+          </li>
           <li v-if="isAdmin">
             <RouterLink to="/users" @click="closeMobileMenu">Users</RouterLink>
           </li>
           <li>
-            <RouterLink to="/participants" @click="closeMobileMenu">Hráči/Tímy</RouterLink>
+            <RouterLink to="/tennis/participants" @click="closeMobileMenu">Hráči/Tímy</RouterLink>
           </li>
           <li>
-            <RouterLink to="/seasons" @click="closeMobileMenu">Sezóny</RouterLink>
+            <RouterLink to="/tennis/seasons" @click="closeMobileMenu">Sezóny</RouterLink>
           </li>
           <li>
             <a href="#" @click.prevent="showContacts = true; closeMobileMenu()">Kontakty</a>
           </li>
           <li>
-            <RouterLink to="/league-rules" @click="closeMobileMenu">Pravidlá</RouterLink>
+            <RouterLink to="/tennis/league-rules" @click="closeMobileMenu">Pravidlá</RouterLink>
           </li>
           <li>
-            <RouterLink to="/aboutus" @click="closeMobileMenu">O nás</RouterLink>
+            <RouterLink to="/tennis/aboutus" @click="closeMobileMenu">O nás</RouterLink>
           </li>
 
           <li v-if="isLoggedIn" class="user-dropdown">
@@ -132,17 +135,17 @@ export default {
     goToCreatePlayer() {
       this.closeDropdown()
       this.closeMobileMenu()
-      this.$router.push('/players/create')
+      this.$router.push('/tennis/players/create')
     },
     goToEditPlayer() {
       this.closeDropdown()
       this.closeMobileMenu()
-      this.$router.push(`/players/edit/${this.playerId}`);
+      this.$router.push(`/tennis/players/edit/${this.playerId}`);
     },
     goToPlayerDetail() {
       this.closeDropdown()
       this.closeMobileMenu()
-      this.$router.push(`/players/${this.playerId}`)
+      this.$router.push(`/tennis/players/${this.playerId}`)
     },
     logout() {
       this.closeDropdown()
