@@ -29,12 +29,12 @@ body.bg-none::before {
 }
 
 body.bg-tennis::before {
-  background-image: url('@/assets/images/background-tennis.jpg');
+  background-image: url('/images/background-tennis.jpg');
 }
 
-body.bg-volleyball::before {
-  background-image: url('@/assets/images/background-volleyball.jpg');
-}
+/* body.bg-volleyball::before {
+  background-image: url('/images/background-volleyball.jpg');
+} */
 
 /* =========================
    TYPOGRAFIA (bez rozbitia tabuliek)
@@ -165,12 +165,12 @@ select:focus {
 @media (max-width: 768px) {
 
   body.bg-tennis::before {
-    background-image: url('@/assets/images/background-tennis-mobile.jpg');
+    background-image: url('/images/background-tennis-mobile.jpg');
   }
 
-  body.bg-volleyball::before {
-    background-image: url('@/assets/images/background-volleyball-mobile.jpg');
-  }
+  /* body.bg-volleyball::before {
+    background-image: url('/images/background-volleyball-mobile.jpg');
+  } */
 
   h1 {
     font-size: 2.2rem;
