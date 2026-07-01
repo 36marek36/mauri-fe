@@ -62,21 +62,13 @@ export default {
 
     border-radius: 20px;
 
-    filter: brightness(.8);
-    transition: transform .5s ease, filter .3s ease;
-}
-
-.panel img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: brightness(.8);
+    filter: brightness(1);
     transition: transform .5s ease, filter .3s ease;
 }
 
 .panel:hover img {
     transform: scale(1.05);
-    filter: brightness(1);
+    filter: brightness(1.2);
 }
 
 .split-screen:has(.bottom:hover) .top img {
