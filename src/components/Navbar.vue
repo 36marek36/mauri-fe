@@ -1,82 +1,81 @@
 <template>
-  <div>
-    <div class="left-side">
+  <div class="navbar-wrapper">
+
+    <div class="message">
+      <FlashMessage v-if="hasFlashMessage" />
     </div>
-    <div class="right-side">
-      <div class="message">
-        <FlashMessage v-if="hasFlashMessage" />
-      </div>
-      <nav class="navbar">
-        <!-- HAMBURGER -->
-        <button class="hamburger" @click="toggleMobileMenu">
-          <img src="/images/icon-ball.png" class="tennis-icon" />
-          <span class="label">Menu</span>
-        </button>
 
-        <ul :class="{ open: showMobileMenu }">
-          <li>
-            <RouterLink to="/" @click="closeMobileMenu">Domov</RouterLink>
-          </li>
-          <li>
-            <RouterLink to="/tennis" @click="closeMobileMenu">Tenis</RouterLink>
-          </li>
-          <li v-if="isAdmin">
-            <RouterLink to="/users" @click="closeMobileMenu">Users</RouterLink>
-          </li>
-          <li>
-            <RouterLink to="/tennis/participants" @click="closeMobileMenu">Hráči/Tímy</RouterLink>
-          </li>
-          <li>
-            <RouterLink to="/tennis/seasons" @click="closeMobileMenu">Sezóny</RouterLink>
-          </li>
-          <li>
-            <a href="#" @click.prevent="showContacts = true; closeMobileMenu()">Kontakty</a>
-          </li>
-          <li>
-            <RouterLink to="/tennis/league-rules" @click="closeMobileMenu">Pravidlá</RouterLink>
-          </li>
-          <li>
-            <RouterLink to="/tennis/aboutus" @click="closeMobileMenu">O nás</RouterLink>
-          </li>
+    <nav class="navbar">
+      <!-- HAMBURGER -->
+      <button class="hamburger" @click="toggleMobileMenu">
+        <img src="/images/icon-ball.png" class="tennis-icon" />
+        <span class="label">Menu</span>
+      </button>
 
-          <li v-if="isLoggedIn" class="user-dropdown">
-            <a class="username" @click="toggleDropdown">{{ userStore.user.username }}</a>
-            <div v-if="showDropdown" class="dropdown-menu">
-              <AppButton v-if="playerId" label="Detail hráča" type="create" @clicked="goToPlayerDetail"
-                htmlType="button" />
-              <!-- <AppButton v-else label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" /> -->
-              <AppButton v-if="playerId" label="Upraviť profil hráča" type="edit" @clicked="goToEditPlayer" />
-              <AppButton label="Zmeniť prihlasovacie meno" type="edit" @clicked="goToChangeUsername" />
-              <AppButton label="Zmeniť heslo" type="edit" @clicked="goToChangePassword" />
-              <AppButton label="Odhlásiť sa" type="delete" @clicked="showLogout = true" />
-            </div>
-          </li>
+      <ul :class="{ open: showMobileMenu }">
+        <li>
+          <RouterLink to="/" @click="closeMobileMenu">Domov</RouterLink>
+        </li>
+        <li>
+          <RouterLink to="/tennis" @click="closeMobileMenu">Tenis</RouterLink>
+        </li>
+        <li v-if="isAdmin">
+          <RouterLink to="/users" @click="closeMobileMenu">Users</RouterLink>
+        </li>
+        <li>
+          <RouterLink to="/tennis/participants" @click="closeMobileMenu">Hráči/Tímy</RouterLink>
+        </li>
+        <li>
+          <RouterLink to="/tennis/seasons" @click="closeMobileMenu">Sezóny</RouterLink>
+        </li>
+        <li>
+          <a href="#" @click.prevent="showContacts = true; closeMobileMenu()">Kontakty</a>
+        </li>
+        <li>
+          <RouterLink to="/tennis/league-rules" @click="closeMobileMenu">Pravidlá</RouterLink>
+        </li>
+        <li>
+          <RouterLink to="/tennis/aboutus" @click="closeMobileMenu">O nás</RouterLink>
+        </li>
 
-          <li v-else>
-            <RouterLink to="/login" @click="closeMobileMenu">Prihlásenie</RouterLink>
-          </li>
-        </ul>
-        <LogoutModal :visible="showLogout" @confirm="logout" @cancel="cancelLogout" />
-      </nav>
+        <li v-if="isLoggedIn" class="user-dropdown">
+          <a class="username" @click="toggleDropdown">{{ userStore.user.username }}</a>
+          <div v-if="showDropdown" class="dropdown-menu">
+            <AppButton v-if="playerId" label="Detail hráča" type="create" @clicked="goToPlayerDetail"
+              htmlType="button" />
+            <!-- <AppButton v-else label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" /> -->
+            <AppButton v-if="playerId" label="Upraviť profil hráča" type="edit" @clicked="goToEditPlayer" />
+            <AppButton label="Zmeniť prihlasovacie meno" type="edit" @clicked="goToChangeUsername" />
+            <AppButton label="Zmeniť heslo" type="edit" @clicked="goToChangePassword" />
+            <AppButton label="Odhlásiť sa" type="delete" @clicked="showLogout = true" />
+          </div>
+        </li>
 
-      <div v-if="showMobileMenu" class="mobile-overlay" @click="closeMobileMenu" />
+        <li v-else>
+          <RouterLink to="/login" @click="closeMobileMenu">Prihlásenie</RouterLink>
+        </li>
+      </ul>
+      <LogoutModal :visible="showLogout" @confirm="logout" @cancel="cancelLogout" />
+    </nav>
 
-      <div v-if="showContacts" class="modal-overlay" @click.self="showContacts = false">
-        <div class="modal">
-          <h3>Kontakty</h3>
+    <div v-if="showMobileMenu" class="mobile-overlay" @click="closeMobileMenu" />
 
-          <a href="tel:0905542596" class="phone-link">
-            <span>Tenisová liga: p.Uríček</span>
-            <p>📞 0905 542 596</p>
-          </a>
-          <a href="tel:0905878476" class="phone-link">
-            <span>Objednávky športovísk:</span>
-            <p>📞 0905 878 476</p>
-          </a>
-          <AppButton label="Zavrieť" type="default" @clicked="showContacts = false" />
-        </div>
+    <div v-if="showContacts" class="modal-overlay" @click.self="showContacts = false">
+      <div class="modal">
+        <h3>Kontakty</h3>
+
+        <a href="tel:0905542596" class="phone-link">
+          <span>Tenisová liga: p.Uríček</span>
+          <p>📞 0905 542 596</p>
+        </a>
+        <a href="tel:0905878476" class="phone-link">
+          <span>Objednávky športovísk:</span>
+          <p>📞 0905 878 476</p>
+        </a>
+        <AppButton label="Zavrieť" type="default" @clicked="showContacts = false" />
       </div>
     </div>
+
 
   </div>
 
@@ -174,10 +173,19 @@ export default {
 </script>
 
 <style scoped>
-.message {
+.navbar-wrapper {
   display: flex;
-  width: 50%;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.message {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3000;
 }
 
 .navbar {
@@ -253,13 +261,13 @@ export default {
 .hamburger {
   display: none;
   position: relative;
-  top: -15px;
+  top: -30px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 5px;
 
-  padding: 10px 14px;
+  /* padding: 10px 14px; */
 
   background: none;
   outline: none;
@@ -350,10 +358,6 @@ export default {
     display: flex;
   }
 
-  .message {
-    width: 100%;
-  }
-
   .navbar {
     display: flex;
     justify-content: flex-end;
@@ -361,7 +365,7 @@ export default {
 
   .navbar ul {
     position: absolute;
-    top: 60px;
+    /* top: 60px; */
     right: 10px;
     flex-direction: column;
     width: 220px;

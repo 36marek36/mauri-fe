@@ -123,5 +123,10 @@ export default {
     .bottom img {
         object-position: 15% center;
     }
+
+    .split-screen:has(.bottom:hover) .top img,
+    .split-screen:has(.top:hover) .bottom img {
+        filter: brightness(1);
+    }
 }
 </style>

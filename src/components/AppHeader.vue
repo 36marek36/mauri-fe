@@ -3,6 +3,9 @@
     <div class="left-side">
     </div>
     <div class="right-side">
+
+      <Navbar class="navbar" />
+      
       <div class="header-wrapper">
 
         <div class="headings">
@@ -10,9 +13,6 @@
           <h1 v-if="subtitle">{{ subtitle }}</h1>
         </div>
 
-        <div class="second">
-
-        </div>
       </div>
 
     </div>
@@ -23,6 +23,7 @@
 
 <script>
 import { useHeaderStore } from '@/stores/header'
+import Navbar from './Navbar.vue';
 
 export default {
   name: 'AppHeader',
@@ -33,13 +34,17 @@ export default {
     subtitle() {
       return useHeaderStore().subtitle
     }
-  }
+  },
+  components: { Navbar }
 }
 </script>
 
 <style scoped>
 .header {
   display: flex;
+}
+.right-side{
+  flex-direction: column;
 }
 
 .header-wrapper {
@@ -49,21 +54,26 @@ export default {
 }
 
 .headings {
-  width: 60%;
+  width: 100%;
 }
 
-.second {
-  width: 40%;
+.navbar {
+  z-index: 1000;
+  width: 100%;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
+/* .second {
+  width: 40%;
+} */
 
 
 @media (max-width: 768px) {
   .headings {
     width: 100%;
-  }
-
-  .second {
-    display: none;
   }
 }
 </style>

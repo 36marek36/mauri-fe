@@ -1,26 +1,9 @@
-<!-- <template>
-  <div class="main-layout">
-    <div class="left-side">
-    </div>
-    <div class="right-side">
-    </div>
-  </div>
-  <div class="bottom-text">
-    <a href="https://www.facebook.com/profile.php?id=100034650532111" target="_blank" class="facebook-link">
-      <img src="/images/facebook.png" alt="Facebook" />
-    </a>
-    <h3>29.augusta 92, Handlová</h3>
-  </div>
-</template> -->
-
 <template>
   <div class="main-layout">
     <div class="left-side">
-
     </div>
     <div class="right-side">
       <div class="list-or-nothing">
-        <div class="hero-title">Handlovská tenisová liga</div>
         <div class="hero-subtitle">Tenis, ktorý spája ľudí, mestá a príbehy</div>
 
         <div class="hero-list">
@@ -98,10 +81,20 @@
 </template>
 
 <script>
+import { useHeaderStore } from '@/stores/header';
+
 
 
 export default {
-  name: 'About Us'
+  name: 'About Us',
+  data(){
+    return{
+      header: useHeaderStore()
+    }
+  },
+  created(){
+    this.header.setTitle('Handlovská tenisová liga')
+  }
 }
 
 </script>
@@ -110,7 +103,7 @@ export default {
 .right-side {
   display: flex;
   flex-direction: column;
-  padding-top: 12rem;
+  /* padding-top: 12rem; */
 }
 
 .list-or-nothing {

@@ -62,7 +62,7 @@ const router = createRouter({
       name: 'participants',
       component: () => import('../views/tennis/ParticipantsView.vue'),
       meta: {
-        hideHeader: true,
+        // hideHeader: true,
         background: 'tennis'
       }
     },
@@ -127,7 +127,7 @@ const router = createRouter({
       name: 'aboutus',
       component: () => import('../views/tennis/AboutUs.vue'),
       meta: {
-        hideHeader: true,
+        // hideHeader: true,
         background: 'tennis'
       }
     },
@@ -136,7 +136,7 @@ const router = createRouter({
       name: 'rules',
       component: () => import('../views/tennis/Rules.vue'),
       meta: {
-        hideHeader: true,
+        // hideHeader: true,
         background: 'tennis'
       }
     }

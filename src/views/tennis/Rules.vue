@@ -1,11 +1,9 @@
 <template>
   <div class="main-layout">
     <div class="left-side">
-
     </div>
     <div class="right-side">
       <div class="list-or-nothing">
-        <div class="hero-title">Pravidlá tenisovej ligy</div>
         <ul class="hero-list">
           <li>Povinnosť domáceho hráča je dohodnúť tenisový zápas.</li>
           <li>Po ukončení zápasu je nutné výsledok zapísať do rozpisu zápasov, ktorý je vyvesený v exteriérovom bare.
@@ -54,10 +52,18 @@
 </template>
 
 <script>
-
+import { useHeaderStore } from '@/stores/header';
 
 export default {
-  name: 'Rules'
+  name: 'Rules',
+  data() {
+    return {
+      header: useHeaderStore()
+    }
+  },
+  created() {
+    this.header.setTitle('Pravidlá tenisovej ligy')
+  }
 }
 
 </script>
@@ -66,7 +72,7 @@ export default {
 .right-side {
   display: flex;
   flex-direction: column;
-  padding-top: 12rem;
+  /* padding-top: 12rem; */
 }
 
 .list-or-nothing {
