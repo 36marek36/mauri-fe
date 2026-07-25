@@ -64,7 +64,13 @@ export default {
                     await userStore.login(this.username, this.password)
                     this.flash.showMessage('Prihlásenie úspešné', 'success')
                     if (this.$route.path === '/login') {
-                        this.$router.push('/tennis')
+                        const redirect = this.$route.query.redirect
+
+                        if (typeof redirect === 'string') {
+                            this.$router.push(redirect)
+                        } else {
+                            this.$router.push('/')
+                        }
                     }
                 }
                 else {

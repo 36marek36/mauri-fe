@@ -30,35 +30,40 @@
               {{ group.date }}
             </h4>
 
-            <div v-for="activity in group.activities" :key="activity.match.id" class="activity-item">
-              <div class="scoreboard">
+            <div v-for="league in group.leagues" :key="league.leagueName" class="league-group">
+              <h5 class="league-name">
+                {{ league.leagueName }}
+              </h5>
 
-                <span class="league-name">{{ activity.leagueName }}</span>
+              <div v-for="activity in league.activities" :key="activity.match.id" class="activity-item">
+                <div class="scoreboard">
 
-                <!-- HOME -->
-                <div class="row">
-                  <div class="name" :class="getPlayerClass(activity.match, 'home')">
-                    {{ getHomeName(activity.match) }}
+                  <!-- HOME -->
+                  <div class="row">
+                    <div class="name" :class="getPlayerClass(activity.match, 'home')">
+                      {{ getHomeName(activity.match) }}
+                    </div>
+
+                    <div class="sets">
+                      <span v-for="(set, i) in getHomeSets(activity.match)" :key="i">
+                        {{ set }}
+                      </span>
+                    </div>
                   </div>
 
-                  <div class="sets">
-                    <span v-for="(set, i) in getHomeSets(activity.match)" :key="i">
-                      {{ set }}
-                    </span>
-                  </div>
-                </div>
+                  <!-- AWAY -->
+                  <div class="row">
+                    <div class="name" :class="getPlayerClass(activity.match, 'away')">
+                      {{ getAwayName(activity.match) }}
+                    </div>
 
-                <!-- AWAY -->
-                <div class="row">
-                  <div class="name" :class="getPlayerClass(activity.match, 'away')">
-                    {{ getAwayName(activity.match) }}
+                    <div class="sets">
+                      <span v-for="(set, i) in getAwaySets(activity.match)" :key="i">
+                        {{ set }}
+                      </span>
+                    </div>
                   </div>
 
-                  <div class="sets">
-                    <span v-for="(set, i) in getAwaySets(activity.match)" :key="i">
-                      {{ set }}
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -240,7 +245,7 @@ export default {
     groupedActivities() {
       if (!this.matchActivities?.length) return [];
 
-      const groups = {};
+      const dayGroups = {};
 
       this.matchActivities.forEach(activity => {
         const date = new Date(activity.playedAt);
@@ -251,18 +256,25 @@ export default {
           month: "2-digit"
         });
 
-        if (!groups[dayKey]) {
-          groups[dayKey] = [];
+        if (!dayGroups[dayKey]) {
+          dayGroups[dayKey] = {};
         }
 
-        groups[dayKey].push(activity);
+        if (!dayGroups[dayKey][activity.leagueName]) {
+          dayGroups[dayKey][activity.leagueName] = [];
+        }
+
+        dayGroups[dayKey][activity.leagueName].push(activity);
       });
 
-      return Object.entries(groups).map(([date, activities]) => ({
+      return Object.entries(dayGroups).map(([date, leagues]) => ({
         date,
-        activities
+        leagues: Object.entries(leagues).map(([leagueName, activities]) => ({
+          leagueName,
+          activities
+        }))
       }));
-    },
+    }
   }
 }
 

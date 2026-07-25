@@ -139,6 +139,15 @@ const router = createRouter({
         // hideHeader: true,
         background: 'tennis'
       }
+    },
+    {
+      path: '/volleyball',
+      name: 'VolleyballHome',
+      component: () => import('../views/volley/VolleyHomeView.vue'),
+      meta: {
+        hideFooter: true,
+        background: 'volleyball'
+      }
     }
   ],
 })

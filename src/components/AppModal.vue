@@ -42,7 +42,7 @@ export default {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 200px;
+    padding-top: 400px;
     z-index: 9999;
 }
 
@@ -87,6 +87,12 @@ button {
     to {
         transform: translateY(0);
         opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-overlay {
+        padding-top: 300px;
     }
 }
 </style>

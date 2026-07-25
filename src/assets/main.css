@@ -32,9 +32,9 @@ body.bg-tennis::before {
   background-image: url('/images/background-tennis.jpg');
 }
 
-/* body.bg-volleyball::before {
-  background-image: url('/images/background-volleyball.jpg');
-} */
+body.bg-volleyball::before {
+  background-image: url('/images/background-volley.jpg');
+}
 
 /* =========================
    TYPOGRAFIA (bez rozbitia tabuliek)

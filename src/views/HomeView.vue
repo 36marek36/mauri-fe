@@ -26,6 +26,7 @@ export default {
             this.$router.push({ name: 'TennisHome' })
         },
         goToVolleyball() {
+            // this.$router.push({ name: 'VolleyballHome' })
             alert('Volleyball stránka sa pripravuje ⚡')
         },
     }

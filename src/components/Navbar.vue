@@ -8,31 +8,40 @@
     <nav class="navbar">
       <!-- HAMBURGER -->
       <button class="hamburger" @click="toggleMobileMenu">
-        <img src="/images/icon-ball.png" class="tennis-icon" />
-        <span class="label">Menu</span>
+        <img :src="sportIcon" :class="['sport-icon', iconClass]" />
+        <span :class="['label', sport === 'volleyball' ? 'volleyball-label' : 'tennis-label']">
+          Menu
+        </span>
       </button>
 
-      <ul :class="{ open: showMobileMenu }">
+      <ul :class="[`${sportTheme}-navbar`, { open: showMobileMenu }]">
         <li>
           <RouterLink to="/" @click="closeMobileMenu">Domov</RouterLink>
         </li>
-        <li>
+        <li v-if="sport === 'tennis'">
           <RouterLink to="/tennis" @click="closeMobileMenu">Tenis</RouterLink>
+        </li>
+        <li v-if="sport === 'volleyball'">
+          <RouterLink to="/volleyball" @click="closeMobileMenu">
+            Volejbal
+          </RouterLink>
         </li>
         <li v-if="isAdmin">
           <RouterLink to="/users" @click="closeMobileMenu">Users</RouterLink>
         </li>
+
         <li>
-          <RouterLink to="/tennis/participants" @click="closeMobileMenu">Hráči/Tímy</RouterLink>
+          <RouterLink :to="`${sportPrefix}/participants`" @click="closeMobileMenu">Hráči/Tímy</RouterLink>
         </li>
+
         <li>
-          <RouterLink to="/tennis/seasons" @click="closeMobileMenu">Sezóny</RouterLink>
+          <RouterLink :to="`${sportPrefix}/seasons`" @click="closeMobileMenu">Sezóny</RouterLink>
         </li>
         <li>
           <a href="#" @click.prevent="showContacts = true; closeMobileMenu()">Kontakty</a>
         </li>
         <li>
-          <RouterLink to="/tennis/league-rules" @click="closeMobileMenu">Pravidlá</RouterLink>
+          <RouterLink :to="`${sportPrefix}/league-rules`" @click="closeMobileMenu">Pravidlá</RouterLink>
         </li>
         <li>
           <RouterLink to="/tennis/aboutus" @click="closeMobileMenu">O nás</RouterLink>
@@ -52,7 +61,14 @@
         </li>
 
         <li v-else>
-          <RouterLink to="/login" @click="closeMobileMenu">Prihlásenie</RouterLink>
+          <RouterLink :to="{
+            path: '/login',
+            query: {
+              redirect: $route.fullPath
+            }
+          }" @click="closeMobileMenu">
+            Prihlásenie
+          </RouterLink>
         </li>
       </ul>
       <LogoutModal :visible="showLogout" @confirm="logout" @cancel="cancelLogout" />
@@ -115,6 +131,64 @@ export default {
     hasFlashMessage() {
       const flashStore = useFlashMessageStore()
       return flashStore.message.trim() !== ''
+    },
+    sportIcon() {
+      const path = this.$route.path
+
+      if (path.startsWith('/tennis')) {
+        return '/images/icon-ball.png'
+      }
+
+      if (path.startsWith('/volleyball')) {
+        return '/images/icon-volley.png'
+      }
+
+      return '/images/icon-ball.png'
+    },
+    sport() {
+      const path = this.$route.path
+
+      if (path.startsWith('/tennis')) {
+        return 'tennis'
+      }
+
+      if (path.startsWith('/volleyball')) {
+        return 'volleyball'
+      }
+
+      // sme napr. na /login
+      const redirect = this.$route.query.redirect
+
+      if (typeof redirect === 'string') {
+        if (redirect.startsWith('/tennis')) {
+          return 'tennis'
+        }
+
+        if (redirect.startsWith('/volleyball')) {
+          return 'volleyball'
+        }
+      }
+
+      return null
+    },
+    sportTheme() {
+      if (this.$route.path.startsWith('/tennis')) {
+        return 'tennis'
+      }
+
+      if (this.$route.path.startsWith('/volleyball')) {
+        return 'volleyball'
+      }
+
+      return 'default'
+    },
+    sportPrefix() {
+      return this.sport ? `/${this.sport}` : ''
+    },
+    iconClass() {
+      return this.sport === 'volleyball'
+        ? 'volleyball-icon'
+        : 'tennis-icon'
     }
   },
   methods: {
@@ -200,9 +274,20 @@ export default {
   transform: scale(1.2);
 }
 
-.navbar li:hover a {
+.tennis-navbar li:hover a {
   color: whitesmoke;
   text-shadow: 5px 5px 3px rgba(0, 0, 0, 0.85);
+}
+
+.volleyball-navbar li:hover a {
+  color: rgb(0, 0, 0);
+  text-shadow: 5px 5px 3px rgba(255, 255, 255, 0.85);
+}
+
+.volleyball-navbar a {
+  color: #0057D9;
+  font-weight: 800;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.85);
 }
 
 .navbar ul {
@@ -238,8 +323,13 @@ export default {
     0.5px 0.5px 0 #ff0000;
 }
 
-.navbar a.username:hover {
+.tennis-navbar a.username:hover {
   color: #ffd700;
+}
+
+.volleyball-navbar a.username:hover {
+  color: #ffffff;
+    text-shadow: 5px 5px 3px rgba(0, 0, 0, 0.85);
 }
 
 
@@ -285,10 +375,7 @@ export default {
   color: white;
 }
 
-.tennis-icon {
-  width: 30px;
-  height: 30px;
-
+.sport-icon {
   object-fit: contain;
 
   transition:
@@ -296,13 +383,32 @@ export default {
     filter 0.25s ease;
 }
 
+.tennis-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.volleyball-icon {
+  width: 40px;
+  height: 40px;
+}
+
 .hamburger .label {
-  font-size: 0.75rem;
-  font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
 
+}
+
+.tennis-label {
   color: #FFD700;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.volleyball-label {
+  color: #C62828;
+  font-weight: 900;
+  font-size: 0.8rem;
 }
 
 .hamburger:hover {
@@ -311,11 +417,18 @@ export default {
   border-color: rgba(255, 215, 0, 0.4);
 }
 
-.hamburger:hover .tennis-icon {
+.hamburger:hover .sport-icon {
   transform: rotate(90deg) scale(1.08);
+}
 
+.hamburger:hover .tennis-icon {
   filter:
     drop-shadow(0 0 8px rgba(255, 255, 0, 0.6));
+}
+
+.hamburger:hover .volleyball-icon {
+  filter:
+    drop-shadow(0 0 8px rgba(255, 0, 0, 0.6));
 }
 
 .hamburger:active {

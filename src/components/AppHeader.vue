@@ -1,11 +1,11 @@
 <template>
-  <div class="header">
+  <div class="header" :class="headerTheme">
     <div class="left-side">
     </div>
     <div class="right-side">
 
       <Navbar class="navbar" />
-      
+
       <div class="header-wrapper">
 
         <div class="headings">
@@ -24,6 +24,7 @@
 <script>
 import { useHeaderStore } from '@/stores/header'
 import Navbar from './Navbar.vue';
+import { useRoute } from 'vue-router';
 
 export default {
   name: 'AppHeader',
@@ -33,6 +34,19 @@ export default {
     },
     subtitle() {
       return useHeaderStore().subtitle
+    },
+    headerTheme() {
+      const path = this.$route.path
+
+      if (path.startsWith('/tennis')) {
+        return 'tennis-header'
+      }
+
+      if (path.startsWith('/volleyball')) {
+        return 'volleyball-header'
+      }
+
+      return ''
     }
   },
   components: { Navbar }
@@ -43,7 +57,19 @@ export default {
 .header {
   display: flex;
 }
-.right-side{
+
+/* TENIS */
+.tennis-header h1 {
+  color: white;
+}
+
+/* VOLEJBAL */
+.volleyball-header h1 {
+  color: #020100;
+  text-shadow: none;
+}
+
+.right-side {
   flex-direction: column;
 }
 
