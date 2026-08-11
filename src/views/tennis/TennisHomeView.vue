@@ -172,7 +172,7 @@ export default {
     },
     initHeader() {
       if (!this.isLoggedIn) {
-        this.header.setTitle('Vitajte', '');
+        this.header.setTitle('Handlovská', 'Tenisová liga');
         return;
       }
 
@@ -181,8 +181,8 @@ export default {
       const firstName = fullName.split(' ')[0];
 
       this.header.setTitle(
-        'Vitaj',
-        firstName
+        'Handlovská Tenisová liga', 'Vitaj ' +
+      firstName
       );
     },
     async loadCurrentSeason() {
@@ -391,11 +391,9 @@ export default {
   padding: 16px 20px;
   border: 1px solid green;
   border-radius: 16px;
-
   width: 100%;
   text-align: center;
   cursor: pointer;
-  transition: background-color 0.2s ease;
   background: #000000;
 }
 
@@ -411,39 +409,6 @@ export default {
   font-size: 1.2rem;
   font-weight: 400;
   letter-spacing: 3px;
-}
-
-.active-season::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -60%;
-  width: 40%;
-  height: 100%;
-
-  background: linear-gradient(120deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.1) 20%,
-      rgba(255, 255, 255, 0.9) 50%,
-      rgba(255, 215, 0, 0.6) 60%,
-      rgba(255, 255, 255, 0.1) 80%,
-      transparent 100%);
-
-  filter: blur(10px);
-  opacity: 0.3;
-  mix-blend-mode: screen;
-
-  animation: scan 9s linear infinite;
-}
-
-@keyframes scan {
-  0% {
-    transform: translateX(-250%);
-  }
-
-  100% {
-    transform: translateX(550%);
-  }
 }
 
 .hint {

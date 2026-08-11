@@ -60,13 +60,15 @@ export default {
 
 /* TENIS */
 .tennis-header h1 {
-  color: white;
+  color: #ffffff;
+  text-shadow: 4px 4px 3px #002E2C;
+  font-weight: 300;
 }
 
 /* VOLEJBAL */
 .volleyball-header h1 {
   color: #020100;
-  text-shadow: none;
+  text-shadow: 3px 3px 4px #ffd700;
 }
 
 .right-side {
@@ -86,7 +88,7 @@ export default {
 .navbar {
   z-index: 1000;
   width: 100%;
-  height: 100px;
+  height: 65px;
   display: flex;
   justify-content: center;
   align-items: center;

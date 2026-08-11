@@ -62,7 +62,7 @@ export default {
     }
   },
   created() {
-    this.header.setTitle('Pravidlá tenisovej ligy')
+    this.header.setTitle('Pravidlá','Tenisovej ligy')
   }
 }
 

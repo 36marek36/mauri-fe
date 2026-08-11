@@ -25,6 +25,18 @@
             <input v-model="player.phone" type="text" />
           </div>
 
+          <div v-if="isAdmin" class="form-group">
+            <label>Športy</label>
+
+            <div v-for="sport in sports" :key="sport">
+              <label>
+                <input type="checkbox" :value="sport" v-model="player.sports" />
+
+                {{ sportLabels[sport] }}
+              </label>
+            </div>
+          </div>
+
           <div class="form-actions">
             <AppButton :label="isEdit ? 'Upraviť' : 'Vytvoriť'" :type="isEdit ? 'edit' : 'create'" htmlType="submit" />
 
@@ -66,7 +78,14 @@ export default {
         firstName: '',
         lastName: '',
         email: '',
-        phone: ''
+        phone: '',
+        sports: []
+      },
+      sports: ['TENNIS', 'VOLLEYBALL'],
+
+      sportLabels: {
+        TENNIS: 'Tenis',
+        VOLLEYBALL: 'Volejbal'
       },
       isEdit: false,
       playerId: null,
@@ -110,7 +129,8 @@ export default {
           firstName: response.data.firstName,
           lastName: response.data.lastName,
           email: response.data.email,
-          phone: response.data.phone
+          phone: response.data.phone,
+          sports: response.data.sports
         };
       } catch (error) {
         console.error('Chyba pri načítaní hráča:', error);
@@ -143,7 +163,7 @@ export default {
           await api.patch(`/players/${this.playerId}`, this.player);
           this.flash.showMessage('Hráč bol úspešne upravený.', 'success');
           await this.userStore.fetchCurrentUser();
-          this.$router.push('/players/' + this.playerId)
+          this.$router.push('/tennis/players/' + this.playerId)
         } else {
           // POST request na vytvorenie hráča
           const endpoint = this.isAdmin

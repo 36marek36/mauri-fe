@@ -80,11 +80,4 @@ watch(
     display: flex;
     flex-direction: column;
 }
-
-/* RESPONSIVE */
-@media (max-width: 768px) {
-    .header {
-        margin-top: 1rem;
-    }
-}
 </style>

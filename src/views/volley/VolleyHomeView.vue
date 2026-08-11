@@ -47,7 +47,7 @@ export default {
 
     initHeader() {
       if (!this.isLoggedIn) {
-        this.header.setTitle('Vitajte', '');
+        this.header.setTitle('Handlovská', ' Beachvolejbalová liga');
         return;
       }
 
@@ -56,7 +56,7 @@ export default {
       const firstName = fullName.split(' ')[0];
 
       this.header.setTitle(
-        'Vitaj',
+        'Handlovská beachvolejbalová liga','Vitaj '+
         firstName
       );
     }

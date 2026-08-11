@@ -18,38 +18,41 @@
         <li>
           <RouterLink to="/" @click="closeMobileMenu">Domov</RouterLink>
         </li>
-        <li v-if="sport === 'tennis'">
+        <li v-if="sport === 'tennis' || sportPrefix === ''">
           <RouterLink to="/tennis" @click="closeMobileMenu">Tenis</RouterLink>
         </li>
-        <li v-if="sport === 'volleyball'">
+        <li v-if="sport === 'volleyball' || sportPrefix === ''">
           <RouterLink to="/volleyball" @click="closeMobileMenu">
             Volejbal
           </RouterLink>
         </li>
-        <li v-if="isAdmin">
-          <RouterLink to="/users" @click="closeMobileMenu">Users</RouterLink>
+
+        <li v-if="sport === 'tennis'">
+          <RouterLink to="/tennis/participants" @click="closeMobileMenu">Hráči/Tímy</RouterLink>
         </li>
 
-        <li>
-          <RouterLink :to="`${sportPrefix}/participants`" @click="closeMobileMenu">Hráči/Tímy</RouterLink>
+        <li v-if="sport === 'volleyball'">
+          <RouterLink to="/volleyball/teams" @click="closeMobileMenu">Tímy</RouterLink>
         </li>
 
-        <li>
+        <li v-if="sportPrefix">
           <RouterLink :to="`${sportPrefix}/seasons`" @click="closeMobileMenu">Sezóny</RouterLink>
         </li>
-        <li>
+        <li v-if="sportPrefix">
           <a href="#" @click.prevent="showContacts = true; closeMobileMenu()">Kontakty</a>
         </li>
-        <li>
+        <li v-if="sportPrefix">
           <RouterLink :to="`${sportPrefix}/league-rules`" @click="closeMobileMenu">Pravidlá</RouterLink>
         </li>
-        <li>
+        <li v-if="sport === 'tennis'">
           <RouterLink to="/tennis/aboutus" @click="closeMobileMenu">O nás</RouterLink>
         </li>
 
         <li v-if="isLoggedIn" class="user-dropdown">
           <a class="username" @click="toggleDropdown">{{ userStore.user.username }}</a>
           <div v-if="showDropdown" class="dropdown-menu">
+            <AppButton v-if="isAdmin" label="Users" type="default" @clicked="gotoUsers" />
+            <AppButton v-if="isAdmin" label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" />
             <AppButton v-if="playerId" label="Detail hráča" type="create" @clicked="goToPlayerDetail"
               htmlType="button" />
             <!-- <AppButton v-else label="Vytvoriť hráča" type="create" @clicked="goToCreatePlayer" /> -->
@@ -132,19 +135,6 @@ export default {
       const flashStore = useFlashMessageStore()
       return flashStore.message.trim() !== ''
     },
-    sportIcon() {
-      const path = this.$route.path
-
-      if (path.startsWith('/tennis')) {
-        return '/images/icon-ball.png'
-      }
-
-      if (path.startsWith('/volleyball')) {
-        return '/images/icon-volley.png'
-      }
-
-      return '/images/icon-ball.png'
-    },
     sport() {
       const path = this.$route.path
 
@@ -172,18 +162,17 @@ export default {
       return null
     },
     sportTheme() {
-      if (this.$route.path.startsWith('/tennis')) {
-        return 'tennis'
-      }
-
-      if (this.$route.path.startsWith('/volleyball')) {
-        return 'volleyball'
-      }
-
-      return 'default'
+      return this.sport || 'default'
     },
     sportPrefix() {
       return this.sport ? `/${this.sport}` : ''
+    },
+    sportIcon() {
+      if (this.sport === 'volleyball') {
+        return '/images/icon-volley.png'
+      }
+
+      return '/images/icon-ball.png'
     },
     iconClass() {
       return this.sport === 'volleyball'
@@ -214,6 +203,11 @@ export default {
       this.closeDropdown()
       this.closeMobileMenu()
       this.$router.push(`/tennis/players/edit/${this.playerId}`);
+    },
+    gotoUsers() {
+      this.closeDropdown()
+      this.closeMobileMenu()
+      this.$router.push('/users')
     },
     goToPlayerDetail() {
       this.closeDropdown()
@@ -281,13 +275,7 @@ export default {
 
 .volleyball-navbar li:hover a {
   color: rgb(0, 0, 0);
-  text-shadow: 5px 5px 3px rgba(255, 255, 255, 0.85);
-}
-
-.volleyball-navbar a {
-  color: #0057D9;
-  font-weight: 800;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.85);
+  text-shadow: 5px 5px 3px rgba(0, 0, 0, 0.85);
 }
 
 .navbar ul {
@@ -323,15 +311,9 @@ export default {
     0.5px 0.5px 0 #ff0000;
 }
 
-.tennis-navbar a.username:hover {
+.navbar a.username:hover {
   color: #ffd700;
 }
-
-.volleyball-navbar a.username:hover {
-  color: #ffffff;
-    text-shadow: 5px 5px 3px rgba(0, 0, 0, 0.85);
-}
-
 
 .dropdown-menu {
   position: absolute;
@@ -351,14 +333,10 @@ export default {
 .hamburger {
   display: none;
   position: relative;
-  top: -30px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 5px;
-
-  /* padding: 10px 14px; */
-
   background: none;
   outline: none;
   border: none;
@@ -377,18 +355,9 @@ export default {
 
 .sport-icon {
   object-fit: contain;
-
   transition:
     transform 0.25s ease,
     filter 0.25s ease;
-}
-
-.tennis-icon {
-  width: 30px;
-  height: 30px;
-}
-
-.volleyball-icon {
   width: 40px;
   height: 40px;
 }
@@ -396,24 +365,21 @@ export default {
 .hamburger .label {
   letter-spacing: 1px;
   text-transform: uppercase;
-
-}
-
-.tennis-label {
-  color: #FFD700;
-  font-weight: 700;
-  font-size: 0.75rem;
-}
-
-.volleyball-label {
-  color: #C62828;
   font-weight: 900;
   font-size: 0.8rem;
 }
 
+.tennis-label {
+  color: #FFD700;
+}
+
+.volleyball-label {
+  color: #C62828;
+
+}
+
 .hamburger:hover {
   transform: translateY(-2px);
-
   border-color: rgba(255, 215, 0, 0.4);
 }
 
@@ -478,7 +444,6 @@ export default {
 
   .navbar ul {
     position: absolute;
-    /* top: 60px; */
     right: 10px;
     flex-direction: column;
     width: 220px;

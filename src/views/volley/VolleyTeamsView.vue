@@ -4,47 +4,6 @@
         </div>
         <div class="right-side">
             <div class="participants-columns">
-                <!-- 🧍 Hráči -->
-                <div class="column">
-
-                    <!-- <AppButton v-if="isAdmin" label="Vytvoriť hráča" icon="➕" type="create" htmlType="button"
-                        @clicked="addPlayer" /> -->
-
-                    <div v-if="loadingPlayers">
-                        ... loading players...
-                    </div>
-
-                    <div v-else-if="players.length === 0" class="list-or-nothing">
-                        <p>Žiadni hráči nie sú k dispozícii.</p>
-                    </div>
-
-                    <!-- Aktívni hráči -->
-                    <div v-else class="list-or-nothing">
-                        <ParticipantList class="participants" :title="'Zoznam hráčov'"
-                            :participants="paginatedPlayersWithIndex"
-                            :remove="isAdmin ? (id) => confirmDeleteParticipant('players', id) : null"
-                            :edit="isAdmin ? (id) => editPlayer(id) : null" :showProgress="false"
-                            @view-detail="(id) => goToDetail('players', id)" />
-                        <div v-if="totalPagesPlayers > 1" class="pagination">
-                            <AppButton label="Predošlá" icon="←" type="edit" htmlType="button"
-                                @clicked="currentPagePlayers--" :disabled="currentPagePlayers === 1" />
-                            <span>{{ currentPagePlayers }} / {{ totalPagesPlayers }}</span>
-                            <AppButton label="Ďalšia" icon="→" type="edit" htmlType="button"
-                                @clicked="currentPagePlayers++" :disabled="currentPagePlayers === totalPagesPlayers" />
-                        </div>
-                    </div>
-
-                    <!-- Neaktívni hráči -->
-                    <div v-if="isAdmin" class="list-or-nothing">
-                        <ParticipantList v-if="inactivePlayers.length > 0" class="participants"
-                            :title="'Neaktívni (vymazaní) hráči'" :participants="inactivePlayers"
-                            @view-detail="(id) => goToDetail('players', id)" :showProgress="false"
-                            :remove="(id) => confirmDeleteParticipant('players', id)" />
-
-                        <p v-else>Žiadni neaktívni hráči nie sú k dispozícii.</p>
-
-                    </div>
-                </div>
 
                 <!-- 🧑‍🤝‍🧑 Tímy -->
                 <div class="column">
@@ -56,27 +15,20 @@
                     <!-- Formulár na vytvorenie tímu -->
                     <div v-if="showCreateTeamForm" class="list-or-nothing">
                         <div class="create-team-form">
-                            <label for="player1">Hráč 1:</label>
-                            <select id="player1" v-model="newTeam.player1Id">
+                            <label for="name">Názov tímu:</label>
+                            <input class="team-input" id="name" type="text" v-model="newTeam.name">
+
+                            <label for="captain">Hráč 2:</label>
+                            <select id="captain" v-model="newTeam.captainId">
                                 <option value="">-- Vyber hráča --</option>
-                                <option v-for="player in players" :key="player.id" :value="player.id">
-                                    <!-- {{ player.firstName }} {{ player.lastName }} -->
-                                    {{ player.name }}
-                                </option>
-                            </select>
-                            <label for="player2">Hráč 2:</label>
-                            <select id="player2" v-model="newTeam.player2Id">
-                                <option value="">-- Vyber hráča --</option>
-                                <option v-for="player in players" :key="player.id" :value="player.id">
-                                    <!-- {{ player.firstName }} {{ player.lastName }} -->
-                                    {{ player.name }}
+                                <option v-for="captain in captains" :key="captain.id" :value="captain.id">
+                                    {{ captain.name }}
                                 </option>
                             </select>
 
                             <AppButton label="Vytvoriť" icon="➕" type="create" htmlType="button"
                                 @clicked="createTeam" />
                         </div>
-
                     </div>
 
                     <!-- Načítavanie -->
@@ -91,8 +43,7 @@
 
                     <!-- Aktívne tímy -->
                     <div v-else class="list-or-nothing">
-                        <ParticipantList class="participants" :title="'Zoznam tímov'"
-                            :participants="paginatedTeamsWithIndex"
+                        <ParticipantList class="teams" :title="'Zoznam tímov'" :participants="paginatedTeamsWithIndex"
                             :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
                             :showProgress="false" @view-detail="(id) => goToDetail('teams', id)" />
                         <div v-if="totalPagesTeams > 1" class="pagination">
@@ -106,7 +57,7 @@
 
                     <!-- Neaktívne tímy -->
                     <div v-if="isAdmin" class="list-or-nothing">
-                        <ParticipantList v-if="inactiveTeams.length > 0" class="participants"
+                        <ParticipantList v-if="inactiveTeams?.length > 0" class="teams"
                             :title="'Neaktívne (vymazané) tímy'" :participants="inactiveTeams"
                             @view-detail="(id) => goToDetail('teams', id)" :showProgress="false"
                             :remove="(id) => confirmDeleteParticipant('teams', id)" />
@@ -117,7 +68,7 @@
         </div>
     </div>
 
-    <AppModal :visible="showDeleteModal" :message="deleteMessage" @confirm="deleteParticipant" @cancel="cancelDelete" />
+    <AppModal :visible="showDeleteModal" :message="deleteMessage" @confirm="deleteTeam" @cancel="cancelDelete" />
 
 </template>
 
@@ -131,24 +82,21 @@ import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header'
 
 export default {
-    name: 'ParticipantsView',
+    name: 'VolleyTeamsView',
     data() {
         return {
-            players: [],
+            captains: [],
             teams: [],
-            inactivePlayers: [],
             inactiveTeams: [],
-            loadingPlayers: true,
             loadingTeams: true,
             showCreateTeamForm: false,
             newTeam: {
-                player1Id: '',
-                player2Id: ''
+                name: '',
+                captainId: ''
             },
             showDeleteModal: false,
             participant: null,
             participantsPerPage: 10,
-            currentPagePlayers: 1,
             currentPageTeams: 1,
             header: useHeaderStore(),
             userStore: useUserStore()
@@ -156,91 +104,54 @@ export default {
 
     },
     created() {
-        this.header.setTitle('Zoznam hráčov a tímov', '')
+        this.header.setTitle('Zoznam', 'Beachvolejbalových tímov')
         this.fetchAllData()
     },
     methods: {
+
         async fetchAllData() {
-            this.loadingPlayers = true
             this.loadingTeams = true
             this.loading = true
 
             try {
-                const [playersRes, teamsRes] = await Promise.all([
-                    api.get('/players/'),
-                    api.get('/teams/')
-                ])
-                this.players = playersRes.data
-                this.teams = teamsRes.data
+                const res = await api.get('/volleyball/teams/');
+                this.teams = res.data
 
                 // 👉 Ak je admin, načítaj aj neaktívnych
                 if (this.isAdmin) {
-                    await this.fetchAllInactiveParticipants()
+                    await this.fetchAllInactiveTeams()
                 }
+
             } catch (error) {
                 // console.error('Chyba pri načítaní hráčov alebo tímov:', error)
             } finally {
-                this.loadingPlayers = false
                 this.loadingTeams = false
                 this.loading = false
             }
         },
-
-        async fetchAllInactiveParticipants() {
+        async fetchCaptains() {
             try {
-                const [inactivePlayersRes, inactiveTeamsRes] = await Promise.all([
-                    api.get('/players/inactive'),
-                    api.get('/teams/inactive')
-                ])
-                this.inactivePlayers = inactivePlayersRes.data
-                this.inactiveTeams = inactiveTeamsRes.data
+                const res = await api.get('/players/volleyball');
+                this.captains = res.data
             } catch (error) {
-                // console.error('Chyba pri načítaní neaktívnych hráčov alebo tímov:', error)
+                console.log(error)
             }
         },
         async goToDetail(type, id) {
             try {
                 // Skúsi načítať detail hráča – backend overí prihlásenie a práva
-                await api.get(`/${type}/${id}`);
+                await api.get(`/volleyball/${type}/${id}`);
                 // Ak request prešiel, presmerujeme na detail
-                this.$router.push(`/tennis/${type}/${id}`);
+                this.$router.push(`/volleyball/${type}/${id}`);
             } catch (error) {
                 // Chyby sa riešia automaticky v axios interceptore
             }
         },
-        addPlayer() {
-            this.$router.push('/tennis/players/create')
-        },
-        toggleCreateForm() {
-            this.showCreateTeamForm = !this.showCreateTeamForm
-        },
-        async createTeam() {
-            const payload = {
-                player1Id: this.newTeam.player1Id,
-                player2Id: this.newTeam.player2Id
-            };
-
+        async deleteTeam() {
             try {
-                const res = await api.post('/teams/create', payload);
-
-                this.flash.showMessage('Tim bol úspešne vytvoreny.', 'success')
-
-                // Resetovanie výberu hráčov
-                this.newTeam = { player1Id: '', player2Id: '' }
-
-                // Načítanie aktualizovaného zoznamu tímov
-                this.fetchAllData();
-
-                // ⬇️ Zatvorenie formulára
-                this.toggleCreateForm();
-            } catch (err) {
-            }
-        },
-        async deleteParticipant() {
-            try {
-                const response = await api.delete(`/${this.participant.type}/${this.participant.id}`);
+                const response = await api.delete(`/volleyball/${this.participant.type}/${this.participant.id}`);
                 const status = response.data?.status;
-                const typeName = this.participant.type === 'players' ? 'Hráč' : 'Tím';
+                const typeName = 'Tím';
 
                 switch (status) {
                     case 'deleted':
@@ -249,19 +160,14 @@ export default {
                     case 'deactivated':
                         this.flash.showMessage(`${typeName} ${this.participant.name} ostáva deaktivovaný, pretože je stále súčasťou líg a zápasov.`, 'warning');
                         break;
-                    case 'deactivated_player_in_team':
-                        this.flash.showMessage(`${typeName} ${this.participant.name} nie je možné vymazať, pretože je stále súčasťou tímu.`, 'warning');
-                        break;
                     default:
                         this.flash.showMessage(`Nastala chyba pri mazaní ${typeName.toLowerCase()}.`, 'error');
                 }
 
                 // Refresh dát podľa typu
-                if (this.participant.type === 'teams') {
-                    this.currentPageTeams = 1;
-                } else if (this.participant.type === 'players') {
-                    this.currentPagePlayers = 1;
-                }
+                this.participant.type === 'teams'
+                this.currentPageTeams = 1;
+
                 await this.fetchAllData();
 
             } catch (err) {
@@ -271,16 +177,47 @@ export default {
                 this.cancelDelete();
             }
         },
+        async fetchAllInactiveTeams() {
+            try {
+                const inactiveTeamsRes = await api.get('/volleyball/teams/inactive')
+                this.inactiveTeams = inactiveTeamsRes.data
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        toggleCreateForm() {
+            this.fetchCaptains()
+            this.showCreateTeamForm = !this.showCreateTeamForm
+        },
+        async createTeam() {
+            const payload = {
+                name: this.newTeam.name,
+                captainId: this.newTeam.captainId
+            };
+
+            try {
+                const res = await api.post('/volleyball/teams/create', payload);
+
+                this.flash.showMessage('Tím ' + this.newTeam.name + ' bol úspešne vytvoreny.', 'success')
+
+                // Resetovanie výberu hráčov
+                this.newTeam = { name: '', captainId: '' }
+
+                // Načítanie aktualizovaného zoznamu tímov
+                this.fetchAllData();
+
+                // ⬇️ Zatvorenie formulára
+                this.toggleCreateForm();
+            } catch (err) {
+            }
+        },
         confirmDeleteParticipant(type, id) {
             let name = '';
 
-            if (type === 'players') {
-                const player = this.players.find(p => p.id === id) || this.inactivePlayers.find(p => p.id === id);
-                name = player ? player.name : '';
-            } else if (type === 'teams') {
-                const team = this.teams.find(t => t.id === id) || this.inactiveTeams.find(t => t.id === id);
-                name = team ? team.name : '';
-            }
+            type === 'teams'
+
+            const team = this.teams.find(t => t.id === id) || this.inactiveTeams.find(t => t.id === id);
+            name = team ? team.name : '';
 
             this.participant = { id, type, name };
             this.showDeleteModal = true;
@@ -288,9 +225,6 @@ export default {
         cancelDelete() {
             this.participant = null;
             this.showDeleteModal = false;
-        },
-        editPlayer(id) {
-            this.$router.push(`/tennis/players/edit/${id}`);
         }
     },
     computed: {
@@ -302,20 +236,6 @@ export default {
         },
         isLoggedIn() {
             return this.userStore.isLoggedIn
-        },
-        totalPagesPlayers() {
-            return Math.ceil(this.players.length / this.participantsPerPage);
-        },
-        paginatedPlayers() {
-            const start = (this.currentPagePlayers - 1) * this.participantsPerPage;
-            const end = start + this.participantsPerPage;
-            return this.players.slice(start, end);
-        },
-        paginatedPlayersWithIndex() {
-            return this.paginatedPlayers.map((p, i) => ({
-                ...p,
-                index: (this.currentPagePlayers - 1) * this.participantsPerPage + i + 1
-            }))
         },
         totalPagesTeams() {
             return Math.ceil(this.teams.length / this.participantsPerPage);
@@ -360,18 +280,10 @@ export default {
     font-size: 1.2rem;
 }
 
-.participants {
+.teams {
     width: 100%;
     padding-top: 1rem;
     flex-grow: 1;
-}
-
-.create-team-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    gap: 0.5rem;
 }
 
 
@@ -386,6 +298,22 @@ export default {
 
 .pagination span {
     font-size: 1rem;
+}
+
+.create-team-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 0.5rem;
+}
+
+.team-input {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
 }
 
 @media (max-width: 768px) {
