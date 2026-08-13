@@ -43,7 +43,7 @@
 
                     <!-- Aktívne tímy -->
                     <div v-else class="list-or-nothing">
-                        <ParticipantList class="teams" :title="'Zoznam tímov'" :participants="paginatedTeamsWithIndex"
+                        <ParticipantList class="teams" :participants="paginatedTeamsWithIndex"
                             :remove="isAdmin ? (id) => confirmDeleteParticipant('teams', id) : null"
                             :showProgress="false" @view-detail="(id) => goToDetail('teams', id)" />
                         <div v-if="totalPagesTeams > 1" class="pagination">

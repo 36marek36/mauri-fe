@@ -1,10 +1,6 @@
 <template>
   <div class="navbar-wrapper">
 
-    <div class="message">
-      <FlashMessage v-if="hasFlashMessage" />
-    </div>
-
     <nav class="navbar">
       <!-- HAMBURGER -->
       <button class="hamburger" @click="toggleMobileMenu">
@@ -102,10 +98,8 @@
 
 <script>
 import { useUserStore } from '@/stores/user'
-import { useFlashMessageStore } from '@/stores/flashMessage';
 import AppButton from './AppButton.vue'
 import LogoutModal from './LogoutModal.vue';
-import FlashMessage from './FlashMessage.vue';
 
 export default {
   name: 'Navbar',
@@ -130,10 +124,6 @@ export default {
     },
     playerId() {
       return this.userStore.playerId
-    },
-    hasFlashMessage() {
-      const flashStore = useFlashMessageStore()
-      return flashStore.message.trim() !== ''
     },
     sport() {
       const path = this.$route.path
@@ -236,7 +226,7 @@ export default {
       this.$router.push('/change-password')
     }
   },
-  components: { AppButton, LogoutModal, FlashMessage }
+  components: { AppButton, LogoutModal }
 }
 </script>
 
@@ -246,14 +236,6 @@ export default {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-}
-
-.message {
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3000;
 }
 
 .navbar {

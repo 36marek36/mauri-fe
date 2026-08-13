@@ -84,9 +84,4 @@ export default {
   border-color: #38bdf8;
 }
 
-@media (max-width: 768px) {
-  .flash-message {
-    margin-top: 60px;
-  }
-}
 </style>
