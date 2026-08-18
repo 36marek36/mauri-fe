@@ -4,13 +4,23 @@
         <!-- MATCH DISPLAY -->
         <div class="match-display">
             <div :class="getMatchClass(match, 'home')">
-                {{ isSingles ? match.homePlayer?.name : match.homeTeam?.name }}
+                <template v-if="leagueType === 'VOLLEYBALL'">
+                    {{ match.volleyHomeTeam?.name }}
+                </template>
+                <template v-else>
+                    {{ isSingles ? match.homePlayer?.name : match.homeTeam?.name }}
+                </template>
             </div>
 
             <div class="vs">vs</div>
 
             <div :class="getMatchClass(match, 'away')">
-                {{ isSingles ? match.awayPlayer?.name : match.awayTeam?.name }}
+                <template v-if="leagueType === 'VOLLEYBALL'">
+                    {{ match.volleyAwayTeam?.name }}
+                </template>
+                <template v-else>
+                    {{ isSingles ? match.awayPlayer?.name : match.awayTeam?.name }}
+                </template>
             </div>
         </div>
 
@@ -34,21 +44,37 @@
             </div>
 
             <!-- SCRATCHED -->
-            <div v-else-if="match.status === 'SCRATCHED'" class="match-scratched">
+            <div v-if="match.status === 'SCRATCHED'" class="match-scratched">
                 Zápas bol skrečovaný
             </div>
 
-            <!-- FINISHED -->
-            <div v-else class="match-result-text">
-                <strong>Výsledok:</strong>
-                {{ match.result?.score1 }} : {{ match.result?.score2 }}
+            <!-- Výsledok sa teraz zobrazí pre FINISHED aj pre SCRATCHED zápasy -->
+            <div class="match-result-text">
+                <strong>Výsledok: </strong>
 
-                <div v-if="match.result?.setScores?.length" class="set-scores">
-                    <span v-for="(set, index) in match.result.setScores" :key="index">
-                        {{ set.score1 }}:{{ set.score2 }}
-                        <span v-if="index < match.result.setScores.length - 1">, </span>
-                    </span>
-                </div>
+                <!-- VOLEJBAL (vychádza z predošlých úprav) -->
+                <template v-if="leagueType === 'VOLLEYBALL'">
+                    {{ match.result?.homeTeamScore }} : {{ match.result?.awayTeamScore }}
+
+                    <div v-if="match.result?.setScores?.length" class="set-scores">
+                        <span v-for="(set, index) in match.result.setScores" :key="index">
+                            {{ set.score1 }}:{{ set.score2 }}
+                            <span v-if="index < match.result.setScores.length - 1">, </span>
+                        </span>
+                    </div>
+                </template>
+
+                <!-- TENIS -->
+                <template v-else>
+                    {{ match.result?.score1 }} : {{ match.result?.score2 }}
+
+                    <div v-if="match.result?.setScores?.length" class="set-scores">
+                        <span v-for="(set, index) in match.result.setScores" :key="index">
+                            {{ set.score1 }}:{{ set.score2 }}
+                            <span v-if="index < match.result.setScores.length - 1">, </span>
+                        </span>
+                    </div>
+                </template>
             </div>
 
             <div v-if="isAdmin && leagueStatus === 'ACTIVE'">

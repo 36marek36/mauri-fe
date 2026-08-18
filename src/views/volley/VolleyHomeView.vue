@@ -15,7 +15,7 @@
       <!-- LIGY -->
       <div v-else class="league-teams">
         <div v-if="volleyLeagues.length">
-          <div v-for="league in volleyLeagues" :key="league.leagueId" class="league">
+          <div v-for="league in volleyLeagues" :key="league.leagueId">
 
             <!-- ZOZNAM TÍMOV V LIGE -->
             <div class="list-or-nothing">
@@ -29,9 +29,16 @@
               </div>
             </div>
 
-            <!-- TLAČIDLO PRE PREPNUTIE ZOBRAZENIA TÍMOV (IBA PRE ADMINA) -->
-            <div v-if="isAdmin">
-              <AppButton :label="showAddTeams[league.leagueId] ? 'Skryť dostupné tímy' : 'Pridať tímy do ligy'"
+            <!-- TLAČIDLÁ PRE ADMINA A POUŽÍVATEĽA -->
+            <div class="league-actions">
+              <!-- Tlačidlo pre zápasy (vidí ho každý) -->
+              <AppButton :label="showMatches[league.leagueId] ? 'Skryť zápasy' : 'Zobraziť zápasy'"
+                :icon="showMatches[league.leagueId] ? '🔼' : '📅'" type="default" htmlType="button"
+                @clicked="toggleMatchesVisibility(league.leagueId)" />
+
+              <!-- Tlačidlo pre pridávanie tímov (iba admin) -->
+              <AppButton v-if="isAdmin && league.leagueStatus === 'CREATED'"
+                :label="showAddTeams[league.leagueId] ? 'Skryť dostupné tímy' : 'Pridať tímy do ligy'"
                 :icon="showAddTeams[league.leagueId] ? '✖️' : '➕'" type="default" htmlType="button"
                 @clicked="toggleTeamsVisibility(league.leagueId)" />
             </div>
@@ -55,6 +62,48 @@
               </p>
             </div>
 
+            <!-- SEKCIA ZÁPASOV -->
+            <section v-if="showMatches[league.leagueId]" class="matches">
+
+              <div class="list-or-nothing" v-if="Object.keys(leagueMatches[league.leagueId] || {}).length">
+
+                <h3 class="center-title">Zápasy ligy</h3>
+
+                <div class="matches-wrapper">
+
+                  <!-- Hromadné tlačidlo pre kolá konkrétnej ligy -->
+                  <AppButton :label="areAnyRoundsOpened(league.leagueId) ? 'Skryť všetky kolá' : 'Zobraziť všetky kolá'"
+                    :icon="areAnyRoundsOpened(league.leagueId) ? '🔼' : '🔽'" type="default" htmlType="button"
+                    @clicked="toggleAllRounds(league.leagueId)" />
+
+                  <!-- Cyklus cez kolá z backendu -->
+                  <div v-for="(roundMatches, roundNumber) in leagueMatches[league.leagueId]" :key="roundNumber">
+
+                    <h5 @click="toggleRound(league.leagueId, roundNumber)" class="round-title">
+                      Kolo: {{ roundNumber }}
+                      <span v-if="isRoundOpened(league.leagueId, roundNumber)">▲</span>
+                      <span v-else>▼</span>
+                    </h5>
+
+                    <!-- Zoznam zápasov v kole -->
+                    <ul v-show="isRoundOpened(league.leagueId, roundNumber)" class="match-list">
+                      <MatchItem v-for="match in roundMatches" :key="match.id" :match="match" :leagueType="'VOLLEYBALL'"
+                        :leagueStatus="'ACTIVE'" :isAdmin="isAdmin" :activeMatchId="activeMatchId"
+                        :getMatchClass="getMatchClass" :isUserPlayerInMatch="isUserPlayerInMatch"
+                        @toggle-form="handleToggleForm" @edit="handleToggleForm" @cancel="handleCancelResult"
+                        @refresh="() => refreshMatchesForLeague(league.leagueId)" />
+                    </ul>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <h3 v-else class="center-title">Žiadne zápasy pre túto ligu.</h3>
+
+            </section>
+
           </div>
         </div>
 
@@ -70,8 +119,10 @@
 <script>
 import { useHeaderStore } from '@/stores/header';
 import { useUserStore } from '@/stores/user';
+import { useFlashMessageStore } from '@/stores/flashMessage';
 import api from '@/axios-interceptor';
 import AppButton from '@/components/AppButton.vue';
+import MatchItem from '@/components/MatchItem.vue';
 
 export default {
   name: 'VolleyHomePage',
@@ -83,6 +134,10 @@ export default {
       teams: [],
       selectedTeamIds: {},
       showAddTeams: {},
+      showMatches: {},
+      leagueMatches: {},
+      openedLeagueRounds: {},
+      activeMatchId: null,
       header: useHeaderStore(),
       userStore: useUserStore()
     }
@@ -100,22 +155,24 @@ export default {
       try {
         this.loading = true;
         this.errorMessage = '';
-
         const response = await api.get('/volleyball/volley_leagues/current_season');
-
         this.volleyLeagues = response.data;
 
-        // Inicializácia polí pre každú ligu
         this.volleyLeagues.forEach(league => {
           if (!Array.isArray(this.selectedTeamIds[league.leagueId])) {
             this.selectedTeamIds[league.leagueId] = [];
           }
-          // Nastavíme predvolený stav skrytia (false) pre každú ligu, ak ešte neexistuje
           if (this.showAddTeams[league.leagueId] === undefined) {
             this.showAddTeams[league.leagueId] = false;
           }
+          // Inicializácia pre zápasy
+          if (this.showMatches[league.leagueId] === undefined) {
+            this.showMatches[league.leagueId] = false;
+          }
+          if (this.leagueMatches[league.leagueId] === undefined) {
+            this.leagueMatches[league.leagueId] = {};
+          }
         });
-
       } catch (err) {
         console.error('Chyba pri načítavaní volejbalových líg:', err);
         this.errorMessage = 'Nepodarilo sa načítať aktuálne volejbalové ligy.';
@@ -132,6 +189,7 @@ export default {
         console.error('Chyba pri načítavaní tímov:', err);
       }
     },
+
     toggleTeamsVisibility(leagueId) {
       this.showAddTeams[leagueId] = !this.showAddTeams[leagueId];
     },
@@ -181,6 +239,8 @@ export default {
           }
         );
 
+        this.flash.showMessage('✅ Tímy boli úspešne pridané do ligy.', 'success')
+
         this.selectedTeamIds[leagueId] = [];
 
         await this.fetchVolleyLeagues();
@@ -219,6 +279,8 @@ export default {
         // Presné volanie na váš @PatchMapping("/{leagueId}/removeTeam/{teamId}")
         await api.patch(`/volleyball/volley_leagues/${leagueId}/removeTeam/${teamId}`);
 
+        this.flash.showMessage('✅ Tím bol úspešne odstránený z ligy.', 'info')
+
         // Po úspešnom odstránení znova načítame ligy, aby sa zoznam okamžite aktualizoval
         await this.fetchVolleyLeagues();
 
@@ -228,8 +290,139 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    async toggleMatchesVisibility(leagueId) {
+      if (this.showMatches[leagueId]) {
+        this.showMatches[leagueId] = false;
+        return;
+      }
+
+      try {
+        this.loading = true;
+        const response = await api.get(`/volleyball/volley-matches/${leagueId}/grouped-by-round`);
+        this.leagueMatches[leagueId] = response.data;
+
+        if (!this.openedLeagueRounds[leagueId]) {
+          this.openedLeagueRounds[leagueId] = [];
+        }
+
+        this.showMatches[leagueId] = true;
+      } catch (err) {
+        console.error('Chyba pri načítavaní zápasov:', err);
+        this.errorMessage = 'Nepodarilo sa načítať zápasy.';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    isRoundOpened(leagueId, roundNumber) {
+      return this.openedLeagueRounds[leagueId]?.includes(Number(roundNumber)) || false;
+    },
+
+    toggleRound(leagueId, roundNumber) {
+      const roundNum = Number(roundNumber);
+      if (!this.openedLeagueRounds[leagueId]) {
+        this.openedLeagueRounds[leagueId] = [];
+      }
+
+      const index = this.openedLeagueRounds[leagueId].indexOf(roundNum);
+      if (index > -1) {
+        this.openedLeagueRounds[leagueId].splice(index, 1);
+      } else {
+        this.openedLeagueRounds[leagueId].push(roundNum);
+      }
+    },
+
+    areAnyRoundsOpened(leagueId) {
+      return (this.openedLeagueRounds[leagueId]?.length || 0) > 0;
+    },
+
+    toggleAllRounds(leagueId) {
+      if (this.areAnyRoundsOpened(leagueId)) {
+        this.openedLeagueRounds[leagueId] = [];
+      } else {
+        const allRounds = Object.keys(this.leagueMatches[leagueId] || {}).map(Number);
+        this.openedLeagueRounds[leagueId] = allRounds;
+      }
+    },
+
+    async refreshMatchesForLeague(leagueId) {
+      try {
+        const response = await api.get(`/volleyball/volley-matches/${leagueId}/grouped-by-round`);
+        this.leagueMatches[leagueId] = response.data;
+        this.activeMatchId = null; // Po úspešnom uložení formulár zatvoríme
+
+      } catch (err) {
+        console.error('Chyba pri aktualizácii zápasov:', err);
+      }
+    },
+
+    // MANAŽMENT FORMULÁROV (pre @toggle-form aj @edit)
+    handleToggleForm(matchId) {
+      this.activeMatchId = this.activeMatchId === matchId ? null : matchId;
+    },
+
+    // ZRUŠENIE VÝSLEDKU (pre @cancel)
+    async handleCancelResult(matchId) {
+      if (!confirm('Naozaj chcete zrušiť výsledok tohto zápasu?')) {
+        return;
+      }
+      try {
+        this.loading = true;
+
+        await api.patch(`/volleyball/volley-matches/${matchId}/cancel-result`);
+
+        this.flash.showMessage('✅ Výsledok zápasu bol úspešne zrušený.', 'warning');
+
+        // Nájdeme ligu, ku ktorej zápas patrí, aby sme ju aktualizovali
+        for (const leagueId in this.leagueMatches) {
+          for (const round in this.leagueMatches[leagueId]) {
+            if (this.leagueMatches[leagueId][round].some(m => m.id === matchId)) {
+              await this.refreshMatchesForLeague(leagueId);
+              break;
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Chyba pri rušení výsledku:', err);
+        this.errorMessage = 'Nepodarilo sa zrušiť výsledok.';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // KLASIFIKÁCIA TRIED PRE VÍŤAZA / PORAZENÉHO (MatchItem ju očakáva)
+    getMatchClass(match, type) {
+      if (!match.result) return '';
+
+      const score1 = match.result.homeTeamScore;
+      const score2 = match.result.awayTeamScore;
+
+      if (score1 === score2) return '';
+
+      if (type === 'home') {
+        return score1 > score2 ? 'winner' : 'loser';
+      } else if (type === 'away') {
+        return score2 > score1 ? 'winner' : 'loser';
+      }
+      return '';
+    },
+    // KONTROLA, ČI PRIHLÁSENÝ POUŽÍVATEĽ HRÁ V ZÁPASE (pre zápis výsledkov hráčmi)
+    isUserPlayerInMatch(match) {
+      // Ak nie je prihlásený žiadny používateľ, rovno vrátime false
+      if (!this.isLoggedIn) return false;
+
+      // Získame ID prihláseného hráča
+      const playerId = this.userStore.playerId;
+
+      // Kontrola, či je prihlásený hráč kapitánom domáceho alebo hosťujúceho tímu
+      return (
+        match.volleyHomeTeam?.captain?.id === playerId ||
+        match.volleyAwayTeam?.captain?.id === playerId
+      );
     }
   },
+
   computed: {
     isLoggedIn() {
       return this.userStore.isLoggedIn
@@ -237,8 +430,11 @@ export default {
     isAdmin() {
       return this.userStore.isAdmin
     },
+    flash() {
+      return useFlashMessageStore();
+    }
   },
-  components: { AppButton }
+  components: { AppButton, MatchItem }
 }
 </script>
 
@@ -260,7 +456,8 @@ export default {
   border-radius: 8px;
   border: 1px solid #e9ecef;
 }
-.teams-wrapper{
+
+.teams-wrapper {
   width: 100%;
 }
 
@@ -300,6 +497,11 @@ export default {
   padding: 8px 12px;
   border-bottom: 1px solid #f1f3f5;
   transition: background-color 0.2s;
+}
+
+.league-actions {
+  gap: 10px;
+  margin: 15px 0;
 }
 
 @media (max-width: 768px) {

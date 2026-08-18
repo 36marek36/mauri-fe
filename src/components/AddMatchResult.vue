@@ -11,7 +11,7 @@
                     Set {{ index + 1 }}
                 </div>
 
-                <!-- HRÁČI -->
+                <!-- HRÁČI / TÍMY -->
                 <div class="player-stack">
 
                     <div class="player-row">
@@ -54,7 +54,18 @@
 
                     <option value="">-- vyberte --</option>
 
-                    <template v-if="leagueType === 'SINGLES'">
+                    <!-- VOLEJBAL -->
+                    <template v-if="leagueType === 'VOLLEYBALL'">
+                        <option :value="match.volleyHomeTeam?.id">
+                            {{ match.volleyHomeTeam?.name }}
+                        </option>
+                        <option :value="match.volleyAwayTeam?.id">
+                            {{ match.volleyAwayTeam?.name }}
+                        </option>
+                    </template>
+
+                    <!-- TENIS SINGLES -->
+                    <template v-else-if="leagueType === 'SINGLES'">
                         <option :value="match.homePlayer?.id">
                             {{ match.homePlayer?.name }}
                         </option>
@@ -63,6 +74,7 @@
                         </option>
                     </template>
 
+                    <!-- TENIS DOUBLES -->
                     <template v-else>
                         <option :value="match.homeTeam?.id">
                             {{ match.homeTeam?.name }}
@@ -92,8 +104,9 @@
 
     </form>
 
-    <AppModal :visible="showConfirmModal" :title="formData.scratchedId ? '⚠️ Potvrdenie skreču' : '🟢 Potvrdenie výsledku'"
-        :message="confirmMessage" @confirm="onModalConfirm" @cancel="onModalCancel" />
+    <AppModal :visible="showConfirmModal"
+        :title="formData.scratchedId ? '⚠️ Potvrdenie skreču' : '🟢 Potvrdenie výsledku'" :message="confirmMessage"
+        @confirm="onModalConfirm" @cancel="onModalCancel" />
 </template>
 
 <script>
@@ -129,7 +142,9 @@ export default {
             const isScratch = !!this.formData.scratchedId;
 
             if (isScratch) {
+                // Kontrola skreču upravená aj pre volejbalové ID
                 const scratchedIsHome =
+                    this.formData.scratchedId == this.match.volleyHomeTeam?.id ||
                     this.formData.scratchedId == this.match.homePlayer?.id ||
                     this.formData.scratchedId == this.match.homeTeam?.id;
 
@@ -147,12 +162,12 @@ export default {
     },
     methods: {
         participantName(side) {
-            if (this.leagueType === 'SINGLES') {
-                const player = side === 'home' ? this.match.homePlayer?.name : this.match.awayPlayer?.name;
-                return player;
+            if (this.leagueType === 'VOLLEYBALL') {
+                return side === 'home' ? this.match.volleyHomeTeam?.name : this.match.volleyAwayTeam?.name;
+            } else if (this.leagueType === 'SINGLES') {
+                return side === 'home' ? this.match.homePlayer?.name : this.match.awayPlayer?.name;
             } else {
-                const team = side === 'home' ? this.match.homeTeam?.name : this.match.awayTeam?.name;
-                return team;
+                return side === 'home' ? this.match.homeTeam?.name : this.match.awayTeam?.name;
             }
         },
         addSet() {
@@ -181,7 +196,13 @@ export default {
             this.showConfirmModal = false;
 
             try {
-                await api.patch(`/matches/${this.match.id}/result`, this.formData);
+                // Dynamická URL adresa: ak ide o volejbal, pošleme to na volejbalový endpoint, inak na pôvodný tenisový
+                const url = this.leagueType === 'VOLLEYBALL'
+                    ? `/volleyball/volley-matches/${this.match.id}/result`
+                    : `/matches/${this.match.id}/result`;
+
+                await api.patch(url, this.formData);
+                this.flash.showMessage('✅ Výsledok zápasu bol úspešne uložený.', 'success');
                 this.$emit('result-submitted', this.match.id);
             } catch (err) {
                 const msg = err.response?.data?.message || 'Nepodarilo sa odoslať výsledok.';

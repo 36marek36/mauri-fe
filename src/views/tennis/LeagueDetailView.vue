@@ -505,7 +505,6 @@ export default {
             // await this.fetchStats()
             await this.loadInitialData()
             this.activeMatchId = null;
-            this.flash.showMessage('✅ Výsledok bol úspešne uložený!', 'success');
         },
         async fetchStats() {
             const leagueId = this.leagueId
