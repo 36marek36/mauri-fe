@@ -71,9 +71,6 @@
             </div>
           </div>
           <br>
-          <div class="credits">
-            © 2026 – Vytvoril a prevádzkuje Marek Krnčok
-          </div>
         </div>
       </div>
     </div>
@@ -126,16 +123,6 @@ export default {
   color: inherit;
   font-size: 1.4rem;
   filter: drop-shadow(0 4px 5px rgb(255, 0, 0));
-}
-
-.credits {
-  font-size: 0.75rem;
-  opacity: 0.8;
-}
-
-.credits a {
-  font-size: 0.8rem;
-  color: #f5eeee;
 }
 
 .facebook-link {

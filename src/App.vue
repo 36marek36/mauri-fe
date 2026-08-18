@@ -9,8 +9,9 @@
                 <RouterView />
             </main>
 
-            <AppFooter v-if="!$route.meta?.hideFooter" />
+
         </div>
+        <AppFooter v-if="!$route.meta?.hideFooter" />
     </div>
 </template>
 
@@ -57,11 +58,13 @@ watch(
     mask-image: linear-gradient(to bottom,
             transparent 0px,
             black 20px,
-            black 100%);
+            black calc(100% - 20px),
+             transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom,
             transparent 0px,
             black 20px,
-            black 100%);
+            black calc(100% - 20px),
+            transparent 100%);
 }
 
 .page-scroll.no-scroll-mask {

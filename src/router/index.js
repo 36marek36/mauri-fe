@@ -145,7 +145,7 @@ const router = createRouter({
       name: 'VolleyballHome',
       component: () => import('../views/volley/VolleyHomeView.vue'),
       meta: {
-        hideFooter: true,
+        // hideFooter: true,
         background: 'volleyball'
       }
     },
@@ -154,7 +154,7 @@ const router = createRouter({
       name: 'VolleyballTeams',
       component: () => import('../views/volley/VolleyTeamsView.vue'),
       meta: {
-        hideFooter: true,
+        // hideFooter: true,
         background: 'volleyball'
       }
     },
@@ -163,7 +163,7 @@ const router = createRouter({
       name: 'VolleyballTeamDetail',
       component: () => import('../views/volley/VolleyTeamDetailView.vue'),
       meta: {
-        hideFooter: true,
+        // hideFooter: true,
         background: 'volleyball'
       }
     }

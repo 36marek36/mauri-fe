@@ -1,43 +1,33 @@
 <template>
   <div class="footer">
-    <div class="logo" v-for="(logo, index) in logos" :key="index" :style="{ backgroundImage: `url(${logo})` }"></div>
+     <span class="text">© 2026 Mauri.sk</span>
+     <span class="text">Web vytvoril a prevádzkuje Marek Krnčok</span>
   </div>
 </template>
 
 <script>
 export default {
   name: 'AppFooter',
-  data() {
-    return {
-      logos: [
-        // '/images/logo.png',
-        '/images/lg_mauri.png'
-      ]
-    }
-  }
 }
 </script>
 <style scoped>
 .footer {
   display: flex;
   justify-content: center;
+  flex-direction: column;
   flex-wrap: wrap;
-  gap: 20px;
-  padding: 20px 0;
+  align-items: center;
+  height: 60px;
+  padding: 5px 20px;
+}
+.text{
+color: #cae5ff;
+/* font-size: 14px; */
 }
 
-.logo {
-  display: flex;
-  max-width: 250px;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background-size: contain;
-  background-repeat: no-repeat;
-  filter: drop-shadow(0 4px 20px rgba(238, 128, 3, 0.922));
-}
 @media (max-width: 768px){
-  .logo{
-    max-width: 200px;
+  .text{
+    font-size: 0.8rem;
   }
 }
 

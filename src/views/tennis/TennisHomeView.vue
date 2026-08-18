@@ -480,5 +480,9 @@ export default {
   .second {
     width: 100%;
   }
+
+  .active-season {
+    padding: 8px 10px;
+  }
 }
 </style>

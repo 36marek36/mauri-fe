@@ -18,7 +18,7 @@
                             <label for="name">Názov tímu:</label>
                             <input class="team-input" id="name" type="text" v-model="newTeam.name">
 
-                            <label for="captain">Hráč 2:</label>
+                            <label for="captain">Kapitán:</label>
                             <select id="captain" v-model="newTeam.captainId">
                                 <option value="">-- Vyber hráča --</option>
                                 <option v-for="captain in captains" :key="captain.id" :value="captain.id">

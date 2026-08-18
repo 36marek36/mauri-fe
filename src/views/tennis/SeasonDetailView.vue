@@ -3,27 +3,41 @@
     <div class="admin-buttons">
 
         <!-- Tlačidlo: Spustiť sezónu -->
-        <AppButton v-if="isAdmin && season.status === 'CREATED' && !showCreateLeagueForm" label="Spustiť sezónu"
+        <AppButton v-if="isAdmin && season.status === 'CREATED' && !showCreateTennisLeagueForm" label="Spustiť sezónu"
             type="create" htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'start')" />
 
         <!-- Tlačidlo: Ukončiť sezónu -->
-        <AppButton v-if="isAdmin && season.status === 'ACTIVE' && !showCreateLeagueForm" label="Ukončiť sezónu"
+        <AppButton v-if="isAdmin && season.status === 'ACTIVE' && !showCreateTennisLeagueForm" label="Ukončiť sezónu"
             type="delete" htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'finish')" />
 
-        <!-- Tlačidlo: Vytvoriť novú ligu / Zavrieť formulár -->
-        <AppButton v-if="isAdmin" :label="showCreateLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú ligu'"
-            :type="showCreateLeagueForm ? 'delete' : 'default'" htmlType="button" @clicked="toggleCreateForm"
+        <!-- Tlačidlo: Vytvoriť tenisovú novú ligu / Zavrieť formulár -->
+        <AppButton v-if="isAdmin && season.status !== 'FINISHED'"
+            :label="showCreateTennisLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú tenisovú ligu'"
+            :type="showCreateTennisLeagueForm ? 'delete' : 'default'" htmlType="button" @clicked="toggleCreateForm"
             icon="➕" />
 
-        <div v-if="showCreateLeagueForm" class="create-form">
+        <div v-if="showCreateTennisLeagueForm" class="create-form">
             <input v-model="newLeague.name" placeholder="Názov ligy" class="form-control" />
             <select v-model="newLeague.leagueType" class="form-control">
                 <option value="SINGLES">DVOJHRA</option>
                 <option value="DOUBLES">ŠTVORHRA</option>
             </select>
 
-            <AppButton label="Vytvoriť" type="create" htmlType="button" icon="➕" @clicked="createLeague" />
+            <AppButton label="Vytvoriť" type="create" htmlType="button" icon="➕" @clicked="createTennisLeague" />
 
+        </div>
+
+        <!-- Tlačidlo: Vytvoriť novú volejbalovú ligu / Zavrieť formulár -->
+        <AppButton v-if="isAdmin && season.status !== 'FINISHED'" :label="showCreateVolleyLeagueForm
+            ? 'Zavrieť formulár'
+            : 'Vytvoriť novú volejbalovú ligu'" :type="showCreateVolleyLeagueForm ? 'delete' : 'default'"
+            htmlType="button" @clicked="toggleCreateVolleyLeagueForm" icon="➕" />
+
+        <div v-if="showCreateVolleyLeagueForm" class="create-form">
+            <input v-model="newVolleyLeague.name" placeholder="Názov volejbalovej ligy" class="form-control" />
+
+            <AppButton label="Vytvoriť" type="create" htmlType="button" icon="➕"
+                :disabled="!newVolleyLeague.name.trim()" @clicked="createVolleyLeague" />
         </div>
     </div>
 
@@ -166,10 +180,14 @@ export default {
     data() {
         return {
             season: {},
-            showCreateLeagueForm: false,
+            showCreateTennisLeagueForm: false,
             newLeague: {
                 name: '',
                 leagueType: 'SINGLES'
+            },
+            showCreateVolleyLeagueForm: false,
+            newVolleyLeague: {
+                name: ''
             },
             showDeleteModal: false,
             leagueToDelete: null,
@@ -203,7 +221,7 @@ export default {
             }
         },
 
-        async createLeague() {
+        async createTennisLeague() {
             try {
                 const seasonId = this.$route.params.id; // id sezóny z URL
 
@@ -221,7 +239,7 @@ export default {
                 this.flash.showMessage(`✅ Liga ${leagueName} bola úspešne vytvorená a pridaná do sezóny`, 'success');
                 console.log(`Liga ${leagueName} bola úspešne vytvorená.`);
 
-                this.showCreateLeagueForm = false;
+                this.showCreateTennisLeagueForm = false;
 
                 // Obnovíme sezónu, aby sa nová liga zobrazila v tabuľke
                 await this.fetchSeason(seasonId);
@@ -239,9 +257,56 @@ export default {
                 }
             }
         },
+        async createVolleyLeague() {
+            try {
+                const seasonId = this.$route.params.id;
+
+                const payload = {
+                    leagueName: this.newVolleyLeague.name.trim(),
+                    seasonId
+                };
+
+                const res = await api.post('/volleyball/volley_leagues/create', payload);
+
+                this.flash.showMessage(
+                    `✅ Liga ${res.data.leagueName} bola úspešne vytvorená a pridaná do sezóny`,
+                    'success'
+                );
+
+                this.newVolleyLeague = {
+                    name: ''
+                };
+
+                this.showCreateVolleyLeagueForm = false;
+
+                await this.fetchSeason(seasonId);
+
+            } catch (err) {
+                if (err.response?.status === 400) {
+                    const msg = err.response.data?.message ||
+                        'Chyba: neplatné dáta.';
+
+                    this.flash.showMessage(msg, 'warning');
+                } else {
+                    this.flash.showMessage(
+                        '❌ Chyba pri vytváraní volejbalovej ligy.',
+                        'error'
+                    );
+
+                    console.error(
+                        'Chyba pri vytváraní volejbalovej ligy:',
+                        err
+                    );
+                }
+            }
+        },
+        toggleCreateVolleyLeagueForm() {
+            this.showCreateVolleyLeagueForm =
+                !this.showCreateVolleyLeagueForm;
+        },
 
         toggleCreateForm() {
-            this.showCreateLeagueForm = !this.showCreateLeagueForm
+            this.showCreateTennisLeagueForm = !this.showCreateTennisLeagueForm
         },
 
         confirmDeleteLeague(league) {
