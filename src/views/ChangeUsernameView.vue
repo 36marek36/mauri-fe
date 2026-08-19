@@ -72,7 +72,7 @@ export default {
     max-width: 400px;
     width: 100%;
     box-sizing: border-box;
-    margin: 0 auto;
+    margin: 1rem auto;
     padding: 1.5rem 2rem;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.15);

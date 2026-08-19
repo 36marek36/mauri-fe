@@ -135,6 +135,7 @@ li.inactive .info span {
         flex-direction: row;
         align-items: flex-start;
         gap: 0.3em;
+        font-size: 1.2rem;
     }
 }
 </style>

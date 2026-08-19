@@ -31,7 +31,7 @@
           <RouterLink to="/volleyball/teams" @click="closeMobileMenu">Tímy</RouterLink>
         </li>
 
-        <li v-if="sportPrefix">
+        <li v-if="sport === 'tennis'">
           <RouterLink :to="`${sportPrefix}/seasons`" @click="closeMobileMenu">Sezóny</RouterLink>
         </li>
         <li v-if="sportPrefix">
@@ -187,12 +187,12 @@ export default {
     goToCreatePlayer() {
       this.closeDropdown()
       this.closeMobileMenu()
-      this.$router.push('/tennis/players/create')
+      this.$router.push('/players/create')
     },
     goToEditPlayer() {
       this.closeDropdown()
       this.closeMobileMenu()
-      this.$router.push(`/tennis/players/edit/${this.playerId}`);
+      this.$router.push(`/players/edit/${this.playerId}`);
     },
     gotoUsers() {
       this.closeDropdown()
@@ -250,15 +250,11 @@ export default {
   transform: scale(1.2);
 }
 
-.tennis-navbar li:hover a {
+.navbar li:hover a {
   color: whitesmoke;
   text-shadow: 5px 5px 3px rgba(0, 0, 0, 0.85);
 }
 
-.volleyball-navbar li:hover a {
-  color: rgb(0, 0, 0);
-  text-shadow: 5px 5px 3px rgba(0, 0, 0, 0.85);
-}
 
 .navbar ul {
   background: transparent;

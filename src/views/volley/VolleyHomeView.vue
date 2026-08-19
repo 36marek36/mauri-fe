@@ -13,21 +13,78 @@
       </p>
 
       <!-- LIGY -->
-      <div v-else class="league-teams">
+      <div v-else class="league">
         <div v-if="volleyLeagues.length">
           <div v-for="league in volleyLeagues" :key="league.leagueId">
 
-            <!-- ZOZNAM TÍMOV V LIGE -->
-            <div class="list-or-nothing">
-              <div v-if="league.teams?.length" class="teams-wrapper">
-                <div v-for="team in league.teams" :key="team.id" class="team-row">
-                  <span>{{ team.name }}</span>
-                  <!-- Tlačidlo na vymazanie tímu z ligy (iba pre admina) -->
-                  <AppButton v-if="isAdmin" label="" icon="➖" type="delete" htmlType="button"
-                    @clicked="removeTeamFromLeague(league.leagueId, team.id)" />
-                </div>
+            <!-- 📊 Tabuľka -->
+            <section>
+              <div class="list-or-nothing">
+
+                <table class="standings-table">
+                  <tbody>
+                    <template v-for="(entry, index) in leagueStandings[league.leagueId]" :key="entry.teamId">
+
+                      <!-- HLAVNÝ RIADOK -->
+                      <tr @click="toggleRow(entry.teamId)"
+                        :class="{ dropped: entry.droppedFromLeague, opened: expandedRow === entry.teamId }">
+                        <td>
+                          {{ index + 1 }}.
+                        </td>
+
+                        <td>
+                          <div class="name-cell">
+                            <span class="name">
+                              {{ entry.teamName }}
+                            </span>
+                          </div>
+                        </td>
+
+                        <td>
+                          <span>
+                            {{ entry.points }} b.
+                          </span>
+                        </td>
+
+                      </tr>
+
+                      <!-- DETAIL -->
+                      <tr v-if="expandedRow === (entry.teamId)" class="detail-row">
+                        <td colspan="100%">
+                          <div class="detail-stats">
+                            <div class="label">Odohraté zápasy:</div>
+                            <div>{{ entry.matches }}</div>
+
+                            <div class="label">W-L:</div>
+                            <div>{{ entry.wins }}-{{ entry.losses }}</div>
+
+                            <div class="label">Sety:</div>
+                            <div>{{ entry.setsWon }}:{{ entry.setsLost }}</div>
+                          </div>
+
+                          <div v-if="isAdmin" class="actions">
+                            <div class="admin-buttons">
+                              <AppButton label="odhlásiť z ligy" type="edit" htmlType="button"
+                                @clicked.stop="dropTeamFromLeague(league.leagueId, entry.teamId)" />
+
+                              <AppButton label="odstrániť z ligy" type="delete" htmlType="button"
+                                @clicked.stop="removeTeamFromLeague(league.leagueId, entry.teamId)" />
+                            </div>
+                          </div>
+
+                          <div class="detail-button">
+                            <AppButton :label="'Detail tímu'" type="default" htmlType="button"
+                              @clicked.stop="goToDetail('teams', entry.teamId)" />
+                          </div>
+                        </td>
+                      </tr>
+
+                    </template>
+                  </tbody>
+                </table>
               </div>
-            </div>
+            </section>
+
 
             <!-- TLAČIDLÁ PRE ADMINA A POUŽÍVATEĽA -->
             <div class="league-actions">
@@ -63,11 +120,9 @@
             </div>
 
             <!-- SEKCIA ZÁPASOV -->
-            <section v-if="showMatches[league.leagueId]" class="matches">
+            <section v-if="showMatches[league.leagueId]">
 
               <div class="list-or-nothing" v-if="Object.keys(leagueMatches[league.leagueId] || {}).length">
-
-                <h3 class="center-title">Zápasy ligy</h3>
 
                 <div class="matches-wrapper">
 
@@ -88,7 +143,7 @@
                     <!-- Zoznam zápasov v kole -->
                     <ul v-show="isRoundOpened(league.leagueId, roundNumber)" class="match-list">
                       <MatchItem v-for="match in roundMatches" :key="match.id" :match="match" :leagueType="'VOLLEYBALL'"
-                        :leagueStatus="'ACTIVE'" :isAdmin="isAdmin" :activeMatchId="activeMatchId"
+                        :leagueStatus="league.leagueStatus" :isAdmin="isAdmin" :activeMatchId="activeMatchId"
                         :getMatchClass="getMatchClass" :isUserPlayerInMatch="isUserPlayerInMatch"
                         @toggle-form="handleToggleForm" @edit="handleToggleForm" @cancel="handleCancelResult"
                         @refresh="() => refreshMatchesForLeague(league.leagueId)" />
@@ -132,12 +187,15 @@ export default {
       errorMessage: '',
       volleyLeagues: [],
       teams: [],
+      leagueStandings: {},
       selectedTeamIds: {},
       showAddTeams: {},
       showMatches: {},
+      showStandings: {},
       leagueMatches: {},
       openedLeagueRounds: {},
       activeMatchId: null,
+      expandedRow: null,
       header: useHeaderStore(),
       userStore: useUserStore()
     }
@@ -172,7 +230,15 @@ export default {
           if (this.leagueMatches[league.leagueId] === undefined) {
             this.leagueMatches[league.leagueId] = {};
           }
+          // Inicializácia štatistík
+          if (this.leagueStandings[league.leagueId] === undefined) {
+            this.leagueStandings[league.leagueId] = {};
+          }
         });
+
+        const statsPromises = this.volleyLeagues.map(league => this.fetchStats(league.leagueId));
+        await Promise.all(statsPromises);
+
       } catch (err) {
         console.error('Chyba pri načítavaní volejbalových líg:', err);
         this.errorMessage = 'Nepodarilo sa načítať aktuálne volejbalové ligy.';
@@ -187,6 +253,19 @@ export default {
         this.teams = response.data;
       } catch (err) {
         console.error('Chyba pri načítavaní tímov:', err);
+      }
+    },
+    async fetchStats(leagueId, forceRefresh = false) {
+      // Ak už štatistiky máme, neťaháme ich znova
+      if (!forceRefresh && this.leagueStandings[leagueId] && this.leagueStandings[leagueId].length > 0) {
+        return;
+      }
+      try {
+        const url = `/volleyball/volley_leagues/${leagueId}/stats`;
+        const res = await api.get(url);
+        this.leagueStandings[leagueId] = res.data;
+      } catch (err) {
+        console.error(`Chyba pri načítavaní štatistík pre ligu ${leagueId}:`, err);
       }
     },
 
@@ -243,7 +322,9 @@ export default {
 
         this.selectedTeamIds[leagueId] = [];
 
-        await this.fetchVolleyLeagues();
+
+        await this.fetchVolleyLeagues()
+        await this.fetchStats(leagueId, true)
 
       } catch (err) {
         console.error(
@@ -283,10 +364,33 @@ export default {
 
         // Po úspešnom odstránení znova načítame ligy, aby sa zoznam okamžite aktualizoval
         await this.fetchVolleyLeagues();
+        await this.fetchStats(leagueId, true);
 
       } catch (err) {
         console.error('Chyba pri odstraňovaní tímu z ligy:', err);
         this.errorMessage = 'Nepodarilo sa odstrániť tím z ligy.';
+      } finally {
+        this.loading = false;
+      }
+    },
+    async dropTeamFromLeague(leagueId, teamId) {
+      if (!confirm('Naozaj chcete odhlásiť tento tím z ligy?')) {
+        return;
+      }
+      try {
+        this.loading = true;
+        this.errorMessage = '';
+
+        const response = await api.patch(`/volleyball/volley_leagues/${leagueId}/dropTeam/${teamId}`)
+
+        this.flash.showMessage(response.data, 'info')
+
+        await this.fetchVolleyLeagues();
+        await this.fetchStats(leagueId, true);
+
+      } catch (err) {
+        console.error('Chyba pri odhlasovaní tímu z ligy:', err);
+        this.flash.showMessage('Nepodarilo sa odhlásiť tím z ligy.', 'error');
       } finally {
         this.loading = false;
       }
@@ -351,7 +455,7 @@ export default {
         const response = await api.get(`/volleyball/volley-matches/${leagueId}/grouped-by-round`);
         this.leagueMatches[leagueId] = response.data;
         this.activeMatchId = null; // Po úspešnom uložení formulár zatvoríme
-
+        await this.fetchStats(leagueId, true);
       } catch (err) {
         console.error('Chyba pri aktualizácii zápasov:', err);
       }
@@ -420,7 +524,20 @@ export default {
         match.volleyHomeTeam?.captain?.id === playerId ||
         match.volleyAwayTeam?.captain?.id === playerId
       );
-    }
+    },
+    toggleRow(id) {
+      this.expandedRow = this.expandedRow === id ? null : id
+    },
+    async goToDetail(type, id) {
+      try {
+        // Skúsi načítať detail hráča – backend overí prihlásenie a práva
+        await api.get(`/volleyball/${type}/${id}`);
+        // Ak request prešiel, presmerujeme na detail
+        this.$router.push(`/volleyball/${type}/${id}`);
+      } catch (error) {
+        // Chyby sa riešia automaticky v axios interceptore
+      }
+    },
   },
 
   computed: {
@@ -445,11 +562,35 @@ export default {
   width: 100%;
 }
 
-.league-teams {
+.league {
   width: 50%;
 }
 
+/* 📊 Tabuľka */
+.standings-table td {
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.standings-table tr.opened {
+  border-left: 1px solid #e9ecef;
+  border-right: 1px solid #e9ecef;
+  border-top: 1px solid #e9ecef;
+}
+
+.standings-table tbody tr:hover {
+  background-color: #363537;
+}
+
+.standings-table tr.dropped td {
+  color: #999;
+  text-shadow: none;
+  font-style: italic;
+}
+
 .list-or-nothing {
+  align-items: center;
   margin-top: 15px;
   padding: 20px;
   background-color: #f8f9fa;
@@ -457,8 +598,20 @@ export default {
   border: 1px solid #e9ecef;
 }
 
-.teams-wrapper {
+.matches-wrapper {
+  text-align: center;
   width: 100%;
+}
+
+.round-title {
+  cursor: pointer;
+  padding: 2px;
+}
+
+.match-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .team-selection {
@@ -504,8 +657,29 @@ export default {
   margin: 15px 0;
 }
 
+/* DETAIL */
+.detail-row td {
+  background: #002E2C;
+  padding: 0.8rem;
+  border-left: 1px solid #e9ecef;
+  border-right: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.detail-stats {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.5rem 1.5rem;
+  align-items: center;
+}
+
+.detail-stats .label {
+  font-weight: 700;
+  color: #ffd700;
+}
+
 @media (max-width: 768px) {
-  .league-teams {
+  .league {
     width: 100%;
   }
 }

@@ -20,7 +20,7 @@ const router = createRouter({
       name: 'users',
       component: () => import('../views/UsersView.vue'),
       meta: {
-        background: 'tennis'
+        background: 'none'
       }
     },
     {
@@ -28,7 +28,7 @@ const router = createRouter({
       name: 'login',
       component: () => import('../views/LoginView.vue'),
       meta: {
-        background: 'tennis'
+        background: 'none'
       }
     },
     {
@@ -37,7 +37,7 @@ const router = createRouter({
       component: () => import('@/views/ChangeUsernameView.vue'),
       meta: {
         requiresAuth: true,
-        background: 'tennis'
+        background: 'none'
       }
     },
     {
@@ -46,7 +46,23 @@ const router = createRouter({
       component: () => import('../views/ChangePasswordView.vue'),
       meta: {
         requiresAuth: true,
-        background: 'tennis'
+        background: 'none'
+      }
+    },
+    {
+      path: '/players/create',
+      name: 'newPlayer',
+      component: () => import('../views/PlayerFormView.vue'),
+      meta: {
+        background: 'none'
+      }
+    },
+    {
+      path: '/players/edit/:id',
+      name: 'editPlayer',
+      component: () => import('../views/PlayerFormView.vue'),
+      meta: {
+        background: 'none'
       }
     },
     {
@@ -78,22 +94,6 @@ const router = createRouter({
       path: '/tennis/teams/:id',
       name: 'teamDetail',
       component: () => import('../views/tennis/TeamDetailView.vue'),
-      meta: {
-        background: 'tennis'
-      }
-    },
-    {
-      path: '/tennis/players/create',
-      name: 'newPlayer',
-      component: () => import('../views/tennis/PlayerFormView.vue'),
-      meta: {
-        background: 'tennis'
-      }
-    },
-    {
-      path: '/tennis/players/edit/:id',
-      name: 'editPlayer',
-      component: () => import('../views/tennis/PlayerFormView.vue'),
       meta: {
         background: 'tennis'
       }
@@ -166,8 +166,25 @@ const router = createRouter({
         // hideFooter: true,
         background: 'volleyball'
       }
-    }
-  ],
+    },
+    {
+      path: '/volleyball/league-rules',
+      name: 'volleyRules',
+      component: () => import('../views/volley/VolleyRulesView.vue'),
+      meta: {
+        // hideFooter: true,
+        background: 'volleyball'
+      }
+    },
+    {
+      path: '/volleyball/players/:id',
+      name: 'volleyPlayerDetail',
+      component: () => import('../views/volley/VolleyTeamCaptainDetailView.vue'),
+      meta: {
+        background: 'volleyball'
+      }
+    },
+  ]
 })
 
 export default router

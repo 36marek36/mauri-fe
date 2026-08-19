@@ -14,7 +14,7 @@
 
         </form>
 
-        <p class="list-or-nothing">
+        <p class="info">
             <a href="#" @click.prevent="toggleMode">
                 {{ isLogin ? 'Nemáš účet? Registruj sa' : 'Už máš účet? Prihlás sa' }}
             </a>
@@ -99,13 +99,13 @@ export default {
 
 <style scoped>
 .login-register-form {
-    max-width: 400px;
-    margin: auto;
     padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
     width: 100%;
+    align-items: center;
+    
 }
 
 .inputs {
@@ -130,8 +130,9 @@ input {
     border: 1px solid #ccc;
 }
 
-.list-or-nothing {
+.info {
     align-items: center;
+    width: auto;
 }
 
 @media (max-width: 768px) {

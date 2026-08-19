@@ -8,8 +8,8 @@
         <div class="right-side">
             <div class="list-or-nothing">
                 <div class="list-row">
-                    <h3 class="label">Kapitán:</h3>
-                    <h3 class="value">{{ team.captain?.name }}</h3>
+                    <h3 class="value">Kapitán:</h3>
+                    <h3 @click="goToDetail('players', team.captain?.id)" class="captain">{{ team.captain?.name }}</h3>
                 </div>
 
                 <div class="list-row">
@@ -114,6 +114,16 @@ export default {
                 console.error('Chyba pri odstraňovaní hráča:', error);
             }
         },
+        async goToDetail(type, id) {
+            try {
+                // Skúsi načítať detail hráča – backend overí prihlásenie a práva
+                await api.get(`/${type}/${id}`);
+                // Ak request prešiel, presmerujeme na detail
+                this.$router.push(`/volleyball/${type}/${id}`);
+            } catch (error) {
+                // Chyby sa riešia automaticky v axios interceptore
+            }
+        },
     },
     computed: {
         isAdmin() {
@@ -157,6 +167,12 @@ export default {
     width: 100%;
     justify-content: space-between;
     gap: 0.5rem;
+}
+
+.captain {
+    color: #ffd700;
+    font-size: 1.3rem;
+    cursor: pointer;
 }
 
 .label {

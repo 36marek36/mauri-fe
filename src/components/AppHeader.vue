@@ -86,6 +86,7 @@ export default {
 
 .headings {
   width: 100%;
+  line-height: 1.3;
 }
 
 .navbar {
