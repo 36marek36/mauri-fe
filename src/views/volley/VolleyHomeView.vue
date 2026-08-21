@@ -789,6 +789,12 @@ export default {
   text-align: center;
 }
 
+.activities h3 {
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
 .day-title {
   color: #CAE5FF;
   padding: 2px 8px;
@@ -833,9 +839,10 @@ export default {
 .activity-item .name {
   flex-grow: 1;
   text-align: left;
-  /* Roztiahne názov tímu a potlačí skóre doprava */
-  /* font-size: 0.95rem; */
   color: #ffffff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .activity-item .name.is-winner {
@@ -889,6 +896,57 @@ export default {
 @media (max-width: 768px) {
   .league {
     width: 100%;
+  }
+
+  .activities {
+    padding: 0;
+    /* Zmenšenie bočného paddingu celej sekcie */
+  }
+
+  .activities h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  .activity-item {
+    padding: 8px 6px;
+    border-radius: 8px;
+  }
+
+  .activity-item .row {
+    padding: 4px 6px;
+    /* Menej vertikálneho miesta v riadku */
+  }
+
+  .day-title {
+    font-size: 0.9rem;
+    /* Jemnejší nadpis dňa */
+  }
+
+  .activity-item .name {
+    font-size: 0.9rem;
+    /* Menšie písmo, aby sa zmestil dlhší text */
+  }
+
+  .total-score {
+    font-size: 1rem;
+    width: 20px;
+    /* Zúženie stĺpca celkového skóre */
+    margin-right: 10px;
+    /* Skrátenie medzery pred setmi */
+  }
+
+  .sets {
+    gap: 4px;
+    /* Menšia medzera medzi políčkami setov */
+  }
+
+  .sets span {
+    font-size: 0.75rem;
+    /* Menšie čísla gemov/bodov */
+    width: 22px;
+    /* Užšie políčko pre set, aby sa zmestilo viac setov vedľa seba */
+    border-radius: 4px;
   }
 }
 </style>
