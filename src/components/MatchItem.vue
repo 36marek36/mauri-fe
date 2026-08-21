@@ -77,7 +77,8 @@
                 </template>
             </div>
 
-            <div v-if="isAdmin && leagueStatus === 'ACTIVE'">
+            <div
+                v-if="(isAdmin || (leagueType === 'VOLLEYBALL' && isUserPlayerInMatch?.(match))) && leagueStatus === 'ACTIVE'">
 
                 <AppButton :label="activeMatchId === match.id ? 'Zavrieť úpravu' : 'Upraviť výsledok'"
                     :type="activeMatchId === match.id ? 'delete' : 'default'" htmlType="button" icon="✏️"
@@ -87,7 +88,7 @@
                     <AddMatchResult :match="match" :leagueType="leagueType" @result-submitted="$emit('refresh')" />
                 </div>
 
-                <AppButton label="Zrušiť výsledok" icon="❌" type="delete" htmlType="button"
+                <AppButton v-if="isAdmin" label="Zrušiť výsledok" icon="❌" type="delete" htmlType="button"
                     @clicked="$emit('cancel', match.id)" :disabled="activeMatchId === match.id" />
 
             </div>

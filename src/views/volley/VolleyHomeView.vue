@@ -12,15 +12,66 @@
         {{ errorMessage }}
       </p>
 
-      <!-- LIGY -->
+      <!-- LIGY A GLOBÁLNY OBSAH -->
       <div v-else class="league">
-        <div v-if="volleyLeagues.length">
-          <div v-for="league in volleyLeagues" :key="league.leagueId">
 
-            <!-- 📊 Tabuľka -->
+        <!-- 🏐 GLOBÁLNE POSLEDNÉ VÝSLEDKY (Vytiahnuté von z cyklu líg, vykreslia sa iba raz na vrchu stránky) -->
+        <div v-if="hasCurrentSeason" class="list-or-nothing">
+          <div class="activities">
+            <h3>Posledné výsledky</h3>
+
+            <p v-if="!matchActivities.length">
+              V posledných 3 dňoch sa neodohrali žiadne zápasy
+            </p>
+
+            <div v-for="group in groupedActivities" :key="group.date">
+              <h4 class="day-title">{{ group.date }}</h4>
+
+              <div v-for="leagueGroup in group.leagues" :key="leagueGroup.leagueName">
+
+                <!-- Názov ligy patriaci k tejto skupine zápasov -->
+                <!-- <h5 class="league-sub-title">{{ leagueGroup.leagueName }}</h5> -->
+
+                <div v-for="({ match }) in leagueGroup.activities" :key="match.id" class="activity-item">
+                  <div class="scoreboard">
+
+                    <!-- Vygenerovanie riadku pre domáci a hosťujúci tím jedným cyklom -->
+                    <div v-for="side in [
+                      { team: match.volleyHomeTeam, isWinner: match.result?.winnerId === match.volleyHomeTeam?.id, scoreKey: 'score1', totalScore: match.result?.homeTeamScore },
+                      { team: match.volleyAwayTeam, isWinner: match.result?.winnerId === match.volleyAwayTeam?.id, scoreKey: 'score2', totalScore: match.result?.awayTeamScore }
+                    ]" :key="side.team?.id" class="row">
+                      <!-- Názov tímu + zvýraznenie víťaza -->
+                      <div class="name" :class="{ 'is-winner': side.isWinner }">
+                        {{ side.team?.name }}
+                      </div>
+
+                      <!-- Celkové skóre zápasu (napr. 3 alebo 1) -->
+                      <div class="total-score" :class="{ 'is-winner': side.isWinner }">
+                        {{ side.totalScore ?? 0 }}
+                      </div>
+
+                      <!-- Zarovnané body pre jednotlivé sety -->
+                      <div class="sets">
+                        <span v-for="(set, i) in match.result?.setScores" :key="i">
+                          {{ set[side.scoreKey] }}
+                        </span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 📊 CYKLUS PRE JEDNOTLIVÉ LIGY -->
+        <div v-if="volleyLeagues.length">
+          <div v-for="league in volleyLeagues" :key="league.leagueId" class="league-section">
+
+            <!-- 📊 Tabuľka ligy -->
             <section>
               <div class="list-or-nothing">
-
                 <table class="standings-table">
                   <tbody>
                     <template v-for="(entry, index) in leagueStandings[league.leagueId]" :key="entry.teamId">
@@ -45,7 +96,6 @@
                             {{ entry.points }} b.
                           </span>
                         </td>
-
                       </tr>
 
                       <!-- DETAIL -->
@@ -53,13 +103,14 @@
                         <td colspan="100%">
                           <div class="detail-stats">
                             <div class="label">Odohraté zápasy:</div>
-                            <div>{{ entry.matches }}</div>
+                            <!-- Pridaná bezpečná kontrola na dĺžku poľa tímov cez voliteľné reťazenie (?.) -->
+                            <div>{{ entry.matches }} / {{ league.teams?.length ? league.teams.length - 1 : 0 }}</div>
 
                             <div class="label">W-L:</div>
-                            <div>{{ entry.wins }}-{{ entry.losses }}</div>
+                            <div>{{ entry.wins }} - {{ entry.losses }}</div>
 
                             <div class="label">Sety:</div>
-                            <div>{{ entry.setsWon }}:{{ entry.setsLost }}</div>
+                            <div>{{ entry.setsWon }} : {{ entry.setsLost }}</div>
                           </div>
 
                           <div v-if="isAdmin" class="actions">
@@ -121,9 +172,7 @@
 
             <!-- SEKCIA ZÁPASOV -->
             <section v-if="showMatches[league.leagueId]">
-
               <div class="list-or-nothing" v-if="Object.keys(leagueMatches[league.leagueId] || {}).length">
-
                 <div class="matches-wrapper">
 
                   <!-- Hromadné tlačidlo pre kolá konkrétnej ligy -->
@@ -133,7 +182,6 @@
 
                   <!-- Cyklus cez kolá z backendu -->
                   <div v-for="(roundMatches, roundNumber) in leagueMatches[league.leagueId]" :key="roundNumber">
-
                     <h5 @click="toggleRound(league.leagueId, roundNumber)" class="round-title">
                       Kolo: {{ roundNumber }}
                       <span v-if="isRoundOpened(league.leagueId, roundNumber)">▲</span>
@@ -148,27 +196,24 @@
                         @toggle-form="handleToggleForm" @edit="handleToggleForm" @cancel="handleCancelResult"
                         @refresh="() => refreshMatchesForLeague(league.leagueId)" />
                     </ul>
-
                   </div>
 
                 </div>
-
               </div>
 
               <h3 v-else class="center-title">Žiadne zápasy pre túto ligu.</h3>
-
             </section>
 
-          </div>
-        </div>
+          </div> <!-- Koniec cyklu v-for="league in volleyLeagues" -->
+        </div> <!-- Koniec v-if="volleyLeagues.length" -->
 
         <p v-else>
           V aktuálnej sezóne zatiaľ nie sú vytvorené žiadne volejbalové ligy.
         </p>
-      </div>
 
-    </div>
-  </div>
+      </div> <!-- Koniec <div v-else class="league"> z 1. časti -->
+    </div> <!-- Koniec <div class="right-side"> -->
+  </div> <!-- Koniec <div class="main-layout"> -->
 </template>
 
 <script>
@@ -183,7 +228,7 @@ export default {
   name: 'VolleyHomePage',
   data() {
     return {
-      loading: false,
+      loading: true,
       errorMessage: '',
       volleyLeagues: [],
       teams: [],
@@ -196,22 +241,35 @@ export default {
       openedLeagueRounds: {},
       activeMatchId: null,
       expandedRow: null,
+      hasCurrentSeason: false,
+      matchActivities: [],
       header: useHeaderStore(),
       userStore: useUserStore()
     }
   },
   async created() {
-    await this.userStore.fetchCurrentUser();
+    this.loading = true; // Zapneme loading na začiatku
 
+    // 1. Používateľ a hlavička
+    await this.userStore.fetchCurrentUser();
     this.initHeader();
+
+    // 2. Sezóna a zápasy (Zápasy sa stiahnu iba ak sezóna vnútorne nastaví hasCurrentSeason = true)
+    await this.loadCurrentSeason();
+    if (this.hasCurrentSeason) {
+      await this.loadMatchActivities();
+    }
+
+    // 3. Ostatné číselníky
     await this.fetchVolleyLeagues();
     await this.fetchTeams();
+
+    this.loading = false; // Vypneme loading na samom konci, keď je všetko pripravené
   },
 
   methods: {
     async fetchVolleyLeagues() {
       try {
-        this.loading = true;
         this.errorMessage = '';
         const response = await api.get('/volleyball/volley_leagues/current_season');
         this.volleyLeagues = response.data;
@@ -242,8 +300,6 @@ export default {
       } catch (err) {
         console.error('Chyba pri načítavaní volejbalových líg:', err);
         this.errorMessage = 'Nepodarilo sa načítať aktuálne volejbalové ligy.';
-      } finally {
-        this.loading = false;
       }
     },
 
@@ -456,6 +512,9 @@ export default {
         this.leagueMatches[leagueId] = response.data;
         this.activeMatchId = null; // Po úspešnom uložení formulár zatvoríme
         await this.fetchStats(leagueId, true);
+        if (this.hasCurrentSeason) {
+          await this.loadMatchActivities();
+        }
       } catch (err) {
         console.error('Chyba pri aktualizácii zápasov:', err);
       }
@@ -472,7 +531,6 @@ export default {
         return;
       }
       try {
-        this.loading = true;
 
         await api.patch(`/volleyball/volley-matches/${matchId}/cancel-result`);
 
@@ -490,8 +548,6 @@ export default {
       } catch (err) {
         console.error('Chyba pri rušení výsledku:', err);
         this.errorMessage = 'Nepodarilo sa zrušiť výsledok.';
-      } finally {
-        this.loading = false;
       }
     },
 
@@ -530,12 +586,28 @@ export default {
     },
     async goToDetail(type, id) {
       try {
-        // Skúsi načítať detail hráča – backend overí prihlásenie a práva
         await api.get(`/volleyball/${type}/${id}`);
-        // Ak request prešiel, presmerujeme na detail
         this.$router.push(`/volleyball/${type}/${id}`);
       } catch (error) {
-        // Chyby sa riešia automaticky v axios interceptore
+      }
+    },
+    async loadCurrentSeason() {
+      try {
+        const res = await api.get('/seasons/current/exists');
+        this.hasCurrentSeason = res.data;
+      } catch {
+        this.hasCurrentSeason = false;
+      }
+    },
+    async loadMatchActivities() {
+      try {
+        this.errorMessage = '';
+        const res = await api.get('/volleyball/match-activities/recent');
+        this.matchActivities = res.data;
+
+      } catch (e) {
+        this.errorMessage = "Nepodarilo sa načítať aktivity";
+        this.matchActivities = [];
       }
     },
   },
@@ -549,6 +621,39 @@ export default {
     },
     flash() {
       return useFlashMessageStore();
+    },
+    groupedActivities() {
+      if (!this.matchActivities?.length) return [];
+
+      const dayGroups = {};
+
+      this.matchActivities.forEach(activity => {
+        const date = new Date(activity.playedAt);
+
+        const dayKey = date.toLocaleDateString("sk-SK", {
+          weekday: "long",
+          day: "2-digit",
+          month: "2-digit"
+        });
+
+        if (!dayGroups[dayKey]) {
+          dayGroups[dayKey] = {};
+        }
+
+        if (!dayGroups[dayKey][activity.leagueName]) {
+          dayGroups[dayKey][activity.leagueName] = [];
+        }
+
+        dayGroups[dayKey][activity.leagueName].push(activity);
+      });
+
+      return Object.entries(dayGroups).map(([date, leagues]) => ({
+        date,
+        leagues: Object.entries(leagues).map(([leagueName, activities]) => ({
+          leagueName,
+          activities
+        }))
+      }));
     }
   },
   components: { AppButton, MatchItem }
@@ -676,6 +781,109 @@ export default {
 .detail-stats .label {
   font-weight: 700;
   color: #ffd700;
+}
+
+.activities {
+  width: 100%;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.day-title {
+  color: #CAE5FF;
+  padding: 2px 8px;
+  font-weight: 400;
+  text-transform: capitalize;
+  text-align: left;
+}
+
+.activity-item {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.scoreboard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.activity-item .row {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-item .row:last-child {
+  border-bottom: none;
+  /* Odstráni spodnú čiaru u hosťujúceho tímu */
+}
+
+/* Názov tímu */
+.activity-item .name {
+  flex-grow: 1;
+  text-align: left;
+  /* Roztiahne názov tímu a potlačí skóre doprava */
+  /* font-size: 0.95rem; */
+  color: #ffffff;
+}
+
+.activity-item .name.is-winner {
+  font-weight: bold;
+  color: #ffd700;
+}
+
+/* 🎯 CELKOVÉ SKÓRE ZÁPASU (napr. 3 alebo 1) */
+.total-score {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+
+  /* Zarovnanie a priestor */
+  width: 24px;
+  /* Fixná šírka, aby boli domáce aj hosťujúce skóre pod sebou */
+  text-align: center;
+  margin-right: 20px;
+  /* Výrazná medzera, ktorá oddelí hlavný výsledok od jednotlivých setov */
+}
+
+/* Ak tím vyhral zápas, jeho celkové skóre bude výraznejšie */
+.total-score.is-winner {
+  color: #ffd700;
+  /* Zladenie s tmavočervenou farbou tvojich setov */
+  font-weight: bold;
+}
+
+.sets {
+  display: flex;
+  gap: 6px;
+  font-family: monospace;
+}
+
+.sets span {
+  background: #8b0000;
+  color: white;
+  padding: 2px 0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+
+  /* Tieto 3 riadky zabezpečia rovnakú šírku a zarovnanie */
+  width: 28px;
+  /* Pevná šírka pre každý set (dostatočná pre 2 cifry) */
+  text-align: center;
+  /* Zarovnanie čísla presne na stred */
+  display: inline-block;
+  /* Aby span rešpektoval nastavenú šírku */
 }
 
 @media (max-width: 768px) {

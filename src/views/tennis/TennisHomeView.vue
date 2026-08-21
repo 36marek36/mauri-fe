@@ -14,8 +14,8 @@
         {{ errorMessage }}
       </p>
 
-      <!-- ACTIVITIES -->
-      <div v-else-if="currentSeason" class="list-or-nothing">
+      <!-- 🟢 ZMENA: Podmienka upravená na hasCurrentSeason -->
+      <div v-else-if="hasCurrentSeason" class="list-or-nothing">
         <div class="activities">
 
           <h3>Posledné výsledky</h3>
@@ -38,28 +38,42 @@
               <div v-for="activity in league.activities" :key="activity.match.id" class="activity-item">
                 <div class="scoreboard">
 
-                  <!-- HOME -->
+                  <!-- HOME (Domáci) -->
                   <div class="row">
-                    <div class="name" :class="getPlayerClass(activity.match, 'home')">
-                      {{ getHomeName(activity.match) }}
+                    <!-- Názov vytiahnutý priamo cez getSideEntity + zjednotená trieda winner -->
+                    <div class="name" :class="{ winner: checkIfWinner(activity.match, 'home') }">
+                      {{ getSideEntity(activity.match, 'home')?.name }}
                     </div>
 
+                    <!-- Celkové skóre domáceho na sety -->
+                    <div class="total-score" :class="{ 'is-winner': checkIfWinner(activity.match, 'home') }">
+                      {{ activity.match.result?.score1 ?? 0 }}
+                    </div>
+
+                    <!-- Priamy cyklus cez setScores bez premapovávania v JS -->
                     <div class="sets">
-                      <span v-for="(set, i) in getHomeSets(activity.match)" :key="i">
-                        {{ set }}
+                      <span v-for="(set, i) in activity.match.result?.setScores" :key="i">
+                        {{ set.score1 }}
                       </span>
                     </div>
                   </div>
 
-                  <!-- AWAY -->
+                  <!-- AWAY (Hosťujúci) -->
                   <div class="row">
-                    <div class="name" :class="getPlayerClass(activity.match, 'away')">
-                      {{ getAwayName(activity.match) }}
+                    <!-- Názov vytiahnutý priamo cez getSideEntity + zjednotená trieda winner -->
+                    <div class="name" :class="{ winner: checkIfWinner(activity.match, 'away') }">
+                      {{ getSideEntity(activity.match, 'away')?.name }}
                     </div>
 
+                    <!-- Celkové skóre hosťa na sety -->
+                    <div class="total-score" :class="{ 'is-winner': checkIfWinner(activity.match, 'away') }">
+                      {{ activity.match.result?.score2 ?? 0 }}
+                    </div>
+
+                    <!-- Priamy cyklus cez setScores bez premapovávania v JS -->
                     <div class="sets">
-                      <span v-for="(set, i) in getAwaySets(activity.match)" :key="i">
-                        {{ set }}
+                      <span v-for="(set, i) in activity.match.result?.setScores" :key="i">
+                        {{ set.score2 }}
                       </span>
                     </div>
                   </div>
@@ -73,49 +87,38 @@
 
       <div class="second">
 
-
-
         <!-- 1. NOT LOGGED IN -->
-
-
         <div v-if="!isLoggedIn" class="panel onboarding">
-
           <h3>Vitaj medzi hráčmi tenisovej ligy</h3>
-
           <p class="intro-text">
             Zaregistruj sa a získaj prístup ku všetkým možnostiam ligy:
           </p>
-
           <ul class="onboarding-steps">
             <li>Vytvor si účet</li>
             <li>Nastav si hráčsky profil</li>
             <li>Prihlás sa do ligy</li>
             <li>Čakajú ťa zápasy, výsledky a porovnanie s ostatnými hráčmi</li>
           </ul>
-
         </div>
 
         <!-- 2. LOGGED IN BUT NO PLAYER -->
         <div v-else-if="!hasPlayer" class="panel onboarding">
           <h3>Dokonči svoj hráčsky profil</h3>
-
           <p>
-            Aby si sa mohol zapojiť do líg a hrať zápasy,
-            potrebuješ si vytvoriť profil hráča.
+            Aby si sa mohol zapojiť do líg a hrať zápasy, potrebuješ si vytvoriť profil hráča.
           </p>
-
           <p class="hint">
             Je to rýchle – zaberie to len pár sekúnd.
           </p>
-
         </div>
 
-        <div v-if="currentSeason" class="active-season" @click="openActiveSeason">
+        <!-- 🟢 ZMENA: Spodné tlačidlo reaguje na hasCurrentSeason -->
+        <div v-if="hasCurrentSeason" class="active-season" @click="openActiveSeason">
           <h4>Aktuálna sezóna</h4>
         </div>
 
         <div v-else class="active-season">
-          <h4>Momentálne nie je aktívna žiadna sezóna</h4>
+          <h4>Momentlemente nie je aktívna žiadna sezóna</h4>
         </div>
 
       </div>
@@ -133,7 +136,7 @@ export default {
   name: 'TennisHomePage',
   data() {
     return {
-      currentSeason: null,
+      currentSeasonId: null,
       loading: true,
       errorMessage: '',
       matchActivities: [],
@@ -142,19 +145,20 @@ export default {
     }
   },
   async created() {
-    await this.userStore.fetchCurrentUser();
+    this.loading = true;
 
+    await this.userStore.fetchCurrentUser().catch(() => { });
     this.initHeader();
 
-    try {
-      await Promise.all([
-        this.loadMatchActivities(),
-        this.loadCurrentSeason()
-      ]);
-    } finally {
-      this.loading = false;
+    // Načítame minimálne informácie o sezóne
+    await this.loadCurrentSeason();
+
+    // Ak sezóna beží (máme ID), stiahneme zápasy
+    if (this.currentSeasonId) {
+      await this.loadMatchActivities();
     }
 
+    this.loading = false;
   },
 
   methods: {
@@ -187,51 +191,28 @@ export default {
     },
     async loadCurrentSeason() {
       try {
-        const res = await api.get('/seasons/current');
-        this.currentSeason = res.data;
+        const res = await api.get('/seasons/current/short');
+        this.currentSeasonId = res.data?.id || null;
       } catch {
-        this.currentSeason = null;
+        this.currentSeasonId = null;
       }
     },
     openActiveSeason() {
-      if (!this.currentSeason) return;
-
-      this.$router.push(`/tennis/seasons/${this.currentSeason.id}`);
+      if (!this.currentSeasonId) return;
+      this.$router.push(`/tennis/seasons/${this.currentSeasonId}`);
     },
-    getPlayerClass(match, side) {
-      const winnerId = match.result?.winnerId;
-
-      const id =
-        match.matchType === 'SINGLES'
-          ? side === 'home'
-            ? match.homePlayer?.id
-            : match.awayPlayer?.id
-          : side === 'home'
-            ? match.homeTeam?.id
-            : match.awayTeam?.id;
-
-      return {
-        winner: id === winnerId
-      };
-    },
-    getHomeName(match) {
-      return match.matchType === "SINGLES"
-        ? match.homePlayer?.name
-        : match.homeTeam?.name;
+    getSideEntity(match, sideKey) {
+      if (match.matchType === 'SINGLES') {
+        return sideKey === 'home' ? match.homePlayer : match.awayPlayer;
+      } else {
+        return sideKey === 'home' ? match.homeTeam : match.awayTeam;
+      }
     },
 
-    getAwayName(match) {
-      return match.matchType === "SINGLES"
-        ? match.awayPlayer?.name
-        : match.awayTeam?.name;
-    },
-
-    getHomeSets(match) {
-      return match.result?.setScores?.map(s => s.score1) || [];
-    },
-
-    getAwaySets(match) {
-      return match.result?.setScores?.map(s => s.score2) || [];
+    // Táto metóda bezpečne overí, či entita na danej strane vyhrala zápas
+    checkIfWinner(match, sideKey) {
+      const entity = this.getSideEntity(match, sideKey);
+      return match.result?.winnerId === entity?.id;
     }
   },
 
@@ -241,6 +222,9 @@ export default {
     },
     hasPlayer() {
       return !!this.userStore.user?.playerId
+    },
+    hasCurrentSeason() {
+      return !!this.currentSeasonId;
     },
     groupedActivities() {
       if (!this.matchActivities?.length) return [];
@@ -330,6 +314,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 4px 0;
 }
 
 .league-name {
@@ -337,11 +322,32 @@ export default {
 }
 
 .name {
+  flex-grow: 1;
   font-size: 1.2rem;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
   color: #ffffff;
+  text-align: left;
+}
+
+.name.winner {
+  color: #FFD700;
+  font-weight: bold;
+}
+
+.total-score {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #ffffff;
+  width: 30px;
+  text-align: center;
+  margin-right: 20px;
+}
+
+.total-score.is-winner {
+  color: #FFD700;
+  font-weight: bold;
 }
 
 .sets {
@@ -353,9 +359,13 @@ export default {
 .sets span {
   background: #8b0000;
   color: white;
-  padding: 2px 6px;
+  padding: 2px 0;
   border-radius: 6px;
   font-size: 0.9rem;
+
+  width: 28px;
+  text-align: center;
+  display: inline-block;
 }
 
 .second {
@@ -448,11 +458,6 @@ export default {
   color: #d9ff00;
 }
 
-/* zvýraznenie usera */
-.winner {
-  color: #FFD700;
-}
-
 
 @media (max-width: 768px) {
 
@@ -469,8 +474,15 @@ export default {
     font-size: 0.9rem;
   }
 
-  .name {
-    font-size: 0.9rem;
+  .total-score {
+    font-size: 1.1rem;
+    width: 20px;
+    margin-right: 10px;
+  }
+
+  .sets span {
+    width: 22px;
+    font-size: 0.8rem;
   }
 
   .right-side {
