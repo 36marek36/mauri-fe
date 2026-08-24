@@ -140,7 +140,8 @@
             <!-- TLAČIDLÁ PRE ADMINA A POUŽÍVATEĽA -->
             <div class="league-actions">
               <!-- Tlačidlo pre zápasy (vidí ho každý) -->
-              <AppButton :label="showMatches[league.leagueId] ? 'Skryť zápasy' : 'Zobraziť zápasy'"
+              <AppButton class="matchesButton"
+                :label="showMatches[league.leagueId] ? 'Skryť zápasy' : 'Zobraziť zápasy'"
                 :icon="showMatches[league.leagueId] ? '🔼' : '📅'" type="default" htmlType="button"
                 @clicked="toggleMatchesVisibility(league.leagueId)" />
 
@@ -674,7 +675,7 @@ export default {
 /* 📊 Tabuľka */
 .standings-table td {
   border: none;
-  padding: 0.5rem;
+  padding: 0.3rem;
   cursor: pointer;
 }
 
@@ -696,9 +697,9 @@ export default {
 
 .list-or-nothing {
   align-items: center;
-  margin-top: 15px;
-  padding: 20px;
-  background-color: #f8f9fa;
+  margin-top: 5px;
+  /* padding: 20px; */
+  /* background-color: #f8f9fa; */
   border-radius: 8px;
   border: 1px solid #e9ecef;
 }
@@ -748,15 +749,6 @@ export default {
   font-weight: 600;
 }
 
-.team-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid #f1f3f5;
-  transition: background-color 0.2s;
-}
-
 .league-actions {
   gap: 10px;
   margin: 15px 0;
@@ -789,11 +781,11 @@ export default {
   text-align: center;
 }
 
-.activities h3 {
+/* .activities h3 {
   font-size: 1.4rem;
   margin-bottom: 12px;
   color: #ffffff;
-}
+} */
 
 .day-title {
   color: #CAE5FF;
@@ -824,15 +816,24 @@ export default {
 }
 
 .activity-item .row {
+  position: relative;
   display: flex;
   align-items: center;
   padding: 6px 12px;
-  border-bottom: 1px solid #f0f0f0;
 }
 
-.activity-item .row:last-child {
-  border-bottom: none;
-  /* Odstráni spodnú čiaru u hosťujúceho tímu */
+.activity-item .row:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: linear-gradient(to right,
+      transparent,
+      #a1a1a1 30%,
+      #a1a1a1 70%,
+      transparent);
 }
 
 /* Názov tímu */
@@ -864,10 +865,8 @@ export default {
   /* Výrazná medzera, ktorá oddelí hlavný výsledok od jednotlivých setov */
 }
 
-/* Ak tím vyhral zápas, jeho celkové skóre bude výraznejšie */
 .total-score.is-winner {
   color: #ffd700;
-  /* Zladenie s tmavočervenou farbou tvojich setov */
   font-weight: bold;
 }
 
@@ -898,14 +897,18 @@ export default {
     width: 100%;
   }
 
+  .matchesButton {
+    width: 100%;
+  }
+
   .activities {
-    padding: 0;
+    padding: 0 5px;
     /* Zmenšenie bočného paddingu celej sekcie */
   }
 
   .activities h3 {
-    font-size: 1.1rem;
-    margin-bottom: 8px;
+    font-size: 1.2rem;
+    /* margin-bottom: 8px; */
   }
 
   .activity-item {

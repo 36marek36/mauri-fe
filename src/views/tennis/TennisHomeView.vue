@@ -118,7 +118,7 @@
         </div>
 
         <div v-else class="active-season">
-          <h4>Momentlemente nie je aktívna žiadna sezóna</h4>
+          <h4>Momentálne nie je aktívna žiadna sezóna</h4>
         </div>
 
       </div>
@@ -273,7 +273,7 @@ export default {
 .list-or-nothing {
   overflow-y: auto;
   align-items: center;
-  font-size: 1.5rem;
+  /* font-size: 1.5rem; */
 }
 
 .activities {
@@ -310,6 +310,27 @@ export default {
   width: 100%;
 }
 
+.activity-item .row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+}
+
+.activity-item .row:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: linear-gradient(to right,
+      transparent,
+      #a1a1a1 30%,
+      #a1a1a1 70%,
+      transparent);
+}
+
 .row {
   display: flex;
   justify-content: space-between;
@@ -323,7 +344,7 @@ export default {
 
 .name {
   flex-grow: 1;
-  font-size: 1.2rem;
+  /* font-size: 1.2rem; */
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -337,10 +358,10 @@ export default {
 }
 
 .total-score {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #ffffff;
-  width: 30px;
+  width: 24px;
   text-align: center;
   margin-right: 20px;
 }
@@ -463,11 +484,20 @@ export default {
 
   .activities {
     padding: 0 5px;
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .activities h3 {
     font-size: 1.2rem;
+  }
+
+  .activity-item {
+    padding: 8px 6px;
+    border-radius: 8px;
+  }
+
+  .activity-item .row {
+    padding: 4px 6px;
   }
 
   .day-title {
@@ -475,14 +505,19 @@ export default {
   }
 
   .total-score {
-    font-size: 1.1rem;
+    font-size: 1rem;
     width: 20px;
     margin-right: 10px;
   }
 
+  .sets {
+    gap: 4px;
+  }
+
   .sets span {
     width: 22px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
   }
 
   .right-side {

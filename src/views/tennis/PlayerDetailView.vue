@@ -94,6 +94,15 @@
                                             <span
                                                 v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
                                                 {{ match.result.score1 }} : {{ match.result.score2 }}
+
+                                                <span v-if="match.result.setScores?.length" class="set-scores">
+                                                    (
+                                                    <span v-for="(set, i) in match.result.setScores" :key="i">
+                                                        {{ set.score1 }} : {{ set.score2 }}<span
+                                                            v-if="i < match.result.setScores.length - 1">, </span>
+                                                    </span>
+                                                    )
+                                                </span>
                                             </span>
 
                                             <span v-else-if="(isAdmin || isUserPlayerInMatch(match))">
@@ -480,6 +489,14 @@ export default {
     font-size: 0.8rem;
     opacity: 0.7;
     text-transform: lowercase;
+}
+
+.set-scores {
+    margin-left: 8px;
+    display: inline-flex;
+    gap: 4px;
+    font-size: 0.85em;
+    opacity: 0.9;
 }
 
 /* =======================
