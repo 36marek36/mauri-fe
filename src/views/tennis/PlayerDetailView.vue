@@ -4,13 +4,14 @@
         <div class="left-side">
         </div>
         <div class="right-side">
-            <div class="details-section">
-                <!--  údaje o hráčovi -->
-                <div class="player-photo-wrapper">
-                    <img :src="getPlayerPhoto(player.id)" @click="toggleZoom" @error="hideMissingImage"
-                        :class="['player-photo', { zoomed: isZoomed }]" />
-                </div>
-                <div class="list-or-nothing">
+
+            <!--  údaje o hráčovi -->
+            <div class="list-or-nothing">
+                <div class="first">
+                    <div class="player-photo-wrapper">
+                        <img :src="getPlayerPhoto(player.id)" @click="toggleZoom" @error="hideMissingImage"
+                            :class="['player-photo', { zoomed: isZoomed }]" />
+                    </div>
                     <div class="player-info">
                         <div>
                             <p class="value">{{ player.phone || 'telefón nezadaný' }}</p>
@@ -27,137 +28,171 @@
                     </div>
                 </div>
                 <div class="second">
-                    <div class="list-or-nothing">
-
-                        <div class="my-teams">
-                            <h3 class="label small">Tímy:</h3>
-                            <div class="value small" v-for="team in player.teams" :key="team.id"
-                                @click="$router.push('/tennis/teams/' + team.id)" style="cursor: pointer;">
-                                {{ team.name }}
-                            </div>
+                    <!-- Tímy -->
+                    <div class="my-teams">
+                        <h3 class="label">Moje tímy:</h3>
+                        <div class="value small" v-for="team in player.teams" :key="team.id"
+                            @click="$router.push('/tennis/teams/' + team.id)" style="cursor: pointer;">
+                            {{ team.name }}
                         </div>
+                    </div>
 
-                        <div class="my-leagues">
-                            <h3 class="label small">Ligy:</h3>
-                            <div class="value small" v-for="league in sortedLeagues" :key="league.leagueId"
-                                @click="$router.push('/tennis/leagues/' + league.leagueId)" style="cursor: pointer;">
-                                {{ league.leagueName }} ({{ league.seasonYear }})
+                    <!-- Aktuálna sezóna -->
+                    <section v-if="activeLeagues.length > 0 && allMatches.length > 0">
+                        <div class="list-or-nothing">
+                            <h3 class="actual-season">Aktuálna sezóna</h3>
+                            <!-- Aktuálne ligy -->
+                            <div class="actual-rank">
+                                <span>Priebežné poradie</span>
+
+                                <div v-for="league in activeLeagues" :key="league.leagueId" class="value small league"
+                                    @click="$router.push('/tennis/leagues/' + league.leagueId)">
+                                    <span>{{ league.leagueName }} - </span>
+
+                                    <span v-if="league.participantRank === 0" class="league-rank">
+                                        odhlásený
+                                    </span>
+
+                                    <span v-else-if="league.participantRank != null" class="league-rank">
+                                        {{ league.participantRank }}. miesto
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- tabuľka zápasov -->
+                            <h3 class="center-title" @click="showMatches = !showMatches">
+                                Zápasy
+                                <span v-if="showMatches">▲</span>
+                                <span v-else>▼</span>
+                            </h3>
+
+                            <transition name="fade">
+                                <table v-show="showMatches" class="matches-table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">Zápas</th>
+                                            <th>Výsledok</th>
+                                            <th>Liga</th>
+                                            <th>Kolo</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <template v-for="match in allMatches" :key="match.id">
+
+                                            <!-- 🔹 HLAVNÝ RIADOK -->
+                                            <tr>
+                                                <td colspan="2" data-label="Zápas">
+                                                    <div class="match-cell">
+                                                        <div :class="getPlayerClass(match, 'home')">
+                                                            <strong>{{ match.homePlayer.name }}</strong>
+                                                        </div>
+
+                                                        <div class="vs">vs</div>
+
+                                                        <div :class="getPlayerClass(match, 'away')">
+                                                            <strong>{{ match.awayPlayer.name }}</strong>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Výsledok -->
+                                                <td data-label="Výsledok">
+                                                    <span
+                                                        v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
+                                                        {{ match.result.score1 }} : {{ match.result.score2 }}
+
+                                                        <span v-if="match.result.setScores?.length" class="set-scores">
+                                                            (
+                                                            <span v-for="(set, i) in match.result.setScores" :key="i">
+                                                                {{ set.score1 }} : {{ set.score2 }}<span
+                                                                    v-if="i < match.result.setScores.length - 1">,
+                                                                </span>
+                                                            </span>
+                                                            )
+                                                        </span>
+                                                    </span>
+
+                                                    <span v-else-if="(isAdmin || isUserPlayerInMatch(match))">
+                                                        <AppButton
+                                                            :label="activeMatchId === match.id ? 'Zavrieť' : 'Zadať'"
+                                                            :type="activeMatchId === match.id ? 'delete' : 'edit'"
+                                                            html-type="button" @clicked="toggleForm(match.id)" />
+                                                    </span>
+
+                                                    <span v-else>-</span>
+                                                </td>
+
+                                                <td data-label="Liga">
+                                                    {{ getLeagueName(match.leagueId) }}
+                                                </td>
+
+                                                <td data-label="Kolo">
+                                                    {{ match.roundNumber }}
+                                                </td>
+
+                                                <td data-label="Status">
+                                                    <span :class="{
+                                                        'badge-finished': match.status === 'FINISHED',
+                                                        'badge-cancelled': match.status === 'CANCELLED',
+                                                        'badge-scratched': match.status === 'SCRATCHED',
+                                                        'badge-pending': !['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status)
+                                                    }">
+                                                        {{
+                                                            match.status === 'FINISHED'
+                                                                ? 'Odohratý'
+                                                                : match.status === 'CANCELLED'
+                                                                    ? 'Zrušený'
+                                                                    : match.status === 'SCRATCHED'
+                                                                        ? 'Skrečovaný'
+                                                                        : 'Neodohratý'
+                                                        }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+
+                                            <!-- 🔥 FORMULÁR -->
+                                            <tr v-if="activeMatchId === match.id">
+                                                <td colspan="6" class="form-cell">
+                                                    <div class="form-wrapper">
+                                                        <AddMatchResult :match="match"
+                                                            :leagueType="getLeagueType(match.leagueId)"
+                                                            @result-submitted="fetchMatchesAndClose" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </transition>
+                        </div>
+                    </section>
+
+                    <!-- Ukončené ligy -->
+                    <div class="my-leagues">
+                        <div v-for="yearGroup in leaguesByYear" :key="yearGroup.year">
+                            <div class="year">
+                                {{ yearGroup.year }}
+                            </div>
+
+                            <div v-for="league in yearGroup.leagues" :key="league.leagueId" class="value small league"
+                                @click="$router.push('/tennis/leagues/' + league.leagueId)">
+                                <span>{{ league.leagueName }} - </span>
+
+                                <span v-if="league.participantRank === 0" class="league-rank">
+                                    odhlásený
+                                </span>
+
+                                <span v-else-if="league.participantRank != null" class="league-rank">
+                                    {{ league.participantRank }}. miesto
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- tabuľka zápasov -->
-            <section class="matches" v-if="leagueId && allMatches.length > 0">
-
-                <div class="list-or-nothing">
-                    <h3 class="center-title" @click="showMatches = !showMatches">
-                        Zápasy sezóny
-                        <span v-if="showMatches">▲</span>
-                        <span v-else>▼</span>
-                    </h3>
-
-                    <transition name="fade">
-                        <table v-show="showMatches" class="matches-table">
-                            <thead>
-                                <tr>
-                                    <th colspan="2">Zápas</th>
-                                    <th>Výsledok</th>
-                                    <th>Liga</th>
-                                    <th>Kolo</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <template v-for="match in allMatches" :key="match.id">
-
-                                    <!-- 🔹 HLAVNÝ RIADOK -->
-                                    <tr>
-                                        <td colspan="2" data-label="Zápas">
-                                            <div class="match-cell">
-                                                <div :class="getPlayerClass(match, 'home')">
-                                                    <strong>{{ match.homePlayer.name }}</strong>
-                                                </div>
-
-                                                <div class="vs">vs</div>
-
-                                                <div :class="getPlayerClass(match, 'away')">
-                                                    <strong>{{ match.awayPlayer.name }}</strong>
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <!-- Výsledok -->
-                                        <td data-label="Výsledok">
-                                            <span
-                                                v-if="['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status) && match.result">
-                                                {{ match.result.score1 }} : {{ match.result.score2 }}
-
-                                                <span v-if="match.result.setScores?.length" class="set-scores">
-                                                    (
-                                                    <span v-for="(set, i) in match.result.setScores" :key="i">
-                                                        {{ set.score1 }} : {{ set.score2 }}<span
-                                                            v-if="i < match.result.setScores.length - 1">, </span>
-                                                    </span>
-                                                    )
-                                                </span>
-                                            </span>
-
-                                            <span v-else-if="(isAdmin || isUserPlayerInMatch(match))">
-                                                <AppButton :label="activeMatchId === match.id ? 'Zavrieť' : 'Zadať'"
-                                                    :type="activeMatchId === match.id ? 'delete' : 'edit'"
-                                                    html-type="button" @clicked="toggleForm(match.id)" />
-                                            </span>
-
-                                            <span v-else>-</span>
-                                        </td>
-
-                                        <td data-label="Liga">
-                                            {{ getLeagueName(match.leagueId) }}
-                                        </td>
-
-                                        <td data-label="Kolo">
-                                            {{ match.roundNumber }}
-                                        </td>
-
-                                        <td data-label="Status">
-                                            <span :class="{
-                                                'badge-finished': match.status === 'FINISHED',
-                                                'badge-cancelled': match.status === 'CANCELLED',
-                                                'badge-scratched': match.status === 'SCRATCHED',
-                                                'badge-pending': !['FINISHED', 'CANCELLED', 'SCRATCHED'].includes(match.status)
-                                            }">
-                                                {{
-                                                    match.status === 'FINISHED'
-                                                        ? 'Odohratý'
-                                                        : match.status === 'CANCELLED'
-                                                            ? 'Zrušený'
-                                                            : match.status === 'SCRATCHED'
-                                                                ? 'Skrečovaný'
-                                                                : 'Neodohratý'
-                                                }}
-                                            </span>
-                                        </td>
-                                    </tr>
-
-                                    <!-- 🔥 FORMULÁR -->
-                                    <tr v-if="activeMatchId === match.id">
-                                        <td colspan="6" class="form-cell">
-                                            <div class="form-wrapper">
-                                                <AddMatchResult :match="match" :leagueType="activeLeague.leagueType"
-                                                    @result-submitted="fetchMatchesAndClose" />
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                </template>
-                            </tbody>
-                        </table>
-                    </transition>
-                </div>
-            </section>
         </div>
     </div>
 </template>
@@ -175,7 +210,6 @@ export default {
     data() {
         return {
             player: null,
-            stats: null,
             createdMatches: [],
             finishedMatches: [],
             cancelledMatches: [],
@@ -194,14 +228,10 @@ export default {
     methods: {
         async fetchAll() {
             this.loading = true;
+
             try {
                 await this.fetchPlayer();
-
-                // Paralelne načítaj zápasy a štatistiky (ak existuje liga)
-                const promises = [this.fetchPlayerMatches()];
-                if (this.leagueId) promises.push(this.fetchPlayerStats(this.leagueId));
-
-                await Promise.all(promises);
+                await this.fetchPlayerMatches();
 
                 this.header.setTitle(
                     this.player.firstName || '',
@@ -240,37 +270,35 @@ export default {
                 console.error('Chyba pri načítavaní zápasov:', error);
             }
         },
-        async fetchPlayerStats() {
-
-            if (!this.leagueId) return;
-
-            try {
-                const response = await api.get(`/leagues/${this.leagueId}/players/${this.playerId}/stats`);
-                this.stats = response.data;
-            } catch (error) {
-                console.error('Chyba pri načítavaní štatistík hráča:', error);
-            }
-        },
         getLeagueName(leagueId) {
             const league = this.player.leagues.find(l => l.leagueId === leagueId);
             return league ? league.leagueName : '';
+        },
+        getLeagueType(leagueId) {
+            return this.activeLeagues.find(
+                league => league.leagueId === leagueId
+            )?.leagueType || null;
         },
         toggleForm(matchId) {
             this.activeMatchId = this.activeMatchId === matchId ? null : matchId;
         },
         async fetchMatchesAndClose() {
-            await this.fetchPlayerMatches()
+            await this.fetchAll();
             this.activeMatchId = null;
             this.flash.showMessage('✅ Výsledok bol úspešne uložený!', 'success')
         },
         isUserPlayerInMatch(match) {
             const playerId = this.userStore.playerId;
+            const leagueType = this.getLeagueType(match.leagueId);
 
-            if (this.isSingles) {
-                return match.homePlayer?.id === playerId || match.awayPlayer?.id === playerId;
+            if (leagueType === 'SINGLES') {
+                return (
+                    match.homePlayer?.id === playerId ||
+                    match.awayPlayer?.id === playerId
+                );
             }
 
-            if (this.isDoubles) {
+            if (leagueType === 'DOUBLES') {
                 return (
                     match.homeTeam?.player1?.id === playerId ||
                     match.homeTeam?.player2?.id === playerId ||
@@ -316,27 +344,37 @@ export default {
         playerId() {
             return this.$route.params.id
         },
-        activeLeague() {
-            return this.player?.leagues?.find(l => l.leagueStatus === 'ACTIVE') || null;
-        },
-        leagueId() {
-            return this.activeLeague?.leagueId || null;
+        activeLeagues() {
+            return this.player?.leagues?.filter(
+                league => league.leagueStatus === 'ACTIVE'
+            ) || [];
         },
         flash() {
             return useFlashMessageStore();
         },
-        isSingles() {
-            return this.activeLeague.leagueType === 'SINGLES';
-        },
-        isDoubles() {
-            return this.activeLeague.leagueType === 'DOUBLES';
-        },
         isAdmin() {
             return this.userStore.isAdmin;
         },
-        sortedLeagues() {
-            return [...(this.player.leagues || [])]
-                .sort((a, b) => b.seasonYear - a.seasonYear)
+        leaguesByYear() {
+            const leagues = (this.player.leagues || [])
+                .filter(league => league.leagueStatus === 'FINISHED')
+
+            const grouped = leagues.reduce((acc, league) => {
+                if (!acc[league.seasonYear]) {
+                    acc[league.seasonYear] = []
+                }
+
+                acc[league.seasonYear].push(league)
+
+                return acc
+            }, {})
+
+            return Object.keys(grouped)
+                .sort((a, b) => b - a)
+                .map(year => ({
+                    year,
+                    leagues: grouped[year]
+                }))
         }
     },
     components: { AppButton, AddMatchResult }
@@ -354,22 +392,13 @@ export default {
     justify-content: flex-start;
 }
 
-.details-section {
-    display: flex;
-    width: 100%;
-}
-
-.matches {
-    width: 100%;
-}
-
-/* =======================
-   PLAYER INFO / SIDE PANELS
-======================= */
-
 .list-or-nothing {
     align-items: center;
-    justify-content: flex-start;
+}
+
+.first {
+    display: flex;
+    align-items: center;
 }
 
 .player-info {
@@ -379,20 +408,9 @@ export default {
     width: 100%;
 }
 
-.second {
-    width: 60%;
-    padding: 0.5rem;
-}
-
-.my-teams,
-.my-leagues {
-    width: 100%;
-    text-align: center;
-}
-
 .player-photo-wrapper {
     display: flex;
-    padding: 0 0.5rem 0.5rem 0;
+    padding: 0.5rem;
 }
 
 .player-photo {
@@ -408,9 +426,60 @@ export default {
 }
 
 .player-photo.zoomed {
-    transform: scale(2);
-    z-index: 10;
+    transform: translate(75%, 75%) scale(2.5);
+    background-color: #1e1e1e;
     cursor: zoom-out;
+    z-index: 1000;
+}
+
+.second {
+    width: 100%;
+    padding: 0.5rem;
+}
+
+.my-leagues {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+    padding: 10px;
+}
+
+.my-teams {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    gap: 5px;
+}
+
+.my-teams::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 12px;
+    height: 3px;
+    background: linear-gradient(to right,
+            transparent,
+            wheat 30%,
+            wheat 70%,
+            transparent);
+}
+
+.year {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #ddd;
+    color: #ffd700;
+}
+
+.league {
+    cursor: pointer;
+    padding: 3px 0;
 }
 
 /* =======================
@@ -419,7 +488,7 @@ export default {
 
 .label {
     color: #ffd700;
-    font-size: 1.3rem;
+    font-size: 18px;
 }
 
 .value {
@@ -458,9 +527,10 @@ export default {
     white-space: normal;
 }
 
-/* divider */
-.matches-table tbody tr {
-    border-bottom: 1px solid #2a2a2a;
+.actual-rank {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .form-cell {
@@ -497,6 +567,11 @@ export default {
     gap: 4px;
     font-size: 0.85em;
     opacity: 0.9;
+}
+
+.winner {
+    color: #ADFF2F;
+    text-shadow: 0 0 6px rgba(173, 255, 47, 0.3);
 }
 
 /* =======================
@@ -548,30 +623,31 @@ export default {
 
 @media (max-width: 768px) {
 
-    .details-section {
-        flex-direction: column;
+    .my-leagues {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 10px;
     }
 
-    .player-photo-wrapper {
-        justify-content: flex-end;
+    .league {
+        font-size: 0.9rem;
     }
 
-    .player-photo.zoomed {
-        transform: translate(-50%, -50%) scale(2);
-    }
-
-    .second {
-        width: 100%;
+    .year {
+        font-size: 1rem;
     }
 
     .center-title {
         font-size: 1.2rem;
-        margin-bottom: 0.8rem;
+        margin: 0.2rem;
+    }
+
+    .actual-season {
+        font-size: 1.4rem;
     }
 
     /* TABLE becomes card layout */
     .matches-table,
-    .matches-table thead,
+    /* .matches-table thead, */
     .matches-table tbody {
         display: block;
         width: 100%;
@@ -588,6 +664,7 @@ export default {
         background: #1e1e1e;
         border-radius: 8px;
         padding: 0.8rem;
+        border: 1px solid wheat;
     }
 
     .matches-table td {

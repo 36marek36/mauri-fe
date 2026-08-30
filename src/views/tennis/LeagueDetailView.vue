@@ -354,7 +354,6 @@ export default {
             try {
                 const res = await api.get('/matches/' + leagueId + '/grouped-by-round');
                 this.groupedMatches = res.data;
-                console.log('Zapasy v lige boli nacitane:', this.groupedMatches);
             } catch (err) {
                 console.error('Chyba pri nacitavani zapasov', err);
             }
@@ -515,7 +514,6 @@ export default {
 
                 const res = await api.get(url);
                 this.standings = res.data;
-                console.log('Štatistiky načítané:', this.standings);
             } catch (err) {
                 console.error('Chyba pri načítavaní štatistík', err);
             }

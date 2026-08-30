@@ -290,7 +290,7 @@ export default {
             this.showDeleteModal = false;
         },
         editPlayer(id) {
-            this.$router.push(`/tennis/players/edit/${id}`);
+            this.$router.push(`/players/edit/${id}`);
         }
     },
     computed: {
