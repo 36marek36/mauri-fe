@@ -99,11 +99,16 @@
                                         </td>
 
                                         <td>
-                                            <CircularProgress :progress="entry.leagueProgress" />
+                                            <CircularProgress v-if="!entry.droppedFromLeague"
+                                                :progress="entry.leagueProgress" />
+
+                                            <span v-else class="dropped-text">
+                                                Zranený
+                                            </span>
                                         </td>
 
                                         <td>
-                                            <span>
+                                            <span v-if="!entry.droppedFromLeague">
                                                 {{ entry.points }} b.
                                             </span>
                                         </td>
@@ -127,21 +132,23 @@
 
                                             <div v-if="isAdmin" class="actions">
                                                 <div class="admin-buttons">
-                                                    <AppButton label="odhlásiť z ligy" type="edit" htmlType="button" @clicked.stop="confirmDropParticipant(
-                                                        isSingles ? 'players' : 'teams',
-                                                        isSingles ? entry.playerId : entry.teamId
-                                                    )" />
+                                                    <AppButton label="odhlásiť z ligy" type="edit" htmlType="button"
+                                                        @clicked.stop="confirmDropParticipant(
+                                                            isSingles ? 'players' : 'teams',
+                                                            isSingles ? entry.playerId : entry.teamId
+                                                        )" />
 
-                                                    <AppButton label="odstrániť z ligy" type="delete" htmlType="button" @clicked.stop="confirmDeleteParticipant(
-                                                        isSingles ? 'players' : 'teams',
-                                                        isSingles ? entry.playerId : entry.teamId
-                                                    )" />
-                                                    </div>
+                                                    <AppButton label="odstrániť z ligy" type="delete" htmlType="button"
+                                                        @clicked.stop="confirmDeleteParticipant(
+                                                            isSingles ? 'players' : 'teams',
+                                                            isSingles ? entry.playerId : entry.teamId
+                                                        )" />
+                                                </div>
 
                                             </div>
 
                                             <div class="detail-button">
-                                                
+
                                                 <AppButton :label="isSingles ? 'Detail hráča' : 'Detail tímu'"
                                                     type="default" htmlType="button" @clicked.stop="goToDetail(
                                                         isSingles ? 'players' : 'teams',
@@ -796,6 +803,11 @@ export default {
 
 .name-cell .name {
     font-weight: 600;
+}
+
+.dropped-text {
+    color: #ffd700;
+    font-style: italic;
 }
 
 .detail-button {

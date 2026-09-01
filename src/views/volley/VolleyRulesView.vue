@@ -24,8 +24,7 @@
                     <li>Dotyk siete počas hry je chyba.</li>
                     <li>Bodovanie do tabuľky:
                         <div class="text-center">
-                            <strong>Pri výhre 3:0 alebo 3:1 získava víťazný tím 3 body a porazený tím 0 bodov.</strong><br>
-                            <strong>Pri výhre 3:2 sa body delia: 2 body pre víťazný tím a 1 bod pre porazený.</strong>
+                            <strong>Víťazný tím získava 2 body a porazený 1 bod.</strong>
                         </div>
                     </li>
                 </ul>
