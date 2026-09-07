@@ -1,18 +1,23 @@
 <template>
 
-    <div class="admin-buttons">
-        <!-- 🟢 Štart ligy -->
-        <AppButton v-if="isAdmin && hasParticipants && leagueStatus === 'CREATED'" label="Odštartovať ligu" icon="🏁"
-            type="create" htmlType="button" @clicked="openGenerateModal" />
+    <div class="admin-section">
+        <!-- Tlačidlá zostanú pekne v jednom riadku vedľa seba -->
+        <div class="admin-buttons">
+            <!-- 🟢 Štart ligy -->
+            <AppButton v-if="isAdmin && hasParticipants && leagueStatus === 'CREATED'" label="Odštartovať ligu"
+                icon="🏁" type="create" htmlType="button" @clicked="openGenerateModal" />
 
-        <!-- 🔴 Ukončenie ligy -->
-        <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Ukončiť ligu" icon="🛑" type="delete"
-            htmlType="button" @clicked="openFinishModal" />
+            <!-- 🔴 Ukončenie ligy -->
+            <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Ukončiť ligu" icon="🛑" type="delete"
+                htmlType="button" @clicked="openFinishModal" />
 
-        <!--    Pridávanie účastníkov -->
-        <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
-            :label="showAddParticipants ? 'Skryť formulár' : isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
-            icon="➕" type="default" htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
+            <!-- Pridávanie účastníkov -->
+            <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
+                :label="showAddParticipants ? 'Skryť formulár' : isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
+                icon="➕" type="default" htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
+        </div>
+
+        <!-- ⬇️ Formulár je teraz VONKU z flexboxu, takže sa vykreslí prirodzene POD ním -->
         <AddParticipantsForm v-if="isAdmin" :show="showAddParticipants" :items="isSingles ? freePlayers : freeTeams"
             :title="isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
             :submitLabel="isSingles ? 'Pridať hráčov' : 'Pridať tímy'" @submit="handleAddParticipants" />
@@ -754,6 +759,15 @@ export default {
     text-align: center;
     cursor: pointer;
     width: 100%;
+}
+
+.admin-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    /* Medzera medzi riadkom tlačidiel a samotným formulárom */
+    width: 100%;
+    padding: 0 2rem;
 }
 
 .admin-buttons {
