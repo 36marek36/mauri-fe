@@ -87,6 +87,12 @@
 
       <div class="second">
 
+        <div class="finish-season-wrapper">
+          <img src="/images/finish2026.jpg" alt="Aktuálna sezóna" class="season-image">
+        </div>
+
+
+
         <!-- 1. NOT LOGGED IN -->
         <div v-if="!isLoggedIn" class="panel onboarding">
           <h3>Vitaj medzi hráčmi tenisovej ligy</h3>
@@ -391,6 +397,23 @@ export default {
 
 .second {
   width: 50%;
+}
+
+.finish-season-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 0 1rem;
+  padding-bottom: 10px;
+}
+
+.season-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border: 3px solid green;
+  box-shadow: 0 0 20px #FFD700;
+  border-radius: 10px;
 }
 
 .error-message {
