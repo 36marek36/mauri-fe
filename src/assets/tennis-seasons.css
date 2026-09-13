@@ -68,19 +68,19 @@
     color: #d9ff00;
 }
 
-.participants {
+.total-participants {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     padding-right: 15px;
 }
 
-.participants strong {
+.total-participants strong {
     font-size: 1.5rem;
     color: #fff;
 }
 
-.participants span {
+.total-participants span {
     font-size: 0.75rem;
     color: #c9c9c9;
 }

@@ -131,7 +131,7 @@
                 <h3>{{ season.year }}</h3>
               </div>
 
-              <div class="participants">
+              <div class="total-participants">
                 <strong>{{ season.totalParticipants }}</strong>
                 <span>účastníkov</span>
               </div>
