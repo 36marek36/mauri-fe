@@ -106,6 +106,14 @@ const router = createRouter({
         background: 'tennis'
       }
     },
+      {
+      path: '/tennis/seasons/archive',
+      name: 'seasonsArchive',
+      component: () => import('../views/tennis/SeasonsArchiveView.vue'),
+      meta: {
+        background: 'tennis'
+      }
+    },
     {
       path: '/tennis/seasons/:id',
       name: 'seasonDetail',

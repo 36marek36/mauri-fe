@@ -15,7 +15,7 @@
       </p>
 
       <!-- 🟢 ZMENA: Podmienka upravená na hasCurrentSeason -->
-      <div v-else-if="hasCurrentSeason" class="list-or-nothing">
+      <div v-else-if="hasActiveSeason" class="list-or-nothing">
         <div class="activities">
 
           <h3>Posledné výsledky</h3>
@@ -118,12 +118,78 @@
           </p>
         </div>
 
-        <!-- 🟢 ZMENA: Spodné tlačidlo reaguje na hasCurrentSeason -->
-        <div v-if="hasCurrentSeason" class="active-season" @click="openActiveSeason">
-          <h4>Aktuálna sezóna</h4>
+        <!-- 🟢 AKTUÁLNA SEZÓNA -->
+        <div v-if="hasCurrentSeason" class="seasons-grid">
+          <div v-for="season in seasons" :key="season.id" class="season-card"
+            @click="$router.push('/tennis/seasons/' + season.id)">
+            <div class="season-header">
+
+              <div>
+                <span class="season-label">
+                  {{ season.status === 'ACTIVE' ? 'AKTUÁLNA SEZÓNA' : 'PRIPRAVOVANÁ SEZÓNA' }}
+                </span>
+                <h3>{{ season.year }}</h3>
+              </div>
+
+              <div class="participants">
+                <strong>{{ season.totalParticipants }}</strong>
+                <span>účastníkov</span>
+              </div>
+            </div>
+
+            <div class="season-stats">
+
+              <!-- Hráči + Tímy -->
+              <div class="stat">
+                <span>Hráči</span>
+                <strong>{{ season.totalPlayers }}</strong>
+              </div>
+              <div class="stat">
+                <span>Tímy</span>
+                <strong>{{ season.totalTeams }}</strong>
+              </div>
+
+              <!-- Ligy - celý riadok -->
+              <div class="stat full">
+                <span>Ligy</span>
+                <strong>{{ season.totalLeagues }}</strong>
+              </div>
+
+
+              <!-- Zápasy + Odohraté -->
+              <div v-if="hasActiveSeason" class="stat">
+                <span>Zápasy</span>
+                <strong>{{ season.totalMatches }}</strong>
+              </div>
+
+              <div v-if="hasActiveSeason" class="stat">
+                <span>Odohraté</span>
+                <strong class="green">{{ season.totalFinishedMatches }}</strong>
+              </div>
+
+              <!-- Kontumované + Zrušené -->
+              <div v-if="hasActiveSeason" class="stat">
+                <span>Kontumované</span>
+                <strong class="orange">{{ season.totalScratchedMatches }}</strong>
+              </div>
+
+              <div v-if="hasActiveSeason" class="stat">
+                <span>Zrušené</span>
+                <strong class="red">{{ season.totalCancelledMatches }}</strong>
+              </div>
+
+            </div>
+
+            <div class="season-dates">
+              <!-- PRE AKTÍVNU SEZÓNU: Zobrazí, koľko dní prebieha -->
+              <div v-if="season.status === 'ACTIVE'">
+                <strong>Prebieha {{ getDaysElapsed(season.startDate) }} dní</strong>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div v-else class="active-season">
+        <div v-else>
           <h4>Momentálne nie je aktívna žiadna sezóna</h4>
         </div>
 
@@ -142,7 +208,7 @@ export default {
   name: 'TennisHomePage',
   data() {
     return {
-      currentSeasonId: null,
+      seasons: [],
       loading: true,
       errorMessage: '',
       matchActivities: [],
@@ -155,12 +221,10 @@ export default {
 
     await this.userStore.fetchCurrentUser().catch(() => { });
     this.initHeader();
-
-    // Načítame minimálne informácie o sezóne
-    await this.loadCurrentSeason();
+    await this.fetchTennisSeasons(['ACTIVE', 'CREATED']);
 
     // Ak sezóna beží (máme ID), stiahneme zápasy
-    if (this.currentSeasonId) {
+    if (this.hasCurrentSeason) {
       await this.loadMatchActivities();
     }
 
@@ -195,17 +259,22 @@ export default {
       firstName
       );
     },
-    async loadCurrentSeason() {
+    async fetchTennisSeasons(status) {
       try {
-        const res = await api.get('/seasons/current/short');
-        this.currentSeasonId = res.data?.id || null;
-      } catch {
-        this.currentSeasonId = null;
+        const response = await api.get('/seasons/tennis', {
+          params: {
+            status: status
+          },
+          paramsSerializer: {
+            indexes: null
+          }
+        });
+        this.seasons = response.data;
+        console.log(this.seasons.length)
+      } catch (err) {
+        console.error('Chyba pri načítavaní tenisových sezón:', err);
+        this.seasons = [];
       }
-    },
-    openActiveSeason() {
-      if (!this.currentSeasonId) return;
-      this.$router.push(`/tennis/seasons/${this.currentSeasonId}`);
     },
     getSideEntity(match, sideKey) {
       if (match.matchType === 'SINGLES') {
@@ -219,6 +288,48 @@ export default {
     checkIfWinner(match, sideKey) {
       const entity = this.getSideEntity(match, sideKey);
       return match.result?.winnerId === entity?.id;
+    },
+    getDaysElapsed(startDateString) {
+      if (!startDateString) return 0;
+
+      let formattedDate = startDateString;
+
+      // Spracovanie slovenského formátu (napr. 21.4.2026 alebo 21. 4. 2026)
+      if (startDateString.includes('.')) {
+        // Odstránime medzery a rozdelíme podľa bodiek
+        const parts = startDateString.replace(/\s+/g, '').split('.');
+
+        if (parts.length >= 3) {
+          // Doplníme nuly na začiatok pre jednociferné dni a mesiace (napr. "4" -> "04")
+          const day = parts[0].padStart(2, '0');
+          const month = parts[1].padStart(2, '0');
+          const year = parts[2];
+
+          // Vytvoríme ISO formát YYYY-MM-DD, ktorému JavaScript 100% rozumie
+          formattedDate = `${year}-${month}-${day}`;
+        }
+      }
+
+      const start = new Date(formattedDate);
+      const today = new Date();
+
+      // Kontrola, či je dátum platný
+      if (isNaN(start.getTime())) {
+        console.error('Nepodporovaný formát dátumu:', startDateString);
+        return 0;
+      }
+
+      // Vynulujeme čas, aby sme porovnávali iba čisté kalendárne dni
+      start.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+
+      const differenceInTime = today.getTime() - start.getTime();
+
+      // Prepočet milisekúnd na dni
+      const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
+
+      // Ak sezóna začala dnes alebo v budúcnosti, vráti 0
+      return differenceInDays > 0 ? differenceInDays : 0;
     }
   },
 
@@ -230,7 +341,15 @@ export default {
       return !!this.userStore.user?.playerId
     },
     hasCurrentSeason() {
-      return !!this.currentSeasonId;
+      return this.seasons.length > 0;
+    },
+    hasActiveSeason() {
+      // Vráti true, ak aspoň jedna sezóna v poli má status 'ACTIVE'
+      return this.seasons.some(season => season.status === 'ACTIVE');
+    },
+
+    hasCreatedSeason() {
+      return this.seasons.some(season => season.status === 'CREATED');
     },
     groupedActivities() {
       if (!this.matchActivities?.length) return [];
@@ -408,12 +527,15 @@ export default {
 
 .season-image {
   display: block;
-  width: 100%;
+  width: 90%;
   height: auto;
   object-fit: cover;
   border: 3px solid green;
   box-shadow: 0 0 20px #FFD700;
   border-radius: 10px;
+}
+.season-dates{
+  justify-content: center;
 }
 
 .error-message {
@@ -437,32 +559,6 @@ export default {
 
 .panel.onboarding p {
   margin-bottom: 10px;
-}
-
-.active-season {
-  position: relative;
-  overflow: hidden;
-  padding: 16px 20px;
-  border: 1px solid green;
-  border-radius: 16px;
-  width: 100%;
-  text-align: center;
-  cursor: pointer;
-  background: #000000;
-}
-
-.active-season:hover {
-  background: #002E2C;
-}
-
-.active-season h4 {
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  color: #FFD700;
-  font-size: 1.2rem;
-  font-weight: 400;
-  letter-spacing: 3px;
 }
 
 .hint {
@@ -549,10 +645,6 @@ export default {
 
   .second {
     width: 100%;
-  }
-
-  .active-season {
-    padding: 8px 10px;
   }
 }
 </style>

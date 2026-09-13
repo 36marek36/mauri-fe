@@ -32,7 +32,7 @@
         </li>
 
         <li v-if="sport === 'tennis'">
-          <RouterLink :to="`${sportPrefix}/seasons`" @click="closeMobileMenu">Sezóny</RouterLink>
+          <RouterLink :to="`${sportPrefix}/seasons/archive`" @click="closeMobileMenu">Archív</RouterLink>
         </li>
         <li v-if="sportPrefix">
           <a href="#" @click.prevent="showContacts = true; closeMobileMenu()">Kontakty</a>
