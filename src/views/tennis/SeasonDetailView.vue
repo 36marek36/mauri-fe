@@ -1,17 +1,17 @@
 <template>
 
-    <div class="admin-buttons">
+    <div v-if="isAdmin" class="admin-buttons">
 
         <!-- Tlačidlo: Spustiť sezónu -->
-        <AppButton v-if="isAdmin && season.status === 'CREATED' && !showCreateTennisLeagueForm" label="Spustiť sezónu"
+        <AppButton v-if="season.status === 'CREATED' && !showCreateTennisLeagueForm" label="Spustiť sezónu"
             type="create" htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'start')" />
 
         <!-- Tlačidlo: Ukončiť sezónu -->
-        <AppButton v-if="isAdmin && season.status === 'ACTIVE' && !showCreateTennisLeagueForm" label="Ukončiť sezónu"
-            type="delete" htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'finish')" />
+        <AppButton v-if="season.status === 'ACTIVE' && !showCreateTennisLeagueForm" label="Ukončiť sezónu" type="delete"
+            htmlType="button" icon="" @clicked="confirmSeasonAction(season, 'finish')" />
 
         <!-- Tlačidlo: Vytvoriť tenisovú novú ligu / Zavrieť formulár -->
-        <AppButton v-if="isAdmin && season.status !== 'FINISHED'"
+        <AppButton v-if="season.status !== 'FINISHED'"
             :label="showCreateTennisLeagueForm ? 'Zavrieť formulár' : 'Vytvoriť novú tenisovú ligu'"
             :type="showCreateTennisLeagueForm ? 'delete' : 'default'" htmlType="button" @clicked="toggleCreateForm"
             icon="➕" />
@@ -28,7 +28,7 @@
         </div>
 
         <!-- Tlačidlo: Vytvoriť novú volejbalovú ligu / Zavrieť formulár -->
-        <AppButton v-if="isAdmin && season.status !== 'FINISHED'" :label="showCreateVolleyLeagueForm
+        <AppButton v-if="season.status !== 'FINISHED'" :label="showCreateVolleyLeagueForm
             ? 'Zavrieť formulár'
             : 'Vytvoriť novú volejbalovú ligu'" :type="showCreateVolleyLeagueForm ? 'delete' : 'default'"
             htmlType="button" @clicked="toggleCreateVolleyLeagueForm" icon="➕" />
@@ -57,23 +57,24 @@
                             <tr v-for="league in singleLeagues" :key="league.id"
                                 @click="$router.push('/tennis/leagues/' + league.leagueId)" class="league-row">
 
-                                <td>{{ league.leagueName }}</td>
+                                <td class="league-name">{{ league.leagueName }}</td>
 
-                                <td>{{ inflection(league) }}</td>
+                                <td v-if="season?.status !== 'FINISHED'" class="occupancy">{{
+                                    inflection(league) }}</td>
 
 
-                                <td v-if="season.status === 'ACTIVE'">
+                                <td v-if="season?.status === 'ACTIVE'" class="progress">
                                     <CircularProgress :progress="league.leagueProgress" />
                                 </td>
 
 
-                                <td v-if="season.status === 'FINISHED'">
+                                <td v-if="season?.status === 'FINISHED'" class="winner">
                                     <span v-if="league.leagueStatus === 'FINISHED' && league.winner">
                                         🏆 {{ league.winner }}
                                     </span>
                                 </td>
 
-                                <td v-if="isAdmin">
+                                <td v-if="isAdmin" class="delete">
                                     <AppButton icon="🗑️" type="delete" htmlType="button"
                                         @clicked="() => confirmDeleteLeague(league)" />
                                 </td>
@@ -88,23 +89,23 @@
                             <tr v-for="league in doubleLeagues" :key="league.id"
                                 @click="$router.push('/tennis/leagues/' + league.leagueId)" class="league-row">
 
-                                <td>{{ league.leagueName }}</td>
+                                <td class="league-name">{{ league.leagueName }}</td>
 
-                                <td>{{ inflection(league) }}</td>
+                                <td v-if="season?.status !== 'FINISHED'" class="occupancy">{{ inflection(league) }}</td>
 
 
-                                <td v-if="season.status === 'ACTIVE'">
+                                <td v-if="season?.status === 'ACTIVE'" class="progress">
                                     <CircularProgress :progress="league.leagueProgress" />
                                 </td>
 
 
-                                <td v-if="season.status === 'FINISHED'">
+                                <td v-if="season?.status === 'FINISHED'" class="winner">
                                     <span v-if="league.leagueStatus === 'FINISHED' && league.winner">
                                         🏆 {{ league.winner }}
                                     </span>
                                 </td>
 
-                                <td v-if="isAdmin">
+                                <td v-if="isAdmin" class="delete">
                                     <AppButton icon="🗑️" type="delete" htmlType="button"
                                         @clicked="() => confirmDeleteLeague(league)" />
                                 </td>
@@ -118,40 +119,6 @@
 
                 </div>
             </div>
-            <!-- <div class="leagues">
-                <div class="list-or-nothing">
-                    <table v-if="hasLeagues" class="league-table">
-                        <tbody>
-                            <tr v-for="league in season.leagues" :key="league.id"
-                                @click="$router.push('/leagues/' + league.leagueId)" class="league-row">
-                                <td>{{ league.leagueName }}</td>
-                                <td>
-                                    <img v-for="n in leagueTypeLabels[league.leagueType].count" :key="n"
-                                        src="/images/icon-racket.png" class="icon" />
-                                </td>
-                                <td v-if="season.status === 'ACTIVE'">
-                                    <CircularProgress :progress="league.leagueProgress" />
-                                </td>
-                                <td>
-                                    {{ inflection(league) }}
-                                </td>
-
-                                <td v-if="season.status === 'FINISHED'">
-                                    <span v-if="league.leagueStatus === 'FINISHED' && league.winner">
-                                        🏆 {{ league.winner }}
-                                    </span>
-                                </td>
-
-                                <td v-if="isAdmin">
-                                    <AppButton v-if="isAdmin" icon="🗑️" type="delete" htmlType="button"
-                                        :preventPropagation="true" @clicked="() => confirmDeleteLeague(league)" />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <p v-else>Sezóna neobsahuje žiadne ligy.</p>
-                </div>
-            </div> -->
         </div>
     </div>
 
@@ -411,32 +378,86 @@ h3 {
 
 .league-table {
     width: 100%;
-    table-layout: fixed;
+    table-layout: auto;
     border-collapse: collapse;
 }
 
 .league-table td {
-    padding-left: 2rem;
+    /* font-size: 1.2rem; */
+    padding-left: 10px;
     text-align: left;
     white-space: normal;
 }
 
+.league-table tbody tr:hover {
+    /* background-color: #363537; */
+    background: linear-gradient(90deg, #484749 0%, transparent 100%);
+}
+
+.league-table tbody tr:hover td:first-child {
+    border-radius: 16px 0 0 16px;
+}
+
+.league-table tbody tr:hover td:last-child {
+    border-radius: 0 16px 16px 0;
+}
+
 .league-row {
-    font-size: x-large;
     height: 60px;
     cursor: pointer;
 }
 
-.league-table tbody tr:hover {
-    background-color: #363537;
+/* názov ligy */
+.league-table td.league-name {
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 1.2rem;
+    text-shadow:
+        0 0 3px #ffd700,
+        0 0 8px #ffd700;
+    white-space: nowrap;
+    width: auto;
 }
+
+/* počet hráčov */
+.league-table td.occupancy {
+    white-space: nowrap;
+    width: 1%;
+    padding-right: 40px;
+    text-align: left;
+}
+
+/* progress */
+.league-table td.progress {
+    white-space: nowrap;
+    width: 1%;
+    text-align: right;
+    padding: 5px;
+}
+
+.league-table td.winner {
+    width: 100%;
+    text-align: center;
+    padding-right: 5px;
+}
+
+.league-table tbody tr:hover td.winner {
+    color: #ffd700;
+}
+
+.league-table td.delete {
+    width: 1%;
+    text-align: right;
+    padding-right: 5px;
+}
+
 
 .admin-buttons {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 2rem;
+    margin-top: 1rem;
+    /* margin-bottom: 2rem; */
 }
 
 .form-control {
@@ -449,17 +470,18 @@ h3 {
 }
 
 @media (max-width: 768px) {
-    .league-table {
-        width: 100%;
-    }
 
     .league-table td {
-        font-size: 0.9rem;
-        /* padding: 0.2rem; */
+        padding: 0.2rem;
         word-wrap: break-word;
         overflow-wrap: break-word;
         white-space: normal;
         /* 💡 umožní lámanie riadkov */
+    }
+
+    .league-table td.occupancy {
+        font-size: 1rem;
+        padding-right: 5px;
     }
 }
 </style>

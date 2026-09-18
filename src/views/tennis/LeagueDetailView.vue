@@ -2,17 +2,17 @@
 
     <div class="admin-section">
         <!-- Tlačidlá zostanú pekne v jednom riadku vedľa seba -->
-        <div class="admin-buttons">
+        <div v-if="isAdmin" class="admin-buttons">
             <!-- 🟢 Štart ligy -->
-            <AppButton v-if="isAdmin && hasParticipants && leagueStatus === 'CREATED'" label="Odštartovať ligu"
-                icon="🏁" type="create" htmlType="button" @clicked="openGenerateModal" />
+            <AppButton v-if="hasParticipants && leagueStatus === 'CREATED'" label="Odštartovať ligu" icon="🏁"
+                type="create" htmlType="button" @clicked="openGenerateModal" />
 
             <!-- 🔴 Ukončenie ligy -->
-            <AppButton v-if="isAdmin && leagueStatus === 'ACTIVE'" label="Ukončiť ligu" icon="🛑" type="delete"
-                htmlType="button" @clicked="openFinishModal" />
+            <AppButton v-if="leagueStatus === 'ACTIVE'" label="Ukončiť ligu" icon="🛑" type="delete" htmlType="button"
+                @clicked="openFinishModal" />
 
             <!-- Pridávanie účastníkov -->
-            <AppButton v-if="isAdmin && leagueStatus === 'CREATED'"
+            <AppButton v-if="leagueStatus === 'CREATED'"
                 :label="showAddParticipants ? 'Skryť formulár' : isSingles ? 'Pridať hráčov do ligy' : 'Pridať tímy do ligy'"
                 icon="➕" type="default" htmlType="button" @clicked="showAddParticipants = !showAddParticipants" />
         </div>
@@ -96,8 +96,8 @@
                                         </td>
 
                                         <td>
-                                            <div class="name-cell">
-                                                <span class="name">
+                                            <div class="name">
+                                                <span>
                                                     {{ isSingles ? entry.playerName : entry.teamName }}
                                                 </span>
                                             </div>
@@ -764,7 +764,7 @@ export default {
 .admin-section {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.5rem;
     /* Medzera medzi riadkom tlačidiel a samotným formulárom */
     width: 100%;
     padding: 0 2rem;
@@ -797,7 +797,6 @@ export default {
 }
 
 .detail-stats .label {
-    font-weight: 700;
     color: #ffd700;
 }
 
@@ -807,16 +806,13 @@ export default {
     vertical-align: middle;
 }
 
-.name-cell {
+.name {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-    width: 100%;
-}
-
-.name-cell .name {
-    font-weight: 600;
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 1.2rem;
+    text-shadow:
+        0 0 3px #ffd700,
+        0 0 8px #ffd700;
 }
 
 .dropped-text {
@@ -867,6 +863,11 @@ export default {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.4rem;
+    }
+
+    .name {
+        display: flex;
+        font-size: 1rem;
     }
 
 }

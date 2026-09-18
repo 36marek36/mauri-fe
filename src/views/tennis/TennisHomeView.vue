@@ -403,7 +403,7 @@ export default {
 
 .activities {
   width: 100%;
-  padding: 0 16px;
+  padding: 0 10px;
   text-align: center;
 }
 
@@ -465,6 +465,7 @@ export default {
 
 .league-name {
   color: #ffffff;
+  font-size: 1.2rem;
 }
 
 .name {
@@ -479,7 +480,6 @@ export default {
 
 .name.winner {
   color: #FFD700;
-  font-weight: bold;
 }
 
 .total-score {
@@ -534,7 +534,8 @@ export default {
   box-shadow: 0 0 20px #FFD700;
   border-radius: 10px;
 }
-.season-dates{
+
+.season-dates {
   justify-content: center;
 }
 
@@ -627,6 +628,10 @@ export default {
     font-size: 1rem;
     width: 20px;
     margin-right: 10px;
+  }
+
+  .league-name {
+    font-size: 0.9rem;
   }
 
   .sets {
