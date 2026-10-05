@@ -66,6 +66,14 @@ const router = createRouter({
       }
     },
     {
+      path: '/seasons/admin/current',
+      name: 'seasonCreator',
+      component: () => import('../views/SeasonManagementView.vue'),
+      meta: {
+        background: 'none'
+      }
+    },
+    {
       path: '/tennis',
       name: 'TennisHome',
       component: () => import('../views/tennis/TennisHomeView.vue'),
@@ -106,7 +114,7 @@ const router = createRouter({
         background: 'tennis'
       }
     },
-      {
+    {
       path: '/tennis/seasons/archive',
       name: 'seasonsArchive',
       component: () => import('../views/tennis/SeasonsArchiveView.vue'),

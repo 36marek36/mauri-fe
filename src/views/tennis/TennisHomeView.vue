@@ -141,51 +141,33 @@
 
               <!-- Hráči + Tímy -->
               <div class="stat">
-                <span>Hráči</span>
-                <strong>{{ season.totalPlayers }}</strong>
+                <strong>
+                  {{ inflection('player', season.totalPlayers) }}
+                </strong>
               </div>
               <div class="stat">
-                <span>Tímy</span>
-                <strong>{{ season.totalTeams }}</strong>
+                <strong>
+                  {{ inflection('team', season.totalTeams) }}
+                </strong>
               </div>
 
-              <!-- Ligy - celý riadok -->
-              <div class="stat full">
-                <span>Ligy</span>
-                <strong>{{ season.totalLeagues }}</strong>
+              <!-- Ligy -->
+              <div class="stat">
+                <strong>
+                  {{ inflection('league', season.totalLeagues) }}
+                </strong>
               </div>
 
 
               <!-- Zápasy + Odohraté -->
               <div v-if="hasActiveSeason" class="stat">
-                <span>Zápasy</span>
-                <strong>{{ season.totalMatches }}</strong>
-              </div>
-
-              <div v-if="hasActiveSeason" class="stat">
-                <span>Odohraté</span>
-                <strong class="green">{{ season.totalFinishedMatches }}</strong>
-              </div>
-
-              <!-- Kontumované + Zrušené -->
-              <div v-if="hasActiveSeason" class="stat">
-                <span>Kontumované</span>
-                <strong class="orange">{{ season.totalScratchedMatches }}</strong>
-              </div>
-
-              <div v-if="hasActiveSeason" class="stat">
-                <span>Zrušené</span>
-                <strong class="red">{{ season.totalCancelledMatches }}</strong>
+                <strong>
+                  {{ inflection('match', season.totalMatches) }}
+                </strong>
               </div>
 
             </div>
 
-            <div class="season-dates">
-              <!-- PRE AKTÍVNU SEZÓNU: Zobrazí, koľko dní prebieha -->
-              <div v-if="season.status === 'ACTIVE'">
-                <strong>Prebieha {{ getDaysElapsed(season.startDate) }} dní</strong>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -203,6 +185,7 @@
 import { useHeaderStore } from '@/stores/header';
 import { useUserStore } from '@/stores/user';
 import api from '@/axios-interceptor';
+import { inflection } from '@/utils/inflection';
 
 export default {
   name: 'TennisHomePage',
@@ -289,48 +272,7 @@ export default {
       const entity = this.getSideEntity(match, sideKey);
       return match.result?.winnerId === entity?.id;
     },
-    getDaysElapsed(startDateString) {
-      if (!startDateString) return 0;
-
-      let formattedDate = startDateString;
-
-      // Spracovanie slovenského formátu (napr. 21.4.2026 alebo 21. 4. 2026)
-      if (startDateString.includes('.')) {
-        // Odstránime medzery a rozdelíme podľa bodiek
-        const parts = startDateString.replace(/\s+/g, '').split('.');
-
-        if (parts.length >= 3) {
-          // Doplníme nuly na začiatok pre jednociferné dni a mesiace (napr. "4" -> "04")
-          const day = parts[0].padStart(2, '0');
-          const month = parts[1].padStart(2, '0');
-          const year = parts[2];
-
-          // Vytvoríme ISO formát YYYY-MM-DD, ktorému JavaScript 100% rozumie
-          formattedDate = `${year}-${month}-${day}`;
-        }
-      }
-
-      const start = new Date(formattedDate);
-      const today = new Date();
-
-      // Kontrola, či je dátum platný
-      if (isNaN(start.getTime())) {
-        console.error('Nepodporovaný formát dátumu:', startDateString);
-        return 0;
-      }
-
-      // Vynulujeme čas, aby sme porovnávali iba čisté kalendárne dni
-      start.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
-
-      const differenceInTime = today.getTime() - start.getTime();
-
-      // Prepočet milisekúnd na dni
-      const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
-
-      // Ak sezóna začala dnes alebo v budúcnosti, vráti 0
-      return differenceInDays > 0 ? differenceInDays : 0;
-    }
+    inflection
   },
 
   computed: {
@@ -535,10 +477,6 @@ export default {
   border-radius: 10px;
 }
 
-.season-dates {
-  justify-content: center;
-}
-
 .error-message {
   text-align: center;
   margin: 10px auto;
@@ -599,6 +537,180 @@ export default {
   color: #d9ff00;
 }
 
+.seasons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  width: 100%;
+  align-items: start;
+}
+
+.season-card {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 10px 10px;
+  border: 1px solid #888888;
+  border-radius: 14px;
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.season-card:hover {
+  transform: translateY(-3px);
+  border-color: #d9ff00;
+  box-shadow: 0 8px 25px rgba(217, 255, 0, 0.12);
+}
+
+.season-header,
+.season-stats {
+  position: relative;
+}
+
+.season-header::after,
+.season-stats::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: linear-gradient(to right,
+      transparent,
+      wheat 30%,
+      wheat 70%,
+      transparent);
+  opacity: 0.65;
+}
+
+/* HEADER */
+
+.season-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  padding-left: 15px;
+}
+
+.season-label {
+  font-size: 0.7rem;
+  color: #c9c9c9;
+  letter-spacing: 2px;
+}
+
+.season-header h3 {
+  margin: 2px 0 0;
+  font-size: 1.8rem;
+  color: #d9ff00;
+}
+
+.total-participants {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-right: 15px;
+}
+
+.total-participants strong {
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.total-participants span {
+  font-size: 0.75rem;
+  color: #c9c9c9;
+}
+
+/* STATS */
+
+.season-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.stat {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: #1a1a1a;
+  border: 1px solid #4d4d4d;
+}
+
+.stat strong {
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.stat strong.green {
+  color: #00ff88;
+}
+
+.stat strong.red {
+  color: #ff3333;
+}
+
+.stat strong.orange {
+  color: #ff9800;
+}
+
+/* DATES */
+
+.season-dates {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+}
+
+.season-date {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.season-date span {
+  font-size: 0.7rem;
+  color: #c9c9c9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.season-date strong {
+  color: #d9ff00;
+  font-size: 0.95rem;
+}
+
+.season-date.start strong::before {
+  content: "▶";
+  margin-right: 6px;
+  font-size: 0.7rem;
+}
+
+.season-date.end {
+  text-align: right;
+}
+
+.season-date.end strong {
+  color: #ff3333;
+}
+
+.season-date.end strong::before {
+  content: "■";
+  margin-right: 6px;
+  font-size: 0.7rem;
+}
+
+.date-separator {
+  color: #777777;
+  font-size: 1.2rem;
+}
 
 @media (max-width: 768px) {
 
