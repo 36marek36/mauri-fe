@@ -81,10 +81,20 @@ const router = createRouter({
         background: 'tennis'
       }
     },
+
     {
       path: '/tennis/participants',
       name: 'participants',
       component: () => import('../views/tennis/ParticipantsView.vue'),
+      meta: {
+        // hideHeader: true,
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/rating-table',
+      name: 'rating-table',
+      component: () => import('../views/tennis/RatingTableView.vue'),
       meta: {
         // hideHeader: true,
         background: 'tennis'

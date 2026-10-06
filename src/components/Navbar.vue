@@ -31,6 +31,10 @@
           <RouterLink to="/volleyball/teams" @click="closeMobileMenu">Tímy</RouterLink>
         </li>
 
+        <!-- <li v-if="sport === 'tennis'">
+          <RouterLink to="/tennis/rating-table" @click="closeMobileMenu">Tabulka</RouterLink>
+        </li> -->
+
         <li v-if="sport === 'tennis'">
           <RouterLink :to="`${sportPrefix}/seasons/archive`" @click="closeMobileMenu">Archív</RouterLink>
         </li>

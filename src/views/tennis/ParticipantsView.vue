@@ -362,7 +362,6 @@ export default {
 
 .participants {
     width: 100%;
-    padding-top: 1rem;
     flex-grow: 1;
 }
 

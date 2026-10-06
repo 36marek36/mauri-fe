@@ -171,10 +171,10 @@
                                             <th>#</th>
                                             <th>{{ isSingles ? 'Hráč' : 'Tím' }}</th>
                                             <th>Z</th>
-                                            <th>W</th>
-                                            <th>L</th>
+                                            <th>V</th>
+                                            <th>P</th>
                                             <th>Sety</th>
-                                            <th>Body</th>
+                                            <th>B</th>
                                             <th v-if="isLeagueActive">Progres</th>
                                         </tr>
                                     </thead>
@@ -246,7 +246,7 @@
                                                         <small>Odohraté zápasy</small>
                                                         <strong>{{ entry.matches }}</strong>
 
-                                                        <small>W-L</small>
+                                                        <small>Výhry - Prehry</small>
                                                         <strong>{{ entry.wins }} - {{ entry.losses }}</strong>
 
                                                         <small>Sety</small>
@@ -1381,15 +1381,15 @@ export default {
 
     .standings-table td {
         font-size: 0.9rem;
-        padding: 5px 7px;
+        padding: 8px 7px;
     }
 
-    .standings-table th:nth-child(3),
+    /* .standings-table th:nth-child(3),
     .standings-table td:nth-child(3),
     .standings-table th:nth-child(4),
     .standings-table td:nth-child(4),
     .standings-table th:nth-child(5),
-    .standings-table td:nth-child(5),
+    .standings-table td:nth-child(5), */
     .standings-table th:nth-child(6),
     .standings-table td:nth-child(6) {
         display: none;

@@ -23,43 +23,15 @@
                     </div>
 
                     <div class="season-stats">
-
-                        <!-- Hráči + Tímy -->
-                        <div class="stat">
-                            <span>Hráči</span>
-                            <strong>{{ season.totalPlayers }}</strong>
-                        </div>
-                        <div class="stat">
-                            <span>Tímy</span>
-                            <strong>{{ season.totalTeams }}</strong>
-                        </div>
-
+    
                         <!-- Ligy -->
                         <div class="stat">
-                            <span>Ligy</span>
-                            <strong>{{ season.totalLeagues }}</strong>
+                            <strong>{{ inflection('league', season.totalLeagues)}}</strong>
                         </div>
                         <!-- Zápasy -->
                         <div class="stat">
-                            <span>Zápasy</span>
-                            <strong>{{ season.totalMatches }}</strong>
+                            <strong>{{ inflection('match', season.totalMatches) }}</strong>
                         </div>
-
-                        <!-- <div class="stat">
-                            <span>Odohraté</span>
-                            <strong class="green">{{ season.totalFinishedMatches }}</strong>
-                        </div> -->
-
-                        <!-- Kontumované + Zrušené -->
-                        <!-- <div class="stat">
-                            <span>Kontumované</span>
-                            <strong class="orange">{{ season.totalScratchedMatches }}</strong>
-                        </div> -->
-
-                        <!-- <div class="stat">
-                            <span>Zrušené</span>
-                            <strong class="red">{{ season.totalCancelledMatches }}</strong>
-                        </div> -->
 
                     </div>
 
@@ -90,6 +62,7 @@ import api from '@/axios-interceptor';
 import AppButton from '@/components/AppButton.vue';
 import { useFlashMessageStore } from '@/stores/flashMessage';
 import { useHeaderStore } from '@/stores/header';
+import { inflection } from '@/utils/inflection';
 
 export default {
     name: 'SeasonsArchive',
@@ -124,6 +97,7 @@ export default {
                 console.error('Chyba pri načítavaní tenisových sezón:', err);
             }
         },
+        inflection
     },
     computed: {
         flash() {
@@ -234,7 +208,7 @@ export default {
 
 .stat {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding: 8px 10px;
     border-radius: 7px;

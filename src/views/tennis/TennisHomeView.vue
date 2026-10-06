@@ -137,20 +137,7 @@
               </div>
             </div>
 
-            <div class="season-stats">
-
-              <!-- Hráči + Tímy -->
-              <div class="stat">
-                <strong>
-                  {{ inflection('player', season.totalPlayers) }}
-                </strong>
-              </div>
-              <div class="stat">
-                <strong>
-                  {{ inflection('team', season.totalTeams) }}
-                </strong>
-              </div>
-
+            <div v-if="hasActiveSeason" class="season-stats">
               <!-- Ligy -->
               <div class="stat">
                 <strong>
@@ -158,14 +145,16 @@
                 </strong>
               </div>
 
-
               <!-- Zápasy + Odohraté -->
-              <div v-if="hasActiveSeason" class="stat">
+              <div class="stat">
                 <strong>
                   {{ inflection('match', season.totalMatches) }}
                 </strong>
               </div>
-
+            </div>
+            <div class="season-date start">
+              <span>Sezóna začala</span>
+              <strong>{{ season.startDate }}</strong>
             </div>
 
           </div>
@@ -671,7 +660,9 @@ export default {
 
 .season-date {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  padding: 5px;
+  align-items: center;
   gap: 3px;
 }
 
@@ -691,25 +682,6 @@ export default {
   content: "▶";
   margin-right: 6px;
   font-size: 0.7rem;
-}
-
-.season-date.end {
-  text-align: right;
-}
-
-.season-date.end strong {
-  color: #ff3333;
-}
-
-.season-date.end strong::before {
-  content: "■";
-  margin-right: 6px;
-  font-size: 0.7rem;
-}
-
-.date-separator {
-  color: #777777;
-  font-size: 1.2rem;
 }
 
 @media (max-width: 768px) {
