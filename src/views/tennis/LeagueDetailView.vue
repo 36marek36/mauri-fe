@@ -19,7 +19,7 @@
                         <div class="league-title">
 
                             <div class="league-title-icon">
-                                <img src="/public/images/logo-mauri.png" alt="logo mauri">
+                                <img src="/images/logo-mauri.png" alt="logo mauri">
                             </div>
 
                             <div class="league-title-text">

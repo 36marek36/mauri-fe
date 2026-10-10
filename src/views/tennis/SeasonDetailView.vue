@@ -18,7 +18,7 @@
                         <div class="season-title">
 
                             <div class="season-title-icon">
-                                <img src="/public/images/logo-mauri.png" alt="logo mauri">
+                                <img src="/images/logo-mauri.png" alt="logo mauri">
                             </div>
 
                             <div class="season-title-text">
