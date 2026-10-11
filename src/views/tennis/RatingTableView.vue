@@ -14,12 +14,18 @@
                 <div class="list-or-nothing">
 
                     <div class="rating-switch">
-                        <AppButton label="Dvojhra" type="default" :class="{ active: selectedMatchType === 'SINGLES' }"
-                            @clicked="changeMatchType('SINGLES')" />
+                        <div class="switch-buttons">
+                            <AppButton label="Dvojhra" type="default"
+                                :class="{ active: selectedMatchType === 'SINGLES' }"
+                                @clicked="changeMatchType('SINGLES')" />
 
-                        <AppButton label="Štvorhra" type="default" :class="{ active: selectedMatchType === 'DOUBLES' }"
-                            @clicked="changeMatchType('DOUBLES')" />
+                            <AppButton label="Štvorhra" type="default"
+                                :class="{ active: selectedMatchType === 'DOUBLES' }"
+                                @clicked="changeMatchType('DOUBLES')" />
+                        </div>
+                        <span class="rating-heading">RATING</span>
                     </div>
+
                     <table class="rating-table">
                         <colgroup>
                             <col class="col-rank">
@@ -61,9 +67,7 @@
                                 </td>
 
                                 <!-- Rating -->
-                                <td class="rating-cell">
-                                    <div class="rating-caption">RATING</div>
-
+                                <td>
                                     <div class="rating-row">
                                         <span v-if="(isDoubles ? player.doubleRatingChange : player.ratingChange) !== 0"
                                             class="rating-change" :class="(isDoubles ? player.doubleRatingChange : player.ratingChange) > 0
@@ -171,19 +175,37 @@ export default {
 
 <style scoped>
 .list-or-nothing {
+    max-width: 600px;
     align-items: center;
 }
 
 /* ===== RATING SWITCH ===== */
 
 .rating-switch {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: flex-end;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.switch-buttons {
+    grid-column: 2;
     display: flex;
     gap: 5px;
     padding: 4px;
-    margin-top: 8px;
     background: #1e2026;
     border: 1px solid rgba(220, 190, 170, 0.2);
     border-radius: 12px;
+}
+
+.rating-heading {
+    grid-column: 3;
+    justify-self: end;
+    padding-right: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #888;
 }
 
 .rating-switch button {
@@ -280,29 +302,26 @@ export default {
 }
 
 .rating-table .rank-medal {
-    font-size: 18px;
+    font-size: 15px;
 }
 
 /* ===== PLAYER INFO ===== */
 
 .rating-table td.player-info {
-    min-width: 0;
-    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .rating-table .participant-name {
     color: #f5f5f5;
     font-size: 13px;
     font-weight: 650;
-    text-align: left;
-    overflow-wrap: anywhere;
 }
 
 /* ===== LEVEL BADGES ===== */
 
 .rating-table .level-badge {
-    display: inline-block;
-    max-width: 100%;
     padding: 4px 7px;
     border-radius: 5px;
     font-size: 9px;
@@ -353,18 +372,6 @@ export default {
 }
 
 /* Rating */
-.rating-table td.rating-cell {
-    text-align: right;
-    vertical-align: middle;
-}
-
-.rating-table .rating-caption {
-    margin-bottom: 3px;
-    color: #858b97;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-}
 
 .rating-table .rating-row {
     display: flex;
@@ -423,11 +430,11 @@ export default {
     }
 
     .rating-table .participant-name {
-        font-size: 12px;
+        font-size: 13px;
     }
 
     .rating-table .rating-value {
-        font-size: 17px;
+        font-size: 16px;
     }
 
     .rating-table .rating-change {

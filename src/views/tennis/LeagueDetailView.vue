@@ -147,8 +147,7 @@
                 <div class="main-flex-layout">
 
                     <!-- TABUĽKA -->
-                    <section class="standings">
-
+                    <section>
                         <div class="list-or-nothing" v-if="hasParticipants">
 
                             <div class="section-heading">
@@ -158,27 +157,21 @@
                                         <h2>Tabuľka</h2>
                                     </div>
                                 </div>
-
                             </div>
-
-
                             <div class="standings-table-wrapper">
-
                                 <table class="standings-table">
-
                                     <thead>
                                         <tr>
-                                            <th>#</th>
-                                            <th>{{ isSingles ? 'Hráč' : 'Tím' }}</th>
-                                            <th>Z</th>
-                                            <th>V</th>
-                                            <th>P</th>
-                                            <th>Sety</th>
-                                            <th>B</th>
-                                            <th v-if="isLeagueActive">Progres</th>
+                                            <th class="rank">#</th>
+                                            <th class="participant-name">{{ isSingles ? 'Hráč' : 'Tím' }}</th>
+                                            <th class="matches">Z</th>
+                                            <th class="wins">V</th>
+                                            <th class="losses">P</th>
+                                            <th class="sets">Sety</th>
+                                            <th class="points">B</th>
+                                            <th v-if="isLeagueActive" class="progress">Progres</th>
                                         </tr>
                                     </thead>
-
 
                                     <tbody>
                                         <template v-for="entry in standings"
@@ -202,7 +195,7 @@
                                                     {{ isSingles ? entry.playerName : entry.teamName }}
                                                 </td>
 
-                                                <td v-if="!entry.droppedFromLeague">
+                                                <td v-if="!entry.droppedFromLeague" class="matches">
                                                     {{ entry.matches }}
                                                 </td>
 
@@ -214,7 +207,7 @@
                                                     {{ entry.losses }}
                                                 </td>
 
-                                                <td v-if="!entry.droppedFromLeague">
+                                                <td v-if="!entry.droppedFromLeague" class="sets">
                                                     {{ entry.setsWon }} :
                                                     {{ entry.setsLost }}
                                                 </td>
@@ -223,13 +216,13 @@
                                                     {{ entry.points }}
                                                 </td>
 
-                                                <td v-if="!entry.droppedFromLeague && isLeagueActive">
+                                                <td v-if="!entry.droppedFromLeague && isLeagueActive" class="progress">
                                                     <CircularProgress :progress="entry.leagueProgress" />
                                                 </td>
 
                                                 <td v-if="entry.droppedFromLeague" colspan="100%">
                                                     <span class="dropped-text">
-                                                        Zranený
+                                                        Zranenie
                                                     </span>
                                                 </td>
 
@@ -270,7 +263,6 @@
                                                         <AppButton :label="isSingles ? 'Detail hráča' : 'Detail tímu'"
                                                             type="default" htmlType="button"
                                                             @clicked.stop="goToDetail(isSingles ? 'players' : 'teams', isSingles ? entry.playerId : entry.teamId)" />
-
                                                     </div>
                                                 </td>
                                             </tr>
@@ -283,12 +275,10 @@
 
 
                     <!-- ZÁPASY -->
-                    <section class="matches">
-
+                    <section>
                         <div class="list-or-nothing" v-if="hasMatches">
 
                             <div class="section-heading">
-
                                 <div>
                                     <span class="section-icon">🎾</span>
                                     <h2>Zápasy</h2>
@@ -301,7 +291,6 @@
                                         <small>{{ cancelledMatches }} zrušených</small> zápasov
                                     </div>
                                 </div>
-
                             </div>
 
                             <div class="matches-wrapper">
@@ -1111,7 +1100,7 @@ export default {
 
 .main-flex-layout {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 18px;
     align-items: start;
 }
@@ -1164,28 +1153,63 @@ export default {
 
 .standings-table {
     width: 100%;
+    min-width: 400px;
     border-collapse: collapse;
-    table-layout: auto;
+    table-layout: fixed;
 }
 
 .standings-table th {
-    padding: 9px 7px;
+    padding: 9px 4px;
     color: #888;
     font-size: 10px;
     text-transform: uppercase;
     border-bottom: 1px solid #eee;
     white-space: nowrap;
+    text-align: center;
 }
 
 .standings-table td {
-    padding: 12px 7px;
+    padding: 10px 7px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Poradie */
+.rank {
+    width: 45px;
+}
+
+/* Meno hráča alebo tímu */
+.participant-name {
+    width: 100%;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 700;
     white-space: nowrap;
 }
 
+/* Z, V, P */
+.matches,
+.wins,
+.losses {
+    width: 30px;
+}
 
-.standings-table th:nth-child(2),
-.standings-table td:nth-child(2) {
-    text-align: left;
+/* Sety */
+.sets {
+    width: 48px;
+}
+
+/* Body */
+.points {
+    width: 30px;
+}
+
+/*Progress*/
+.progress {
+    width: 70px;
 }
 
 .standings-table tr.dropped td {
@@ -1214,17 +1238,6 @@ export default {
     background: #3d3d3d;
 }
 
-.rank {
-    width: 35px;
-    font-weight: 700;
-}
-
-.participant-name {
-    width: 100%;
-    font-weight: 600;
-    white-space: normal;
-}
-
 .wins {
     color: #16a34a;
     font-weight: 600;
@@ -1237,7 +1250,6 @@ export default {
 .points {
     font-weight: 800;
 }
-
 
 /* =========================
    DETAIL
@@ -1339,13 +1351,13 @@ export default {
    MOBILE
 ========================= */
 @media (max-width: 768px) {
+    .right-side {
+        padding: 10px;
+        margin-top: 10px;
+    }
 
     .main-flex-layout {
         grid-template-columns: 1fr;
-    }
-
-    .league-page {
-        padding: 12px;
     }
 
     .league-header {
@@ -1379,20 +1391,31 @@ export default {
         margin-top: 10px;
     }
 
-    .standings-table td {
-        font-size: 0.9rem;
-        padding: 8px 7px;
+    .standings-table {
+        min-width: 0;
     }
 
-    /* .standings-table th:nth-child(3),
-    .standings-table td:nth-child(3),
-    .standings-table th:nth-child(4),
-    .standings-table td:nth-child(4),
-    .standings-table th:nth-child(5),
-    .standings-table td:nth-child(5), */
-    .standings-table th:nth-child(6),
-    .standings-table td:nth-child(6) {
+    .standings-table td {
+        padding: 10px 3px;
+        font-size: 12px;
+    }
+
+    .standings-table .rank {
+        width: 30px;
+    }
+
+    .matches,
+    .wins,
+    .losses {
+        width: 25px;
+    }
+
+    .sets {
         display: none;
+    }
+
+    .progress {
+        width: 55px;
     }
 
     .standings-table tr.dropped td {
