@@ -4,6 +4,46 @@
     </div>
     <div class="right-side">
 
+      <div class="ticker-container">
+        <div class="ticker">
+
+          <!-- NEPRIHLÁSENÝ POUŽÍVATEĽ -->
+          <template v-if="!isLoggedIn">
+            <strong class="ticker-title">
+              Vitaj medzi hráčmi handlovskej tenisovej ligy!
+            </strong>
+            &nbsp; Registruj sa a získaj prístup ku všetkým možnostiam ligy:
+            <span class="ticker-item">• Vytvor si účet</span>
+            <span class="ticker-item">• Nastav si hráčsky profil</span>
+            <span class="ticker-item">• Prihlás sa do ligy</span>
+            <span class="ticker-item">• Čakajú ťa zápasy, výsledky a porovnanie s ostatnými hráčmi.</span>
+          </template>
+
+          <!-- PRIHLÁSENÝ, ALE BEZ HRÁČA -->
+          <template v-else-if="!hasPlayer">
+            <strong class="ticker-title">
+              Dokonči svoj hráčsky profil!
+            </strong>
+            &nbsp; Aby si sa mohol zapojiť do líg a hrať zápasy, potrebuješ si vytvoriť profil hráča.
+            <span class="ticker-item">• Je to rýchle – zaberie to len pár sekúnd.</span>
+          </template>
+
+          <!-- PRIHLÁSENÝ S HRÁČOM -->
+          <template v-else>
+            <strong class="ticker-title">
+              Vitaj, {{ firstName }}!
+            </strong>
+            <span class="ticker-item">
+              Prajeme ti veľa úspešných zápasov v handlovskej tenisovej lige!
+            </span>
+            <span class="ticker-item">
+              • Nech sa ti darí na kurte!
+            </span>
+          </template>
+
+        </div>
+      </div>
+
       <!-- LOADING -->
       <p v-if="loading">
         Načítavam posledné výsledky...
@@ -14,8 +54,7 @@
         {{ errorMessage }}
       </p>
 
-      <!-- 🟢 ZMENA: Podmienka upravená na hasCurrentSeason -->
-      <div v-else-if="hasActiveSeason" class="list-or-nothing">
+      <div class="list-or-nothing">
         <div class="activities">
 
           <h3>Posledné výsledky</h3>
@@ -86,31 +125,6 @@
       </div>
 
       <div class="second">
-
-        <!-- 1. NOT LOGGED IN -->
-        <div v-if="!isLoggedIn" class="panel onboarding">
-          <h3>Vitaj medzi hráčmi tenisovej ligy</h3>
-          <p class="intro-text">
-            Zaregistruj sa a získaj prístup ku všetkým možnostiam ligy:
-          </p>
-          <ul class="onboarding-steps">
-            <li>Vytvor si účet</li>
-            <li>Nastav si hráčsky profil</li>
-            <li>Prihlás sa do ligy</li>
-            <li>Čakajú ťa zápasy, výsledky a porovnanie s ostatnými hráčmi</li>
-          </ul>
-        </div>
-
-        <!-- 2. LOGGED IN BUT NO PLAYER -->
-        <div v-else-if="!hasPlayer" class="panel onboarding">
-          <h3>Dokonči svoj hráčsky profil</h3>
-          <p>
-            Aby si sa mohol zapojiť do líg a hrať zápasy, potrebuješ si vytvoriť profil hráča.
-          </p>
-          <p class="hint">
-            Je to rýchle – zaberie to len pár sekúnd.
-          </p>
-        </div>
 
         <!-- 🟢 AKTUÁLNA SEZÓNA -->
         <div v-if="hasCurrentSeason" class="seasons-grid">
@@ -189,10 +203,12 @@ export default {
     this.initHeader();
     await this.fetchTennisSeasons(['ACTIVE', 'CREATED']);
 
+    await this.loadMatchActivities();
+
     // Ak sezóna beží (máme ID), stiahneme zápasy
-    if (this.hasCurrentSeason) {
-      await this.loadMatchActivities();
-    }
+    // if (this.hasCurrentSeason) {
+    //   await this.loadMatchActivities();
+    // }
 
     this.loading = false;
   },
@@ -211,18 +227,8 @@ export default {
       }
     },
     initHeader() {
-      if (!this.isLoggedIn) {
-        this.header.setTitle('Handlovská', 'Tenisová liga');
-        return;
-      }
-
-      const fullName = this.userStore.user?.playerName || '';
-
-      const firstName = fullName.split(' ')[0];
-
       this.header.setTitle(
-        'Handlovská Tenisová liga', 'Vitaj ' +
-      firstName
+        'Handlovská Tenisová liga', ' '
       );
     },
     async fetchTennisSeasons(status) {
@@ -308,6 +314,10 @@ export default {
           activities
         }))
       }));
+    },
+    firstName() {
+      const fullName = this.userStore.user?.playerName || '';
+      return fullName.trim().split(/\s+/)[0] || '';
     }
   }
 }
@@ -316,8 +326,53 @@ export default {
 
 <style scoped>
 .right-side {
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: flex-start;
+}
+
+.ticker-container {
+  background: linear-gradient(to right,
+      rgba(0, 0, 0, 1),
+      /* viac čierna zhora */
+      rgba(0, 0, 0, 0.7)
+      /* takmer priehľadné dole */
+    );
+  border-radius: 16px;
+  border: 1px solid green;
+  box-shadow: 0 0 5px #FFD700;
+  padding: 10px;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.ticker {
+  width: max-content;
+  white-space: nowrap;
+  animation: scroll 50s linear infinite;
+}
+
+.ticker-title {
+  color: #d6b58c;
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ticker-item {
+  margin-left: 25px;
+  color: #ffffff;
+}
+
+.ticker-item::first-letter {
+  color: #d6b58c;
+}
+
+.ticker-container:hover .ticker {
+  animation-play-state: paused;
 }
 
 .list-or-nothing {
@@ -440,67 +495,12 @@ export default {
 }
 
 .second {
-  width: 50%;
+  width: 100%;
 }
 
 .error-message {
   text-align: center;
   margin: 10px auto;
-}
-
-.panel.onboarding {
-  background: #002E2C;
-  border: 2px solid gold;
-  border-radius: 10px;
-  padding: 16px;
-  color: #e5e7eb;
-  margin-bottom: 1rem;
-}
-
-.panel.onboarding h3 {
-  margin-bottom: 10px;
-  color: gold;
-}
-
-.panel.onboarding p {
-  margin-bottom: 10px;
-}
-
-.hint {
-  /* margin-top: 6px; */
-  font-size: 0.85rem;
-  color: #94a3b8;
-
-  padding-left: 10px;
-  border-left: 2px solid rgba(217, 255, 0, 0.4);
-
-  opacity: 0.9;
-}
-
-.intro-text {
-  margin-bottom: 12px;
-  opacity: 0.9;
-}
-
-.onboarding-steps {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.onboarding-steps li {
-  position: relative;
-  padding-left: 22px;
-  margin-bottom: 8px;
-  line-height: 1.4;
-}
-
-/* custom bullet */
-.onboarding-steps li::before {
-  content: "✔";
-  position: absolute;
-  left: 0;
-  color: #d9ff00;
 }
 
 .seasons-grid {
@@ -661,6 +661,16 @@ export default {
   font-size: 0.7rem;
 }
 
+@keyframes scroll {
+  from {
+    transform: translateX(100vw);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
 @media (max-width: 768px) {
 
   .activities {
@@ -703,14 +713,6 @@ export default {
     width: 22px;
     font-size: 0.75rem;
     border-radius: 4px;
-  }
-
-  .right-side {
-    flex-direction: column-reverse;
-  }
-
-  .second {
-    width: 100%;
   }
 }
 </style>

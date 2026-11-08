@@ -373,7 +373,6 @@
 
 <script>
 import AppButton from '@/components/AppButton.vue';
-import AddMatchResult from '@/components/AddMatchResult.vue';
 import api from '@/axios-interceptor';
 import AddParticipantsForm from '@/components/AddParticipantsForm.vue';
 import { useUserStore } from '@/stores/user';
@@ -928,7 +927,7 @@ export default {
                 .length;
         }
     },
-    components: { AppButton, AddMatchResult, AddParticipantsForm, AppModal, CircularProgress, MatchItem }
+    components: { AppButton, AddParticipantsForm, AppModal, CircularProgress, MatchItem }
 }
 
 </script>
@@ -1199,12 +1198,12 @@ export default {
 
 /* Sety */
 .sets {
-    width: 48px;
+    width: 55px;
 }
 
 /* Body */
 .points {
-    width: 30px;
+    width: 40px;
 }
 
 /*Progress*/

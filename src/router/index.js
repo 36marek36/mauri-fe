@@ -167,6 +167,24 @@ const router = createRouter({
       }
     },
     {
+      path: '/tennis/friendly-matches',
+      name: 'FriendlyMatches',
+      component: () => import('../views/tennis/FriendlyMatches.vue'),
+      meta: {
+        // hideHeader: true,
+        background: 'tennis'
+      }
+    },
+    {
+      path: '/tennis/new-match',
+      name: 'newMatch',
+      component: () => import('../views/tennis/NewMatchView.vue'),
+      meta: {
+        // hideHeader: true,
+        background: 'tennis'
+      }
+    },
+    {
       path: '/volleyball',
       name: 'VolleyballHome',
       component: () => import('../views/volley/VolleyHomeView.vue'),

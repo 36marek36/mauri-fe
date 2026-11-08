@@ -31,9 +31,17 @@
           <RouterLink to="/volleyball/teams" @click="closeMobileMenu">Tímy</RouterLink>
         </li>
 
-        <!-- <li v-if="sport === 'tennis'">
-          <RouterLink to="/tennis/rating-table" @click="closeMobileMenu">Tabulka</RouterLink>
-        </li> -->
+        <li v-if="sport === 'tennis' && isLoggedIn">
+          <RouterLink to="/tennis/new-match" @click="closeMobileMenu">Nový zápas</RouterLink>
+        </li>
+
+        <li v-if="sport === 'tennis'">
+          <RouterLink to="/tennis/rating-table" @click="closeMobileMenu">Celkový rebríček</RouterLink>
+        </li>
+
+        <li v-if="sport === 'tennis'">
+          <RouterLink to="/tennis/friendly-matches" @click="closeMobileMenu">Priateľské zápasy</RouterLink>
+        </li>
 
         <li v-if="sport === 'tennis'">
           <RouterLink :to="`${sportPrefix}/seasons/archive`" @click="closeMobileMenu">Archív</RouterLink>
