@@ -1,17 +1,24 @@
 <template>
-    <div v-if="visible" class="modal-overlay" @click.self="cancel">
-        <div class="modal">
-        </div>
-        <div class="modal-content">
-            <h3>Naozaj sa chcete odhlásiť?</h3>
-            <div class="buttons">
-                <AppButton :label="'Odhlásiť'" :type="'create'" htmlType="button" @click="confirm" />
-                <AppButton :label="'Zrušiť'" :type="'delete'" htmlType="button" @click="cancel" />
+    <Teleport to="body">
+        <div v-if="visible" class="modal-overlay" @click.self="cancel">
+            <div class="logout-modal">
+
+                <div class="logout-icon">↪</div>
+
+                <h3>Naozaj sa chcete odhlásiť?</h3>
+
+                <p>Ste si istý, že sa chcete odhlásiť zo svojho účtu?</p>
+
+                <div class="buttons">
+                    <AppButton label="Odhlásiť sa" type="delete" htmlType="button" @clicked="confirm" />
+
+                    <AppButton label="Zrušiť" type="default" htmlType="button" @clicked="cancel" />
+                </div>
+
             </div>
         </div>
-    </div>
+    </Teleport>
 </template>
-
 <script>
 import AppButton from './AppButton.vue';
 export default {
@@ -35,61 +42,81 @@ export default {
 <style scoped>
 .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
+    inset: 0;
+
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    align-items: center;
 
-}
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
 
-.modal {
-    width: 745px;
-    height: 745px;
-    background-image: url('/images/logout.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    border-radius: 12px;
-    padding: 20px 30px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    color: red;
-    /* border: 20px solid black; */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-
-    -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 75%);
-    mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 75%);
-    -webkit-mask-size: cover;
-    mask-size: cover;
-}
-
-
-.modal-content {
-    background: rgba(0, 0, 0, 0.6);
-    /* jemné pozadie pre čitateľnosť textu */
-    border-radius: 8px;
-    margin-bottom: 2rem;
+    z-index: 99999;
     padding: 20px;
+    box-sizing: border-box;
+}
+
+.logout-modal {
+    width: 100%;
+    max-width: 420px;
+
+    padding: 35px 30px;
+
+    background: #172932;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+    color: white;
+    text-align: center;
+
+    animation: modalAppear 0.2s ease;
+}
+
+.logout-icon {
+    font-size: 35px;
+    margin-bottom: 15px;
+    color: #e4b832;
+}
+
+.logout-modal h3 {
+    font-size: 1.3rem;
+    margin: 0 0 12px;
+}
+
+.logout-modal p {
+    color: #b8c5ca;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
 }
 
 .buttons {
-    margin-top: 20px;
     display: flex;
     justify-content: center;
-    gap: 15px;
+    gap: 12px;
 }
-@media (max-width: 768px) {
-  .modal {
-    width: 100vw;             /* prispôsobí sa šírke obrazovky */
-  }
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .logout-modal {
+        padding: 28px 18px;
+    }
+
+    .buttons {
+        flex-direction: column;
+    }
 }
 </style>

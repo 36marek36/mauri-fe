@@ -7,7 +7,7 @@
       <!-- Header + Navbar -->
       <div class="header-content">
 
-        <Navbar class="navbar" />
+        <Navbar class="navbar-container" />
 
         <div class="header-wrapper">
           <div class="headings">
@@ -68,7 +68,8 @@ export default {
 .header {
   display: flex;
 }
-.right-side{
+
+.right-side {
   flex-direction: column;
 }
 
@@ -89,13 +90,10 @@ export default {
   line-height: 1.3;
 }
 
-.navbar {
+.navbar-container {
   z-index: 1000;
   width: 100%;
-  height: 65px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
 }
 
 .message {
@@ -132,12 +130,12 @@ export default {
 
   .header-wrapper {
     order: 1;
-    width: 80%;
+    width: 70%;
   }
 
-  .navbar {
+  .navbar-container {
     order: 2;
-    width: 20%;
+    width: 30%;
   }
 
   .headings {

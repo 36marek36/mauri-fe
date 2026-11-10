@@ -114,6 +114,24 @@
                             </div>
 
                         </div>
+                        <!-- ZADANIE VÝSLEDKU -->
+                        <div v-if="canEnterResult(match)" class="enter-result">
+
+                            <AppButton :label="['FINISHED', 'SCRATCHED'].includes(match.status)
+                                ? 'Opraviť výsledok'
+                                : 'Zadať výsledok'" type="create" @clicked="openResultForm(match)" />
+
+                        </div>
+
+                        <!-- FORMULÁR VÝSLEDKU -->
+                        <div v-if="selectedMatchForResult?.id === match.id" class="result-form">
+
+                            <AddMatchResult :key="selectedMatchForResult.id" :match="selectedMatchForResult"
+                                :leagueType="selectedMatchType" @result-submitted="onResultSubmitted" />
+
+                            <AppButton label="Zavrieť" type="default" @clicked="selectedMatchForResult = null" />
+
+                        </div>
 
                     </div>
 
@@ -147,24 +165,27 @@
 
 <script>
 import api from '@/axios-interceptor';
+import AddMatchResult from '@/components/AddMatchResult.vue';
 import AppButton from '@/components/AppButton.vue';
 import { useHeaderStore } from '@/stores/header';
+import { useUserStore } from '@/stores/user';
 
 export default {
 
     name: 'FriendlyMatches',
 
     components: {
-        AppButton
+        AppButton, AddMatchResult
     },
 
     data() {
         return {
 
             header: useHeaderStore(),
+            userStore: useUserStore(),
 
             matches: [],
-
+            selectedMatchForResult: null,
             selectedMatchType: 'SINGLES',
 
             page: 0,
@@ -235,6 +256,7 @@ export default {
             this.selectedMatchType = matchType;
 
             this.page = 0;
+            this.selectedMatchForResult = null;
 
             await this.loadMatches();
 
@@ -306,6 +328,66 @@ export default {
             };
 
             return classes[status] || '';
+
+        },
+        // KONTROLA, ČI JE PRIHLÁSENÝ POUŽÍVATEĽ ÚČASTNÍKOM ZÁPASU
+        isUserPlayerInMatch(match) {
+
+            const playerId = this.userStore.user?.playerId;
+
+            if (!playerId) {
+                return false;
+            }
+
+            if (this.selectedMatchType === 'SINGLES') {
+
+                return (
+                    String(match.homePlayer?.id) === String(playerId) ||
+                    String(match.awayPlayer?.id) === String(playerId)
+                );
+
+            }
+
+            if (this.selectedMatchType === 'DOUBLES') {
+
+                return (
+                    String(match.homeTeam?.player1?.id) === String(playerId) ||
+                    String(match.homeTeam?.player2?.id) === String(playerId) ||
+                    String(match.awayTeam?.player1?.id) === String(playerId) ||
+                    String(match.awayTeam?.player2?.id) === String(playerId)
+                );
+
+            }
+
+            return false;
+        },
+
+        // KONTROLA, ČI MÔŽE POUŽÍVATEĽ ZADAŤ VÝSLEDOK
+        canEnterResult(match) {
+
+            return (
+                ['CREATED', 'FINISHED', 'SCRATCHED'].includes(match.status) &&
+                this.isUserPlayerInMatch(match)
+            );
+
+        },
+
+        // OTVORENIE FORMULÁRA VÝSLEDKU
+        openResultForm(match) {
+
+            this.selectedMatchForResult =
+                this.selectedMatchForResult?.id === match.id
+                    ? null
+                    : match;
+
+        },
+
+        // ÚSPEŠNÉ ODOSLANIE VÝSLEDKU
+        async onResultSubmitted() {
+
+            this.selectedMatchForResult = null;
+
+            await this.loadMatches();
 
         }
 
